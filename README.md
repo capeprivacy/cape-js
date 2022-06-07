@@ -1,2 +1,1 @@
-# cape-js
-The Cape Privacy JavaScript SDK
+# Cape Privacy SDK for JavaScript

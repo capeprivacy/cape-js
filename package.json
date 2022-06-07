@@ -6,10 +6,11 @@
   "scripts": {
     "format": "npx prettier --write .",
     "format:check": "npx prettier --check .",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "npx eslint . --ext .js,.ts --fix",
     "prepare": "husky install",
     "test": "jest",
-    "lint": "eslint . --ext .js,.ts",
-    "lint:fix": "npx eslint . --ext .js,.ts --fix"
+    "test:ci": "jest --ci --coverage --verbose --passWithNoTests"
   },
   "workspaces": [
     "packages/core",
