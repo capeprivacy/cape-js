@@ -1,0 +1,6 @@
+{
+  "extends": "./packages/typescript/tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true
+  }
+}
