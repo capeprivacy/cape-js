@@ -4,11 +4,7 @@
   "description": "",
   "main": "index.js",
   "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "npx prettier --write .",
-    "format:check": "npx prettier --check ."
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/capeprivacy/cape-js.git"

@@ -4,8 +4,12 @@
   "description": "The Cape Privacy JavaScript SDK",
   "private": true,
   "scripts": {
+    "format": "npx prettier --write .",
+    "format:check": "npx prettier --check .",
+    "prepare": "husky install",
     "test": "jest",
-    "prepare": "husky install"
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "npx eslint . --ext .js,.ts --fix"
   },
   "workspaces": [
     "packages/core",
@@ -16,6 +20,15 @@
     "@swc/core": "^1.2.197",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.27.1",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^2.7.1",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "eslint-plugin-sort-export-all": "^1.2.2",
     "husky": "^8.0.1",
     "jest": "^28.1.1",
     "jest-environment-jsdom": "^28.1.1",
