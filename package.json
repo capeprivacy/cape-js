@@ -1,0 +1,13 @@
+{
+  "name": "cape-js",
+  "version": "0.0.0",
+  "description": "The Cape Privacy JavaScript SDK",
+  "private": true,
+  "scripts": {
+    "test": "npm test --workspaces"
+  },
+  "workspaces": [
+    "packages/core",
+    "packages/browser"
+  ]
+}
