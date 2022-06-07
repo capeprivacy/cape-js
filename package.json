@@ -4,10 +4,19 @@
   "description": "The Cape Privacy JavaScript SDK",
   "private": true,
   "scripts": {
-    "test": "npm test --workspaces"
+    "test": "npm test --workspaces",
+    "prepare": "husky install"
   },
   "workspaces": [
     "packages/core",
     "packages/browser"
-  ]
+  ],
+  "devDependencies": {
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.0",
+    "prettier": "2.6.2"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
+  }
 }
