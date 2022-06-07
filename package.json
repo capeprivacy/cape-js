@@ -4,7 +4,7 @@
   "description": "The Cape Privacy JavaScript SDK",
   "private": true,
   "scripts": {
-    "test": "npm test --workspaces",
+    "test": "jest",
     "prepare": "husky install"
   },
   "workspaces": [
@@ -13,9 +13,15 @@
     "packages/typescript"
   ],
   "devDependencies": {
+    "@swc/core": "^1.2.197",
+    "@swc/jest": "^0.2.21",
+    "@types/jest": "^28.1.1",
     "husky": "^8.0.1",
+    "jest": "^28.1.1",
+    "jest-environment-jsdom": "^28.1.1",
     "lint-staged": "^13.0.0",
     "prettier": "2.6.2",
+    "ts-node": "^10.8.1",
     "typescript": "^4.7.3"
   },
   "lint-staged": {
