@@ -14,5 +14,5 @@
   "bugs": {
     "url": "https://github.com/capeprivacy/cape-js/issues"
   },
-  "homepage": "https://github.com/capeprivacy/cape-js#readme"
+  "homepage": "https://github.com/capeprivacy/cape-js/tree/master/packages/browser"
 }
