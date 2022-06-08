@@ -4,13 +4,15 @@
   "description": "The Cape Privacy JavaScript SDK",
   "private": true,
   "scripts": {
-    "format": "npx prettier --write .",
-    "format:check": "npx prettier --check .",
-    "lint": "eslint . --ext .js,.ts",
-    "lint:fix": "npx eslint . --ext .js,.ts --fix",
+    "lint:eslint": "eslint . --ext .js,.ts",
+    "lint:fix": "npm run lint:eslint -- --fix",
+    "lint:prettier": "npx prettier --check .",
+    "lint:prettier:fix": "npx prettier --write .",
+    "lint": "npm run lint:eslint && npm run lint:prettier",
     "prepare": "husky install",
-    "test": "jest",
-    "test:ci": "jest --ci --coverage --verbose --passWithNoTests"
+    "test": "npm run test --workspaces",
+    "test:ci": "npm run test:ci --workspaces",
+    "type-check": "npm run type-check --workspaces --if-present"
   },
   "workspaces": [
     "packages/core",
