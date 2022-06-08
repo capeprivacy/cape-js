@@ -1,0 +1,21 @@
+{
+  "name": "@capeprivacy/browser",
+  "version": "0.0.1",
+  "description": "",
+  "devDependencies": {},
+  "scripts": {
+    "test": "jest",
+    "test:ci": "jest --ci --coverage --verbose --passWithNoTests",
+    "type-check": "tsc --noEmit ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/capeprivacy/cape-js.git"
+  },
+  "author": "Cape Privacy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/capeprivacy/cape-js/issues"
+  },
+  "homepage": "https://github.com/capeprivacy/cape-js/tree/master/packages/browser"
+}

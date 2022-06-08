@@ -1,0 +1,46 @@
+{
+  "name": "cape-js",
+  "version": "0.0.0",
+  "description": "The Cape Privacy JavaScript SDK",
+  "private": true,
+  "scripts": {
+    "lint:eslint": "eslint . --ext .js,.ts",
+    "lint:fix": "npm run lint:eslint -- --fix",
+    "lint:prettier": "npx prettier --check .",
+    "lint:prettier:fix": "npx prettier --write .",
+    "lint": "npm run lint:eslint && npm run lint:prettier",
+    "prepare": "husky install",
+    "test": "npm run test --workspaces",
+    "test:ci": "npm run test:ci --workspaces",
+    "type-check": "npm run type-check --workspaces --if-present"
+  },
+  "workspaces": [
+    "packages/core",
+    "packages/browser",
+    "packages/typescript"
+  ],
+  "devDependencies": {
+    "@swc/core": "^1.2.197",
+    "@swc/jest": "^0.2.21",
+    "@types/jest": "^28.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.27.1",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^2.7.1",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "eslint-plugin-sort-export-all": "^1.2.2",
+    "husky": "^8.0.1",
+    "jest": "^28.1.1",
+    "jest-environment-jsdom": "^28.1.1",
+    "lint-staged": "^13.0.0",
+    "prettier": "2.6.2",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
+  }
+}
