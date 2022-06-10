@@ -4,6 +4,7 @@
   "description": "The Cape Privacy JavaScript SDK",
   "private": true,
   "scripts": {
+    "build": "npm run build --workspaces --if-present",
     "lint:eslint": "eslint . --ext .js,.ts",
     "lint:fix": "npm run lint:eslint -- --fix",
     "lint:prettier": "npx prettier --check .",
@@ -15,9 +16,9 @@
     "type-check": "npm run type-check --workspaces --if-present"
   },
   "workspaces": [
-    "packages/core",
-    "packages/browser",
-    "packages/typescript"
+    "packages/typescript",
+    "packages/cape",
+    "packages/types"
   ],
   "devDependencies": {
     "@swc/core": "^1.2.197",

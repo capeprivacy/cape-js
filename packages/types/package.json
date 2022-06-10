@@ -1,13 +1,12 @@
 {
-  "name": "@capeprivacy/browser",
+  "name": "@cape/types",
   "version": "0.0.1",
   "description": "",
-  "devDependencies": {},
+  "types": "index.d.ts",
   "scripts": {
-    "test": "jest",
-    "test:ci": "jest --ci --coverage --verbose --passWithNoTests",
-    "type-check": "tsc --noEmit ."
+    "build": "tsc -p tsconfig.types.json"
   },
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/capeprivacy/cape-js.git"
@@ -17,5 +16,5 @@
   "bugs": {
     "url": "https://github.com/capeprivacy/cape-js/issues"
   },
-  "homepage": "https://github.com/capeprivacy/cape-js/tree/master/packages/browser"
+  "homepage": "https://github.com/capeprivacy/cape-js#readme"
 }

@@ -1,0 +1,39 @@
+{
+  "name": "@cape/cape-sdk",
+  "version": "0.0.1",
+  "description": "",
+  "main": "./dist-cjs/index.js",
+  "module": "./dist-es/index.js",
+  "types": "./dist-types/index.d.ts",
+  "scripts": {
+    "build": "concurrently 'npm run build:cjs' 'npm run build:es' 'npm run build:es'",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:es": "tsc -p tsconfig.es.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/capeprivacy/cape-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/capeprivacy/cape-js/issues"
+  },
+  "homepage": "https://github.com/capeprivacy/cape-js#readme",
+  "dependencies": {
+    "cbor": "^8.1.0",
+    "cbor-rn-prereqs": "^8.1.0",
+    "isomorphic-ws": "^4.0.1",
+    "ws": "^8.8.0"
+  },
+  "devDependencies": {
+    "@cape/types": "*",
+    "@types/ws": "^8.5.3",
+    "concurrently": "^7.2.1",
+    "mock-socket": "^9.1.5",
+    "rimraf": "^3.0.2"
+  }
+}
