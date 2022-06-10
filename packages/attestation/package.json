@@ -1,0 +1,22 @@
+{
+  "name": "@cape/attestation",
+  "version": "0.0.1",
+  "description": "",
+  "browser": "src/index.browser.ts",
+  "main": "src/index.node.ts",
+  "types": "dist-types/index.d.ts",
+  "scripts": {
+    "build": "concurrently 'npm run build:cjs' 'npm run build:es' 'npm run build:es'",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:es": "tsc -p tsconfig.es.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cbor": "^8.1.0",
+    "cbor-rn-prereqs": "^8.1.0",
+    "cbor-web": "^8.1.0"
+  }
+}

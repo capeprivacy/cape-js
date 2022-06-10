@@ -1,0 +1,15 @@
+import 'cbor-rn-prereqs'; // Fixes TextDecoder not found issue and must be imported before cbor
+import { decodeAllSync } from 'cbor';
+import type { AttestationDocument } from '@cape/types';
+
+/**
+ * Parses an attestation document and returns the decoded payload.
+ * @param document The attestation document to parse represented as a buffer-like object.
+ */
+export const parseAttestationDocument = (document: string): AttestationDocument => {
+  const payloadArray = decodeAllSync(Buffer.from(document, 'base64'))[0];
+  if (!Array.isArray(payloadArray) || payloadArray.length !== 4) {
+    throw new Error('Invalid attestation document');
+  }
+  return decodeAllSync(payloadArray[2])[0];
+};

@@ -24,8 +24,7 @@
   },
   "homepage": "https://github.com/capeprivacy/cape-js#readme",
   "dependencies": {
-    "cbor": "^8.1.0",
-    "cbor-rn-prereqs": "^8.1.0",
+    "@cape/attestation": "*",
     "isomorphic-ws": "^4.0.1",
     "ws": "^8.8.0"
   },

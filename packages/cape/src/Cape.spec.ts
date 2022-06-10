@@ -1,0 +1,44 @@
+import { Cape } from './Cape';
+import { Server } from 'mock-socket';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
+
+const authToken = 'abc';
+const file = readFileSync(join(__dirname, '../attestation.bin'));
+
+describe('Cape', () => {
+  describe('#run', () => {
+    it('when the function id is missing, it should reject', async () => {
+      const cape = new Cape({ authToken });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - we are testing the reject behavior
+      await expect(cape.run({})).rejects.toThrowError('Unable to run the function, missing function id argument.');
+    });
+
+    it('should run a function', async () => {
+      const id = 'ABC';
+      const capeApiUrl = 'ws://localhost:8000';
+      const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', (data) => {
+          if (typeof data === 'string') {
+            const parsed = JSON.parse(data);
+            // First message contains a nonce, send back the attestation document.
+            if (parsed.nonce) {
+              socket.send(JSON.stringify({ message: Buffer.from(file).toString('base64'), type: 'attestation_doc' }));
+            }
+          }
+        });
+      });
+
+      const client = new Cape({ authToken, capeApiUrl });
+      await client.run({ id });
+
+      mockServer.stop();
+    });
+  });
+});
