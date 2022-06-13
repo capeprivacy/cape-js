@@ -1,6 +1,4 @@
-import { hybrid } from 'tink-crypto';
-import { BinaryKeysetReader } from 'tink-crypto/internal/binary_keyset_reader';
-import { readNoSecret } from 'tink-crypto/internal/keyset_handle';
+import { binary, hybrid } from 'tink-crypto';
 
 /**
  * Encrypts the given input using the provided public key.
@@ -9,17 +7,9 @@ import { readNoSecret } from 'tink-crypto/internal/keyset_handle';
  * @param publicKey The public key to use for encryption.
  * @param context The context to use for encryption.
  */
-export async function encrypt(
-  inputBytes: Uint8Array,
-  publicKey: Uint8Array,
-  context: Uint8Array = new Uint8Array(),
-): Promise<Uint8Array> {
+export async function encrypt(inputBytes: Uint8Array, publicKey: Uint8Array, context: Uint8Array): Promise<Uint8Array> {
   hybrid.register();
-  // const keyHandle = await generateNewKeysetHandle(publicKey);
-  // const encrypt = await keyHandle.getPrimitive(aead.Aead);
-  // return await encrypt.encrypt(inputBytes, context);
-  const reader = new BinaryKeysetReader(publicKey);
-  const khPub = readNoSecret(reader);
-  const encrypt = await khPub.getPrimitive(hybrid.HybridEncrypt);
-  return await encrypt.encrypt(inputBytes, context);
+  const keyHandle = binary.deserializeNoSecretKeyset(publicKey);
+  const encrypt = await keyHandle.getPrimitive<hybrid.HybridEncrypt>(hybrid.HybridEncrypt);
+  return encrypt.encrypt(inputBytes, context);
 }

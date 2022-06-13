@@ -1,7 +1,8 @@
 import { WebsocketConnection } from './websocket-connection';
 import { parseAttestationDocument } from '@cape/attestation';
 import type { AttestationDocument } from '@cape/types';
-import { TextEncoder } from 'node:util';
+import { encrypt } from './enclave-encrypt';
+import { TextEncoder } from 'util';
 
 interface RunArguments {
   /**
@@ -54,12 +55,15 @@ export abstract class Methods {
               return;
             }
 
-            console.log(getBytes('hello world'));
-            // const cypherText = await encrypt(getBytes('hello world'), attestationDocument.public_key);
+            const cypherText = await encrypt(
+              getBytes('hello world'),
+              attestationDocument.public_key,
+              getBytes('abcdef'),
+            );
 
-            // console.log(cypherText);
+            ws.send(cypherText);
 
-            ws.close(true);
+            ws.close();
           }
 
           // Finally, wait for a message from the server. Shutdown the websocket and resolve the promise with the data
@@ -71,14 +75,14 @@ export abstract class Methods {
       );
 
       // Send nonce to the server to kick off the function.
-      ws.send({ nonce, authToken: 'not_implemented' });
+      ws.send(JSON.stringify({ nonce, authToken: 'not_implemented' }));
     });
   }
 }
 
 function getBytes(str) {
   const encoder = new TextEncoder();
-  return encoder.encode(str);
+  return new Uint8Array(encoder.encode(str));
 }
 
 function generateNonce() {

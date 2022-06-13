@@ -55,12 +55,11 @@ export class WebsocketConnection {
   /**
    * Send a message to the server.
    *
-   * @param data - An object to send to the server.
+   * @param data - Data to send to the server.
    */
-  send(data: Record<string, unknown>) {
+  send(data: any) {
     this.waitForConnection(() => {
-      console.log('sending', data);
-      this.socket?.send(JSON.stringify(data));
+      this.socket?.send(data);
     });
   }
 

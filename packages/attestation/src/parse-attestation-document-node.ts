@@ -7,9 +7,13 @@ import type { AttestationDocument } from '@cape/types';
  * @param document The attestation document to parse represented as a buffer-like object.
  */
 export const parseAttestationDocument = (document: string): AttestationDocument => {
-  const payloadArray = decodeAllSync(Buffer.from(document, 'base64'))[0];
+  const payloadArray = decodeAllSync(Buffer.from(document, 'base64'), {
+    preferWeb: true, // Uses Uint8Array over Buffer needed for Tink
+  })[0];
   if (!Array.isArray(payloadArray) || payloadArray.length !== 4) {
     throw new Error('Invalid attestation document');
   }
-  return decodeAllSync(payloadArray[2])[0];
+  return decodeAllSync(payloadArray[2], {
+    preferWeb: true,
+  })[0];
 };

@@ -2,6 +2,7 @@ import { Cape } from './Cape';
 import { Server } from 'mock-socket';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import crypto from 'crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
@@ -10,6 +11,13 @@ const authToken = 'abc';
 const file = readFileSync(join(__dirname, '../attestation.bin'));
 
 describe('Cape', () => {
+  beforeEach(() => {
+    // Tink depends on crypto.getRandomValues which exists off window.crypto, but is not globally available in Node.js,
+    // so it must be mocked.
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    global.crypto = crypto.webcrypto;
+  });
   describe('#run', () => {
     it('when the function id is missing, it should reject', async () => {
       const cape = new Cape({ authToken });
