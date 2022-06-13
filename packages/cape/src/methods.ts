@@ -1,5 +1,5 @@
 import { WebsocketConnection } from './websocket-connection';
-import { getBytes, parseAttestationDocument } from '@cape/isomorphic';
+import { base64Decode, getBytes, parseAttestationDocument } from '@cape/isomorphic';
 import type { AttestationDocument } from '@cape/types';
 import { encrypt } from './enclave-encrypt';
 
@@ -8,21 +8,21 @@ interface RunArguments {
    * The function ID to run.
    */
   id: string;
+  data: string;
 }
 
 export abstract class Methods {
   public abstract getCanonicalPath(path: string): string;
+  public abstract getAuthToken(): string;
 
   /**
    * Run a function within an enclave.
    *
-   * 1. Establish a websocket connection with the enclave including the Function ID in the url path.
-   * 2. Send the nonce for isomorphic as a websocket message to the enclave (this is where the auth token will be sent in the future)
-   * 3. Receive the attestation_document as a websocket message from the enclave.
-   * 4. Send the encrypted inputs as a websocket message to the enclave.
-   * 5. Receive the response as a websocket message from the enclave.
+   * @param args - The arguments to pass to the function.
+   * @param data - The data to encrypt and send to the enclave.
+   * @returns The result of the function.
    */
-  public run({ id }: RunArguments): Promise<void> {
+  public run<Result = any>({ id, data }: RunArguments): Promise<Result> {
     return new Promise((resolve, reject) => {
       // Ensure we have the required function ID. If not, reject and terminate the control flow.
       if (!id) {
@@ -33,6 +33,7 @@ export abstract class Methods {
       const ws = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`));
       const nonce = generateNonce();
       let attestationDocument: AttestationDocument;
+      let functionResult: string;
 
       // Listen for messages from the enclave server.
       ws.open(
@@ -55,15 +56,13 @@ export abstract class Methods {
             }
 
             // Encrypt the inputs using the public key from the isomorphic document.
-            const cypherText = await encrypt(
-              getBytes('hello world'),
-              attestationDocument.public_key,
-              getBytes('abcdef'),
-            );
+            const cypherText = await encrypt(getBytes(data), attestationDocument.public_key, getBytes('abcdef'));
 
             // Send the encrypted inputs as a websocket message to the enclave.
             ws.send(cypherText);
-
+          } else if (result.type === 'function_result') {
+            functionResult = base64Decode(result.message);
+            resolve(functionResult);
             ws.close();
           }
 
@@ -71,12 +70,12 @@ export abstract class Methods {
           // from the server.
         },
         (graceful) => {
-          graceful ? resolve() : reject();
+          graceful ? resolve(functionResult) : reject();
         },
       );
 
       // Send nonce to the server to kick off the function.
-      ws.send(JSON.stringify({ nonce, authToken: 'not_implemented' }));
+      ws.send(JSON.stringify({ nonce, authToken: this.getAuthToken() }));
     });
   }
 }

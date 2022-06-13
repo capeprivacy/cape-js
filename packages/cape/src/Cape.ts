@@ -28,4 +28,8 @@ export class Cape extends Methods {
   getCanonicalPath(path: string): string {
     return this.capeApiUrl + path;
   }
+
+  getAuthToken(): string {
+    return this.authToken;
+  }
 }

@@ -30,21 +30,29 @@ describe('Cape', () => {
       const id = 'ABC';
       const capeApiUrl = 'ws://localhost:8000';
       const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
+      let incomingMessageCount = 0;
 
       mockServer.on('connection', (socket) => {
         socket.on('message', (data) => {
+          incomingMessageCount++;
+
           if (typeof data === 'string') {
             const parsed = JSON.parse(data);
             // First message contains a nonce, send back the isomorphic document.
             if (parsed.nonce) {
               socket.send(JSON.stringify({ message: Buffer.from(file).toString('base64'), type: 'attestation_doc' }));
             }
+          } else {
+            socket.send(JSON.stringify({ message: Buffer.from('pong').toString('base64'), type: 'function_result' }));
           }
         });
       });
 
       const client = new Cape({ authToken, capeApiUrl });
-      await client.run({ id });
+      const result = await client.run({ id, data: 'ping' });
+
+      expect(incomingMessageCount).toBe(2);
+      expect(result).toBe('pong');
 
       mockServer.stop();
     });
