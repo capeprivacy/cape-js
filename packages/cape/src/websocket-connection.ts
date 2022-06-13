@@ -48,8 +48,8 @@ export class WebsocketConnection {
   /**
    * Close the websocket connection.
    */
-  close() {
-    this.onClose(true);
+  close(graceful = true) {
+    this.onClose(graceful);
   }
 
   /**

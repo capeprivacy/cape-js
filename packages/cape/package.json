@@ -26,6 +26,7 @@
   "dependencies": {
     "@cape/attestation": "*",
     "isomorphic-ws": "^4.0.1",
+    "tink-crypto": "^0.1.0",
     "ws": "^8.8.0"
   },
   "devDependencies": {

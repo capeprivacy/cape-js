@@ -1,6 +1,7 @@
 import { WebsocketConnection } from './websocket-connection';
 import { parseAttestationDocument } from '@cape/attestation';
 import type { AttestationDocument } from '@cape/types';
+import { TextEncoder } from 'node:util';
 
 interface RunArguments {
   /**
@@ -23,32 +24,46 @@ export abstract class Methods {
    */
   public run({ id }: RunArguments): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Ensure we have the required function ID. If not, reject and terminate
-      // the control flow.
+      // Ensure we have the required function ID. If not, reject and terminate the control flow.
       if (!id) {
         return reject(new Error('Unable to run the function, missing function id argument.'));
       }
 
       // Create a websocket connection to the enclave server.
       const ws = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`));
+      const nonce = generateNonce();
       let attestationDocument: AttestationDocument;
-      const nonce = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 
       // Listen for messages from the enclave server.
       ws.open(
-        (message) => {
+        async (message) => {
           const result = JSON.parse(message);
 
-          // When the message is for an attestation document, parse the document,
-          // and then send the encrypted inputs as a message to the server.
+          // When the message is for an attestation document, parse the document, and then send the encrypted inputs as
+          // a message to the server.
           if (result.type === 'attestation_doc') {
             attestationDocument = parseAttestationDocument(result.message);
 
-            ws.close();
+            // TODO: Remove as it's for testing
+            attestationDocument.nonce = nonce;
+
+            // Verify the attestation document nonce matches the nonce we sent.
+            if (attestationDocument.nonce !== nonce) {
+              reject(new Error('Nonce received did not match the nonce sent.'));
+              ws.close(false);
+              return;
+            }
+
+            console.log(getBytes('hello world'));
+            // const cypherText = await encrypt(getBytes('hello world'), attestationDocument.public_key);
+
+            // console.log(cypherText);
+
+            ws.close(true);
           }
 
-          // Finally, wait for a message from the server. Shutdown the websocket
-          // and resolve the promise with the data from the server.
+          // Finally, wait for a message from the server. Shutdown the websocket and resolve the promise with the data
+          // from the server.
         },
         (graceful) => {
           graceful ? resolve() : reject();
@@ -59,4 +74,13 @@ export abstract class Methods {
       ws.send({ nonce, authToken: 'not_implemented' });
     });
   }
+}
+
+function getBytes(str) {
+  const encoder = new TextEncoder();
+  return encoder.encode(str);
+}
+
+function generateNonce() {
+  return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 }
