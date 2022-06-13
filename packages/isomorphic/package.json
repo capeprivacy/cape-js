@@ -4,7 +4,7 @@
   "description": "",
   "browser": "src/index.browser.ts",
   "main": "src/index.node.ts",
-  "types": "dist-types/index.d.ts",
+  "types": "dist-types/index.node.d.ts",
   "scripts": {
     "build": "concurrently 'npm run build:cjs' 'npm run build:es' 'npm run build:es'",
     "build:cjs": "tsc -p tsconfig.cjs.json",

@@ -8,5 +8,5 @@
     "stripInternal": true
   },
   "extends": "../../tsconfig.es.json",
-  "include": ["src/"]
+  "include": ["src/", "types/**/*.d.ts"]
 }

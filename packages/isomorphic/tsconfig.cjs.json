@@ -6,5 +6,5 @@
     "stripInternal": true
   },
   "extends": "../../tsconfig.cjs.json",
-  "include": ["src/"]
+  "include": ["src/", "types/**/*.d.ts"]
 }
