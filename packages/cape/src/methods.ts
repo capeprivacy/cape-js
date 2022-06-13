@@ -1,8 +1,7 @@
 import { WebsocketConnection } from './websocket-connection';
-import { parseAttestationDocument } from '@cape/attestation';
+import { getBytes, parseAttestationDocument } from '@cape/isomorphic';
 import type { AttestationDocument } from '@cape/types';
 import { encrypt } from './enclave-encrypt';
-import { TextEncoder } from 'util';
 
 interface RunArguments {
   /**
@@ -18,7 +17,7 @@ export abstract class Methods {
    * Run a function within an enclave.
    *
    * 1. Establish a websocket connection with the enclave including the Function ID in the url path.
-   * 2. Send the nonce for attestation as a websocket message to the enclave (this is where the auth token will be sent in the future)
+   * 2. Send the nonce for isomorphic as a websocket message to the enclave (this is where the auth token will be sent in the future)
    * 3. Receive the attestation_document as a websocket message from the enclave.
    * 4. Send the encrypted inputs as a websocket message to the enclave.
    * 5. Receive the response as a websocket message from the enclave.
@@ -40,7 +39,7 @@ export abstract class Methods {
         async (message) => {
           const result = JSON.parse(message);
 
-          // When the message is for an attestation document, parse the document, and then send the encrypted inputs as
+          // When the message is for an isomorphic document, parse the document, and then send the encrypted inputs as
           // a message to the server.
           if (result.type === 'attestation_doc') {
             attestationDocument = parseAttestationDocument(result.message);
@@ -48,19 +47,21 @@ export abstract class Methods {
             // TODO: Remove as it's for testing
             attestationDocument.nonce = nonce;
 
-            // Verify the attestation document nonce matches the nonce we sent.
+            // Verify the isomorphic document nonce matches the nonce we sent.
             if (attestationDocument.nonce !== nonce) {
               reject(new Error('Nonce received did not match the nonce sent.'));
               ws.close(false);
               return;
             }
 
+            // Encrypt the inputs using the public key from the isomorphic document.
             const cypherText = await encrypt(
               getBytes('hello world'),
               attestationDocument.public_key,
               getBytes('abcdef'),
             );
 
+            // Send the encrypted inputs as a websocket message to the enclave.
             ws.send(cypherText);
 
             ws.close();
@@ -78,11 +79,6 @@ export abstract class Methods {
       ws.send(JSON.stringify({ nonce, authToken: 'not_implemented' }));
     });
   }
-}
-
-function getBytes(str) {
-  const encoder = new TextEncoder();
-  return new Uint8Array(encoder.encode(str));
 }
 
 function generateNonce() {

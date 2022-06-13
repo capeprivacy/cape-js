@@ -1,5 +1,5 @@
 {
-  "name": "@cape/attestation",
+  "name": "@cape/isomorphic",
   "version": "0.0.1",
   "description": "",
   "browser": "src/index.browser.ts",

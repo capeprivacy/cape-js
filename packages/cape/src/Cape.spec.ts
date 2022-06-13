@@ -35,7 +35,7 @@ describe('Cape', () => {
         socket.on('message', (data) => {
           if (typeof data === 'string') {
             const parsed = JSON.parse(data);
-            // First message contains a nonce, send back the attestation document.
+            // First message contains a nonce, send back the isomorphic document.
             if (parsed.nonce) {
               socket.send(JSON.stringify({ message: Buffer.from(file).toString('base64'), type: 'attestation_doc' }));
             }

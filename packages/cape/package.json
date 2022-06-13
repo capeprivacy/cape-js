@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/capeprivacy/cape-js#readme",
   "dependencies": {
-    "@cape/attestation": "*",
+    "@cape/isomorphic": "*",
     "isomorphic-ws": "^4.0.1",
     "tink-crypto": "^0.1.0",
     "ws": "^8.8.0"

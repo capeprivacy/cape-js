@@ -59,6 +59,7 @@ export class WebsocketConnection {
    */
   send(data: any) {
     this.waitForConnection(() => {
+      console.log('Sending websocket message', data);
       this.socket?.send(data);
     });
   }

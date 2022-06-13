@@ -7,5 +7,5 @@ export interface AttestationDocument {
   cabundle: Uint8Array[];
   public_key: Uint8Array;
   user_data: any;
-  nonce: any;
+  nonce: number;
 }
