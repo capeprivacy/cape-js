@@ -1,4 +1,5 @@
 import WebSocket, { Data } from 'isomorphic-ws';
+import { debug, error } from 'loglevel';
 
 export class WebsocketConnection {
   private socket: WebSocket | undefined;
@@ -26,7 +27,7 @@ export class WebsocketConnection {
     this.socket = new WebSocket(this.url);
 
     this.socket.onopen = () => {
-      console.log('Websocket connection opened');
+      debug('Websocket connection opened');
     };
 
     this.socket.onclose = () => {
@@ -37,9 +38,9 @@ export class WebsocketConnection {
       this.handleMessage(message);
     };
 
-    this.socket.onerror = (error) => {
-      console.log('Websocket error. Closing connection');
-      console.error(error?.message);
+    this.socket.onerror = (e) => {
+      debug('Websocket error. Closing connection');
+      error(e?.message);
 
       this.onClose(false);
     };
@@ -59,7 +60,7 @@ export class WebsocketConnection {
    */
   send(data: Data) {
     this.waitForConnection(() => {
-      console.log('Sending websocket message', data);
+      debug('Sending websocket message', data);
       this.socket?.send(data);
     });
   }
@@ -70,7 +71,7 @@ export class WebsocketConnection {
    * @private
    */
   private onClose(graceful: boolean) {
-    console.log('Websocket connection closed');
+    debug('Websocket connection closed');
 
     if (this.onDisconnect) {
       this.onDisconnect(graceful);
@@ -87,7 +88,7 @@ export class WebsocketConnection {
   private handleMessage(message: WebSocket.MessageEvent) {
     this.frames.push(message);
     const { data } = message;
-    console.log('message received', data);
+    debug('Websocket message received', data);
     this.onMessage?.(data);
   }
 

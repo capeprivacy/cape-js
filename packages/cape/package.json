@@ -26,6 +26,7 @@
   "dependencies": {
     "@cape/isomorphic": "*",
     "isomorphic-ws": "^4.0.1",
+    "loglevel": "^1.8.0",
     "tink-crypto": "^0.1.0",
     "ws": "^8.8.0"
   },
