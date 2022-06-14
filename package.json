@@ -11,8 +11,8 @@
     "lint:prettier:fix": "npx prettier --write .",
     "lint": "yarn lint:eslint && yarn lint:prettier",
     "prepare": "husky install",
-    "test": "jest --coverage --passWithNoTests",
-    "test:ci": "yarn workspaces run test:ci",
+    "test": "jest --coverage",
+    "test:ci": "jest --coverage --ci",
     "type-check": "yarn workspaces run type-check"
   },
   "workspaces": [
