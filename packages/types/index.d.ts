@@ -36,3 +36,10 @@ export interface AttestationDocument {
    */
   nonce: number;
 }
+
+export type WebSocketMessageType = 'attestation_doc' | 'function_result';
+
+export interface WebSocketMessage {
+  type: WebSocketMessageType;
+  message: string;
+}

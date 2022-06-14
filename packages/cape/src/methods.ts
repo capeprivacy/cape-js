@@ -1,13 +1,20 @@
 import { WebsocketConnection } from './websocket-connection';
 import { base64Decode, getBytes, parseAttestationDocument } from '@cape/isomorphic';
-import type { AttestationDocument } from '@cape/types';
+import type { AttestationDocument, WebSocketMessage } from '@cape/types';
 import { encrypt } from './enclave-encrypt';
 
+/**
+ * The configuration object for the `run` method.
+ */
 interface RunArguments {
   /**
    * The function ID to run.
    */
   id: string;
+  /**
+   * The function input data.
+   * TODO: This should accept more than just a string.
+   */
   data: string;
 }
 
@@ -18,11 +25,9 @@ export abstract class Methods {
   /**
    * Run a function within an enclave.
    *
-   * @param args - The arguments to pass to the function.
-   * @param data - The data to encrypt and send to the enclave.
-   * @returns The result of the function.
+   * @returns The result of the function ran inside the enclave.
    */
-  public run<TResult = unknown>({ id, data }: RunArguments): Promise<TResult> {
+  public run({ id, data }: RunArguments): Promise<string> {
     return new Promise((resolve, reject) => {
       // Ensure we have the required function ID. If not, reject and terminate the control flow.
       if (!id) {
@@ -33,41 +38,47 @@ export abstract class Methods {
       const ws = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`));
       const nonce = generateNonce();
       let attestationDocument: AttestationDocument;
-      let functionResult: TResult;
+      let functionResult: string;
+
+      const messageTypes = {
+        // When the message is for an attestation document, parse the document, and then send the encrypted inputs as a
+        // message to the server.
+        attestation_doc: async (message: string) => {
+          attestationDocument = parseAttestationDocument(message);
+
+          // TODO: Remove as it's for testing
+          attestationDocument.nonce = nonce;
+
+          // Verify the isomorphic document nonce matches the nonce we sent.
+          if (attestationDocument.nonce !== nonce) {
+            reject(new Error('Nonce received did not match the nonce sent.'));
+            ws.close(false);
+            return;
+          }
+
+          // Encrypt the inputs using the public key from the isomorphic document.
+          const cypherText = await encrypt(getBytes(data), attestationDocument.public_key, getBytes('abcdef'));
+
+          // Send the encrypted inputs as a websocket message to the enclave.
+          ws.send(cypherText);
+        },
+
+        // When the message is for the result of the function, decode the result, close the websocket connection, and
+        // return it.
+        function_result: (message: string) => {
+          functionResult = base64Decode(message);
+          resolve(functionResult);
+          ws.close();
+        },
+      };
 
       // Listen for messages from the enclave server.
       ws.open(
         async (message) => {
-          const result = JSON.parse(message);
-
-          // When the message is for an isomorphic document, parse the document, and then send the encrypted inputs as
-          // a message to the server.
-          if (result.type === 'attestation_doc') {
-            attestationDocument = parseAttestationDocument(result.message);
-
-            // TODO: Remove as it's for testing
-            attestationDocument.nonce = nonce;
-
-            // Verify the isomorphic document nonce matches the nonce we sent.
-            if (attestationDocument.nonce !== nonce) {
-              reject(new Error('Nonce received did not match the nonce sent.'));
-              ws.close(false);
-              return;
-            }
-
-            // Encrypt the inputs using the public key from the isomorphic document.
-            const cypherText = await encrypt(getBytes(data), attestationDocument.public_key, getBytes('abcdef'));
-
-            // Send the encrypted inputs as a websocket message to the enclave.
-            ws.send(cypherText);
-          } else if (result.type === 'function_result') {
-            functionResult = base64Decode(result.message);
-            resolve(functionResult);
-            ws.close();
+          if (typeof message === 'string') {
+            const result: WebSocketMessage = JSON.parse(message);
+            messageTypes[result.type]?.(result.message);
           }
-
-          // Finally, wait for a message from the server. Shutdown the websocket and resolve the promise with the data
-          // from the server.
         },
         (graceful) => {
           graceful ? resolve(functionResult) : reject();
