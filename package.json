@@ -16,7 +16,9 @@
     "type-check": "yarn workspaces run type-check"
   },
   "workspaces": [
-    "packages/**"
+    "packages/types",
+    "packages/isomorphic",
+    "packages/*"
   ],
   "devDependencies": {
     "@swc/core": "^1.2.197",
