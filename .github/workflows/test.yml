@@ -11,6 +11,8 @@ jobs:
           node-version: 16
           cache: npm
       - run: yarn install --frozen-lockfile
+      - name: Build
+        run: yarn build
       - name: Lint
         run: yarn lint
       - name: Test

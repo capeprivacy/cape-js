@@ -10,7 +10,8 @@
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:es": "tsc -p tsconfig.es.json",
     "build:types": "tsc -p tsconfig.types.json",
-    "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo"
+    "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
+    "test": "jest --coverage"
   },
   "author": "",
   "license": "ISC",

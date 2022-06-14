@@ -1,9 +1,9 @@
-import WebSocket from 'isomorphic-ws';
+import WebSocket, { Data } from 'isomorphic-ws';
 
 export class WebsocketConnection {
   private socket: WebSocket | undefined;
   private readonly url: string;
-  onMessage?: (message: any) => void;
+  onMessage?: (message: Data) => void;
   onDisconnect?: (graceful: boolean) => void;
   frames: WebSocket.MessageEvent[] = [];
 
@@ -19,7 +19,7 @@ export class WebsocketConnection {
    * @param onMessage - Callback to handle messages from the server.
    * @param onDisconnect - Callback when the websocket connection is closed.
    */
-  open(onMessage: (message: string) => void, onDisconnect: (graceful: boolean) => void) {
+  open(onMessage: (message: Data) => void, onDisconnect: (graceful: boolean) => void) {
     this.onMessage = onMessage;
     this.onDisconnect = onDisconnect;
 
@@ -57,7 +57,7 @@ export class WebsocketConnection {
    *
    * @param data - Data to send to the server.
    */
-  send(data: any) {
+  send(data: Data) {
     this.waitForConnection(() => {
       console.log('Sending websocket message', data);
       this.socket?.send(data);

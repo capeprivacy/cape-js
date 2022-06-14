@@ -22,7 +22,7 @@ export abstract class Methods {
    * @param data - The data to encrypt and send to the enclave.
    * @returns The result of the function.
    */
-  public run<Result = any>({ id, data }: RunArguments): Promise<Result> {
+  public run<TResult = unknown>({ id, data }: RunArguments): Promise<TResult> {
     return new Promise((resolve, reject) => {
       // Ensure we have the required function ID. If not, reject and terminate the control flow.
       if (!id) {
@@ -33,7 +33,7 @@ export abstract class Methods {
       const ws = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`));
       const nonce = generateNonce();
       let attestationDocument: AttestationDocument;
-      let functionResult: string;
+      let functionResult: TResult;
 
       // Listen for messages from the enclave server.
       ws.open(
