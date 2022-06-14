@@ -1,7 +1,7 @@
 import { WebsocketConnection } from './websocket-connection';
 import { base64Decode, getBytes, parseAttestationDocument } from '@cape/isomorphic';
 import type { AttestationDocument, WebSocketMessage } from '@cape/types';
-import { encrypt } from './enclave-encrypt';
+import { encrypt } from './encrypt';
 
 /**
  * The configuration object for the `run` method.
@@ -49,15 +49,15 @@ export abstract class Methods {
           // TODO: Remove as it's for testing
           attestationDocument.nonce = nonce;
 
-          // Verify the isomorphic document nonce matches the nonce we sent.
+          // Verify the attestation document nonce matches the nonce we sent.
           if (attestationDocument.nonce !== nonce) {
             reject(new Error('Nonce received did not match the nonce sent.'));
             ws.close(false);
             return;
           }
 
-          // Encrypt the inputs using the public key from the isomorphic document.
-          const cypherText = await encrypt(getBytes(data), attestationDocument.public_key, getBytes('abcdef'));
+          // Encrypt the inputs using the public key from the attestation document.
+          const cypherText = await encrypt(getBytes(data), attestationDocument.public_key, getBytes(nonce.toString()));
 
           // Send the encrypted inputs as a websocket message to the enclave.
           ws.send(cypherText);
