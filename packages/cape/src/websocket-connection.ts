@@ -66,7 +66,8 @@ export class WebsocketConnection {
   }
 
   /**
-   * An on close e
+   * An on close event handler.
+   *
    * @param graceful - Was the connection closed gracefully?
    * @private
    */
@@ -93,8 +94,8 @@ export class WebsocketConnection {
   }
 
   /**
-   * Wait for the websocket connection to be open. This prevents messages from
-   * being sent before the connection has been established with the server.
+   * Wait for the websocket connection to be open. This prevents messages from being sent before the connection has
+   * been established with the server.
    *
    * @param callback - Callback to execute when the connection is open.
    */
