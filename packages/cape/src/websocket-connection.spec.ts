@@ -36,7 +36,7 @@ describe('WebSocketConnection', () => {
     const mockServer = new Server(url);
     mockServer.on('connection', (socket) => {
       socket.on('message', () => {
-        socket.close({ code: 1011, reason: 'bye', wasClean: false });
+        socket.close({ code: 1011, reason: 'bye', wasClean: true });
       });
     });
 
