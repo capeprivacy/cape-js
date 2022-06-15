@@ -26,7 +26,7 @@ describe('Cape', () => {
       await expect(cape.run({})).rejects.toThrowError('Unable to run the function, missing function id argument.');
     });
 
-    it('should run a function', async () => {
+    it('should run a function without error', async () => {
       const id = 'ABC';
       const capeApiUrl = 'ws://localhost:8000';
       const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
@@ -56,5 +56,7 @@ describe('Cape', () => {
 
       mockServer.stop();
     });
+
+    it.todo('when the nonce does not match what was sent, it should reject');
   });
 });

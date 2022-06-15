@@ -1,5 +1,5 @@
 import { WebsocketConnection } from './websocket-connection';
-import { base64Decode, getBytes, parseAttestationDocument } from '@cape/isomorphic';
+import { base64Decode, type BytesInput, getBytes, parseAttestationDocument } from '@cape/isomorphic';
 import type { AttestationDocument, WebSocketMessage } from '@cape/types';
 import { encrypt } from './encrypt';
 
@@ -13,9 +13,8 @@ interface RunArguments {
   id: string;
   /**
    * The function input data.
-   * TODO: This should accept more than just a string.
    */
-  data: string;
+  data: BytesInput;
 }
 
 export abstract class Methods {
@@ -46,7 +45,7 @@ export abstract class Methods {
         attestation_doc: async (message: string) => {
           attestationDocument = parseAttestationDocument(message);
 
-          // TODO: Remove as it's for testing
+          // FIXME: Remove as it's for testing
           attestationDocument.nonce = nonce;
 
           // Verify the attestation document nonce matches the nonce we sent.
