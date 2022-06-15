@@ -30,7 +30,8 @@ export class WebsocketConnection {
       debug('Websocket connection opened');
     };
 
-    this.socket.onclose = () => {
+    this.socket.onclose = (e) => {
+      debug('Websocket onclose', e);
       this.onClose(true);
     };
 

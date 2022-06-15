@@ -1,6 +1,6 @@
 import { WebsocketConnection } from './websocket-connection';
 import { base64Decode, type BytesInput, getBytes, parseAttestationDocument } from '@cape/isomorphic';
-import type { AttestationDocument, WebSocketMessage } from '@cape/types';
+import type { WebSocketMessage } from '@cape/types';
 import { encrypt } from './encrypt';
 
 /**
@@ -20,6 +20,7 @@ interface RunArguments {
 export abstract class Methods {
   public abstract getCanonicalPath(path: string): string;
   public abstract getAuthToken(): string;
+  publicKey?: Uint8Array;
 
   /**
    * Run a function within an enclave.
@@ -36,17 +37,16 @@ export abstract class Methods {
       // Create a websocket connection to the enclave server.
       const ws = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`));
       const nonce = generateNonce();
-      let attestationDocument: AttestationDocument;
       let functionResult: string;
 
       const messageTypes = {
         // When the message is for an attestation document, parse the document, and then send the encrypted inputs as a
         // message to the server.
         attestation_doc: async (message: string) => {
-          attestationDocument = parseAttestationDocument(message);
+          this.publicKey = parseAttestationDocument(message).public_key;
 
           // Encrypt the inputs using the public key from the attestation document.
-          const cypherText = await encrypt(getBytes(data), attestationDocument.public_key, getBytes(nonce.toString()));
+          const cypherText = await encrypt(getBytes(data), this.publicKey, getBytes(''));
 
           // Send the encrypted inputs as a websocket message to the enclave.
           ws.send(cypherText);
@@ -75,7 +75,7 @@ export abstract class Methods {
       );
 
       // Send nonce to the server to kick off the function.
-      ws.send(JSON.stringify({ nonce, authToken: this.getAuthToken() }));
+      ws.send(JSON.stringify({ nonce, auth_token: this.getAuthToken() }));
     });
   }
 }
