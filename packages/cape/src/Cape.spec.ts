@@ -23,7 +23,7 @@ describe('Cape', () => {
       const cape = new Cape({ authToken });
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - we are testing the reject behavior
-      await expect(cape.run({})).rejects.toThrowError('Unable to run the function, missing function id argument.');
+      await expect(cape.run({})).rejects.toThrowError('Unable to run the function, missing function id.');
     });
 
     it('should run a function without error', async () => {

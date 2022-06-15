@@ -30,7 +30,7 @@ export abstract class Methods {
     return new Promise((resolve, reject) => {
       // Ensure we have the required function ID. If not, reject and terminate the control flow.
       if (!id) {
-        return reject(new Error('Unable to run the function, missing function id argument.'));
+        return reject(new Error('Unable to run the function, missing function id.'));
       }
 
       // Create a websocket connection to the enclave server.
@@ -44,16 +44,6 @@ export abstract class Methods {
         // message to the server.
         attestation_doc: async (message: string) => {
           attestationDocument = parseAttestationDocument(message);
-
-          // FIXME: Remove as it's for testing
-          attestationDocument.nonce = nonce;
-
-          // Verify the attestation document nonce matches the nonce we sent.
-          if (attestationDocument.nonce !== nonce) {
-            reject(new Error('Nonce received did not match the nonce sent.'));
-            ws.close(false);
-            return;
-          }
 
           // Encrypt the inputs using the public key from the attestation document.
           const cypherText = await encrypt(getBytes(data), attestationDocument.public_key, getBytes(nonce.toString()));
