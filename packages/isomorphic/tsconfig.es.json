@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist-es",
+    "lib": ["es5"],
+    "noUnusedLocals": true,
+    "rootDir": "src",
+    "stripInternal": true
+  },
+  "extends": "../../tsconfig.es.json",
+  "include": ["src/", "types/**/*.d.ts"]
+}

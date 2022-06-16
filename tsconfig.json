@@ -1,6 +1,17 @@
 {
-  "extends": "./packages/typescript/tsconfig.json",
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true
-  }
+    "baseUrl": ".",
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitReturns": true,
+    "paths": {
+      "@cape/*": ["packages/*/src"]
+    },
+    "target": "es5"
+  },
+  "exclude": ["node_modules/", "**/*.spec.ts"],
+  "include": ["packages/**/*.ts"]
 }
