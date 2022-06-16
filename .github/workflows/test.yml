@@ -1,4 +1,4 @@
-name: Test
+name: Build and Test
 on: push
 jobs:
   build:
@@ -11,6 +11,7 @@ jobs:
           node-version: 16
           cache: npm
       - run: yarn install --frozen-lockfile
+      - run: yarn bootstrap
       - name: Build
         run: yarn build
       - name: Lint
@@ -23,3 +24,12 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: coverage/coverage-final.json
           flags: unittests
+      - name: Publish
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        run: |
+          git remote set-url origin "https://$GH_USER:$GH_TOKEN@github.com/$GH_REPO.git"
+          git config --global user.email "$GIT_EMAIL"
+          git config --global user.name "$GIT_NAME"
+          npm config set '//registry.npmjs.org/:_authToken' "${{ secrets.NPM_TOKEN }}"
+          npm whoami
+          yarn publish:ci

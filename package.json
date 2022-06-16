@@ -15,6 +15,7 @@
     "lint:prettier:fix": "npx prettier --write .",
     "prepare": "husky install",
     "publish": "lerna publish",
+    "publish:ci": "lerna publish --yes --canary --preid next --npm-tag next --force-publish=*",
     "test": "jest --coverage",
     "test:ci": "jest --coverage --ci",
     "type-check": "yarn workspaces run type-check"
