@@ -2,7 +2,7 @@ import WebSocket, { Data } from 'isomorphic-ws';
 import { debug, error } from 'loglevel';
 
 export class WebsocketConnection {
-  private socket: WebSocket | undefined;
+  private socket: WebSocket | undefined | null;
   private readonly url: string;
   onMessage?: (message: Data) => void;
   onDisconnect?: (graceful: boolean) => void;
