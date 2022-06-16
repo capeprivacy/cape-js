@@ -1,5 +1,8 @@
 import { Server } from 'mock-socket';
 import { WebsocketConnection } from './websocket-connection';
+import loglevel from 'loglevel';
+
+loglevel.setLevel('debug');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
@@ -51,5 +54,29 @@ describe('WebSocketConnection', () => {
       },
     );
     ws.send('hello');
+  });
+
+  it('can close the connection', (done) => {
+    const url = 'ws://localhost:8000';
+    const mockServer = new Server(url);
+    mockServer.on('connection', () => {
+      // noop
+    });
+    mockServer.on('close', () => {
+      mockServer.stop();
+      done();
+    });
+
+    const ws = new WebsocketConnection(url);
+    ws.open(
+      () => {
+        // noop
+      },
+      (graceful) => {
+        expect(graceful).toBe(true);
+        expect(ws.frames).toHaveLength(0);
+      },
+    );
+    ws.close(true);
   });
 });
