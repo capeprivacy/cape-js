@@ -20,7 +20,7 @@ yarn add @cape/cape-sdk
 
 ## Usage
 
-Example [index.mjs](https://github.com/capeprivacy/cape-js/tree/main/packages/cape/examples/index.mjs):
+Example [run.mjs](https://github.com/capeprivacy/cape-js/tree/main/packages/cape/examples/run.mjs):
 
 Replace `<AUTH_TOKEN>` and `<FUNCTION_ID>` with your values.
 
