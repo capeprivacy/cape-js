@@ -1,39 +1,46 @@
 # Cape Privacy SDK for JavaScript
 
-## Prerequisites
+[![codecov](https://codecov.io/gh/capeprivacy/cape-js/branch/main/graph/badge.svg?token=faHLjMR1MK)](https://codecov.io/gh/capeprivacy/cape-js) ![build](https://github.com/capeprivacy/cape-js/actions/workflows/test.yml/badge.svg)
 
-1. Cape Access Token:
+The Cape SDK for JavaScript is a library that provides a simple way to interact with the Cape Privacy API. Works in Node.js and the browser.
 
-```
-cat ~/.config/cape/auth | jq -r .access_token
-```
+## Installation
 
-2. Cape Function ID, from `cape deploy`.
+Using npm:
 
-3. Yarn
-
-```
-npm install yarn -g
+```bash
+npm install @cape/cape-sdk
 ```
 
-## Build
+Using yarn:
 
-```
-yarn install && yarn build
-```
-
-## Test
-
-```
-yarn test
+```bash
+yarn add @cape/cape-sdk
 ```
 
-## Example
+## Usage
 
-Edit `packages/cape/examples/run.mjs` to replace `<AUTH_TOKEN>` and `<FUNCTION_ID>` with your values.
+Example [index.mjs](https://github.com/capeprivacy/cape-js/tree/main/packages/cape/examples/index.mjs):
 
-Run the example:
+Replace `<AUTH_TOKEN>` and `<FUNCTION_ID>` with your values.
 
+```js
+import { Cape } from '@cape/cape-sdk';
+
+const client = new Cape({ authToken: '<AUTH_TOKEN>' });
+await client.run({ id: '<FUNCTION_ID>', data: 'Hello world' });
 ```
-node packages/cape/examples/run.mjs
-```
+
+## TypeScript
+
+The Cape SDK for JavaScript bundles TypeScript definitions to use in TypeScript projects.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
