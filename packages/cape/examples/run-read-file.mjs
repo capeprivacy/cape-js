@@ -3,8 +3,6 @@ import { Cape } from '../dist-cjs/index.js';
 
 const data = await readFile('./text.txt', { encoding: 'utf8' });
 
-globalThis.window = globalThis;
-
 const client = new Cape({ authToken: '<AUTH_TOKEN>' });
 const result = await client.run({ id: '<FUNCTION_ID>', data });
 

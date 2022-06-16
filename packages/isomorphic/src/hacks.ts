@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 
-// Hack to get the global crypto object in Node to work with Tink. Tink depends on the browsers window.crypto object,
-// so we must add it to the global object.
+// Hacks to get Tink working without the browser.
+
 if (typeof globalThis.self === 'undefined') {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -14,7 +14,9 @@ if (typeof globalThis.self.crypto === 'undefined') {
   globalThis.self.crypto = crypto.webcrypto;
 }
 
-if (typeof window === 'undefined') {
+if (typeof globalThis.window === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - we already know this is bad, look for a long term fix
   globalThis.window = globalThis;
 }
 
