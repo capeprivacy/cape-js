@@ -8,7 +8,7 @@
     "moduleResolution": "node",
     "noImplicitReturns": true,
     "paths": {
-      "@cape/*": ["packages/*/src"]
+      "@capeprivacy/*": ["packages/*/src"]
     },
     "target": "es5"
   },

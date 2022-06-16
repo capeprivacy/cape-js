@@ -1,5 +1,5 @@
 {
-  "name": "@cape/isomorphic",
+  "name": "@capeprivacy/isomorphic",
   "version": "0.0.1",
   "description": "",
   "browser": "dist-es/index.browser.js",

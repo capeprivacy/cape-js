@@ -20,13 +20,13 @@ The Cape SDK for JavaScript is a library that provides a simple way to interact 
 Using npm:
 
 ```bash
-npm install @cape/cape-sdk
+npm install @capeprivacy/cape-sdk
 ```
 
 Using yarn:
 
 ```bash
-yarn add @cape/cape-sdk
+yarn add @capeprivacy/cape-sdk
 ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -38,7 +38,7 @@ Example [run.mjs](https://github.com/capeprivacy/cape-js/tree/main/packages/cape
 Replace `<AUTH_TOKEN>` and `<FUNCTION_ID>` with your values.
 
 ```js
-import { Cape } from '@cape/cape-sdk';
+import { Cape } from '@capeprivacy/cape-sdk';
 
 const client = new Cape({ authToken: '<AUTH_TOKEN>' });
 await client.run({ id: '<FUNCTION_ID>', data: 'Hello world' });
