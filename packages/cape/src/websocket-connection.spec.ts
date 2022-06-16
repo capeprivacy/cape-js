@@ -56,9 +56,6 @@ describe('WebSocketConnection', () => {
   it('can close the connection', (done) => {
     const url = 'ws://localhost:8002';
     const mockServer = new Server(url);
-    mockServer.on('connection', () => {
-      // noop
-    });
     mockServer.on('close', () => {
       mockServer.stop();
       done();
