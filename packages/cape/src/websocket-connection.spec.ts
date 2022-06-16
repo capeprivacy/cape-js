@@ -1,8 +1,5 @@
 import { Server } from 'mock-socket';
 import { WebsocketConnection } from './websocket-connection';
-import loglevel from 'loglevel';
-
-loglevel.setLevel('debug');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
