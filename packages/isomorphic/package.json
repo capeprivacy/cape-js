@@ -5,6 +5,7 @@
   "browser": "dist-es/index.browser.js",
   "main": "dist-cjs/index.node.js",
   "types": "dist-types/index.node.d.ts",
+  "private": true,
   "scripts": {
     "build": "concurrently 'npm run build:cjs' 'npm run build:es' 'npm run build:types'",
     "build:cjs": "tsc -p tsconfig.cjs.json",
@@ -13,7 +14,7 @@
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
     "test": "jest --coverage"
   },
-  "author": "",
+  "author": "Cape Privacy",
   "license": "ISC",
   "dependencies": {
     "cbor": "^8.1.0",
