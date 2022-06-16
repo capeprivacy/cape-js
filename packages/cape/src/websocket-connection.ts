@@ -2,11 +2,12 @@ import WebSocket, { Data } from 'isomorphic-ws';
 import { debug, error } from 'loglevel';
 
 export class WebsocketConnection {
-  private socket: WebSocket | undefined;
+  private socket: WebSocket | undefined | null;
   private readonly url: string;
   onMessage?: (message: Data) => void;
   onDisconnect?: (graceful: boolean) => void;
   frames: WebSocket.MessageEvent[] = [];
+  isClosed = false;
 
   constructor(url: string) {
     this.url = url;
@@ -73,11 +74,19 @@ export class WebsocketConnection {
    * @private
    */
   private onClose(graceful: boolean) {
-    debug('Websocket connection closed');
+    if (!this.isClosed) {
+      debug('Websocket connection closed');
+      this.isClosed = true;
 
-    if (this.onDisconnect) {
-      this.onDisconnect(graceful);
-      this.onDisconnect = undefined;
+      if (this.socket) {
+        this.socket.close();
+        this.socket = null;
+      }
+
+      if (this.onDisconnect) {
+        this.onDisconnect(graceful);
+        this.onDisconnect = undefined;
+      }
     }
   }
 
