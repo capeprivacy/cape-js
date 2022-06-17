@@ -1,6 +1,6 @@
 {
   "name": "@capeprivacy/isomorphic",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "browser": "dist-es/index.browser.js",
   "main": "dist-cjs/index.node.js",
