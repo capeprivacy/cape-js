@@ -25,11 +25,9 @@ jobs:
           file: coverage/coverage-final.json
           flags: unittests
       - name: Publish
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        #if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
-          git remote set-url origin "https://$GH_USER:$GH_TOKEN@github.com/$GH_REPO.git"
-          git config --global user.email "$GIT_EMAIL"
-          git config --global user.name "$GIT_NAME"
-          npm config set '//registry.npmjs.org/:_authToken' "${{ secrets.NPM_TOKEN }}"
-          npm whoami
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc 
           yarn publish:ci
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
