@@ -1,0 +1,8 @@
+node_modules
+src
+jest.config.ts
+setupTests.ts
+tsconfig.json
+tsconfig.*.json
+attestation.bin
+examples
