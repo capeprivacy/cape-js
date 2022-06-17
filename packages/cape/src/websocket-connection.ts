@@ -1,30 +1,82 @@
 import WebSocket, { Data } from 'isomorphic-ws';
 import { debug, error } from 'loglevel';
 
+interface Callback {
+  resolve: (x: Data) => void;
+  reject: () => void;
+}
+
 export class WebsocketConnection {
+  /**
+   * The WebSocket instance.
+   * @private
+   */
   private socket: WebSocket | undefined | null;
+  /**
+   * The url to the websocket server.
+   * @private
+   */
   private readonly url: string;
-  onMessage?: (message: Data) => void;
-  onDisconnect?: (graceful: boolean) => void;
-  frames: WebSocket.MessageEvent[] = [];
+  /**
+   * The message queue. We use this queue to store messages received from the server.
+   * @private
+   */
+  private messageQueue: Data[] = [];
+  /**
+   * The callbacks queue. We use queue to buffer receive calls.
+   * @private
+   */
+  private callbacksQueue: Callback[] = [];
+  /**
+   * Is the websocket connection closed?
+   */
   isClosed = false;
 
   constructor(url: string) {
     this.url = url;
   }
 
+  /**
+   * Is the websocket connection open?
+   */
+  get connected(): boolean {
+    return this.socket && this.socket.readyState === 1;
+  }
+
   // TODO: WebSocket connection timeout
 
   /**
-   * Open a connection to the websocket server.
-   *
-   * @param onMessage - Callback to handle messages from the server.
-   * @param onDisconnect - Callback when the websocket connection is closed.
+   * The number of messages available.
    */
-  open(onMessage: (message: Data) => void, onDisconnect: (graceful: boolean) => void) {
-    this.onMessage = onMessage;
-    this.onDisconnect = onDisconnect;
+  get messagesAvailable(): number {
+    return this.messageQueue.length;
+  }
 
+  /**
+   * The number of callbacks available.
+   */
+  get callbacksAvailable(): number {
+    return this.callbacksQueue.length;
+  }
+
+  receive(): Promise<Data> {
+    if (this.messagesAvailable) {
+      return Promise.resolve(this.messageQueue.shift());
+    }
+
+    if (!this.connected) {
+      return Promise.reject(new Error('Websocket connection not open'));
+    }
+
+    return new Promise((resolve, reject) => {
+      this.callbacksQueue.push({ resolve, reject });
+    });
+  }
+
+  /**
+   * Open a connection to the websocket server.
+   */
+  connect() {
     this.socket = new WebSocket(this.url);
 
     this.socket.onopen = () => {
@@ -33,7 +85,7 @@ export class WebsocketConnection {
 
     this.socket.onclose = (e) => {
       debug('Websocket onclose', e);
-      this.onClose(true);
+      this.onClose();
     };
 
     this.socket.onmessage = (message) => {
@@ -44,15 +96,15 @@ export class WebsocketConnection {
       debug('Websocket error. Closing connection');
       error(e?.message);
 
-      this.onClose(false);
+      this.onClose();
     };
   }
 
   /**
    * Close the websocket connection.
    */
-  close(graceful = true) {
-    this.onClose(graceful);
+  close() {
+    this.onClose();
   }
 
   /**
@@ -60,20 +112,22 @@ export class WebsocketConnection {
    *
    * @param data - Data to send to the server.
    */
-  send(data: Data) {
-    this.waitForConnection(() => {
-      debug('Sending websocket message', data);
-      this.socket?.send(data);
+  send(data: Data): Promise<void> {
+    return new Promise((resolve) => {
+      this.waitForConnection(() => {
+        debug('Sending websocket message', data);
+        this.socket?.send(data);
+        resolve();
+      });
     });
   }
 
   /**
    * An on close event handler.
    *
-   * @param graceful - Was the connection closed gracefully?
    * @private
    */
-  private onClose(graceful: boolean) {
+  private onClose() {
     if (!this.isClosed) {
       debug('Websocket connection closed');
       this.isClosed = true;
@@ -81,11 +135,6 @@ export class WebsocketConnection {
       if (this.socket) {
         this.socket.close();
         this.socket = null;
-      }
-
-      if (this.onDisconnect) {
-        this.onDisconnect(graceful);
-        this.onDisconnect = undefined;
       }
     }
   }
@@ -97,10 +146,15 @@ export class WebsocketConnection {
    * @private
    */
   private handleMessage(message: WebSocket.MessageEvent) {
-    this.frames.push(message);
     const { data } = message;
     debug('Websocket message received', data);
-    this.onMessage?.(data);
+
+    if (this.callbacksAvailable) {
+      this.callbacksQueue.shift().resolve(data);
+      return;
+    }
+
+    this.messageQueue.push(data);
   }
 
   /**
@@ -110,7 +164,7 @@ export class WebsocketConnection {
    * @param callback - Callback to execute when the connection is open.
    */
   private waitForConnection(callback: () => void) {
-    if (this.socket?.readyState === 1) return callback();
+    if (this.connected) return callback();
 
     setTimeout(() => {
       this.waitForConnection(callback);

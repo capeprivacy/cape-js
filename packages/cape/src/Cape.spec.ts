@@ -3,6 +3,9 @@ import { Server } from 'mock-socket';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import crypto from 'crypto';
+import loglevel from 'loglevel';
+
+loglevel.setLevel('trace');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
