@@ -25,7 +25,7 @@ jobs:
           file: coverage/coverage-final.json
           flags: unittests
       - name: Publish
-        #if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
           echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc 
           yarn publish:ci
