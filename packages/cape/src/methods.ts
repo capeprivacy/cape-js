@@ -40,23 +40,23 @@ export abstract class Methods {
   public abstract getCanonicalPath(path: string): string;
   public abstract getAuthToken(): string;
   publicKey?: Uint8Array;
-  websocket: WebsocketConnection;
-  nonce: string;
+  websocket?: WebsocketConnection;
+  nonce?: string;
 
   /**
    * Connect to the Cape server.
    */
   public async connect({ id }: ConnectArgs): Promise<void> {
     // Ensure we have the required function ID. If not, reject and terminate the control flow.
-    if (!id) {
+    if (!id || id.length === 0) {
       throw new Error('Unable to connect to the server, missing function id.');
     }
     if (this.websocket) {
-      throw new Error('Unable to initiate another instance, already connected to the server.');
+      throw new Error('Unable to instantiate another websocket instance, already connected to the server.');
     }
     // Set up the connection to the server
     this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`));
-    this.websocket.connect();
+    await this.websocket.connect();
 
     // Generate the nonce for the connection.
     this.nonce = generateNonce();
@@ -65,7 +65,7 @@ export abstract class Methods {
     await this.websocket.send(JSON.stringify({ nonce: this.nonce, auth_token: this.getAuthToken() }));
 
     // Wait for the server to send back the attestation document with the public key.
-    const result = this.parseMessage(await this.websocket.receive());
+    const result = Methods.parseMessage(await this.websocket.receive());
     if (result.type !== 'attestation_doc') {
       throw new Error(`Expected attestation document but received ${result.type}.`);
     }
@@ -83,8 +83,7 @@ export abstract class Methods {
   }
 
   /**
-   * Run a single function within an enclave. This method will connect to the server, run a single function, disconnect,
-   * and return the result.
+   * Run a single function. This method will manage the entire lifecycle for you.
    *
    * @returns The result of the function ran inside the enclave.
    *
@@ -102,9 +101,27 @@ export abstract class Methods {
   }
 
   /**
-   * Invoke a function within an enclave.
+   * Invoke a function. This method is useful is you need to perform multiple invocations of the same function without
+   * closing the connection to the server.
+   *
+   * You will need to manage the entire lifecycle of the connection to the server when calling this method. To invoke
+   * commands against the server start with `connect` before invoking any functions, then `invoke` as many times as you
+   * need, and then call `disconnect` whenever you are finished.
+   *
    * @param data - The function input data.
    * @returns The result of the function ran inside the enclave.
+   *
+   * @example
+   * ```ts
+   * const client = new Cape({ authToken: 'my-auth-token' });
+   * await client.connect({ id: 'my-function-id' });
+   * const results = await Promise.all([
+   *   client.invoke({ data: 'my-data-1' }),
+   *   client.invoke({ data: 'my-data-2' }),
+   *   client.invoke({ data: 'my-data-3' }),
+   * ]);
+   * client.disconnect();
+   * ```
    */
   public async invoke({ data }: InvokeArgs): Promise<string> {
     if (!this.websocket) {
@@ -115,7 +132,7 @@ export abstract class Methods {
     }
     const cypherText = await encrypt(getBytes(data), this.publicKey, getBytes(''));
     await this.websocket.send(cypherText);
-    const result = this.parseMessage(await this.websocket.receive());
+    const result = Methods.parseMessage(await this.websocket.receive());
     return base64Decode(result.message);
   }
 
@@ -126,7 +143,8 @@ export abstract class Methods {
    * @returns The message from the server
    * @private
    */
-  private parseMessage(frame: Data): Message {
+  private static parseMessage(frame: Data): Message {
+    console.log(frame, typeof frame);
     if (typeof frame !== 'string') {
       throw new Error('Invalid message received from the server.');
     }

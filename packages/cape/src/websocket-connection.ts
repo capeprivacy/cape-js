@@ -1,4 +1,4 @@
-import WebSocket, { Data } from 'isomorphic-ws';
+import WebSocket, { Data, OPEN } from 'isomorphic-ws';
 import { debug, error } from 'loglevel';
 
 interface Callback {
@@ -40,7 +40,7 @@ export class WebsocketConnection {
    * Is the websocket connection open?
    */
   get connected(): boolean {
-    return this.socket && this.socket.readyState === 1;
+    return !!this.socket && this.socket.readyState === OPEN;
   }
 
   // TODO: WebSocket connection timeout
@@ -52,20 +52,13 @@ export class WebsocketConnection {
     return this.messageQueue.length;
   }
 
-  /**
-   * The number of callbacks available.
-   */
-  get callbacksAvailable(): number {
-    return this.callbacksQueue.length;
-  }
-
   receive(): Promise<Data> {
     if (this.messagesAvailable) {
       return Promise.resolve(this.messageQueue.shift());
     }
 
     if (!this.connected) {
-      return Promise.reject(new Error('Websocket connection not open'));
+      return Promise.reject(new Error('WebSocket connection not open'));
     }
 
     return new Promise((resolve, reject) => {
@@ -76,28 +69,34 @@ export class WebsocketConnection {
   /**
    * Open a connection to the websocket server.
    */
-  connect() {
-    this.socket = new WebSocket(this.url);
+  connect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.socket = new WebSocket(this.url);
 
-    this.socket.onopen = () => {
-      debug('Websocket connection opened');
-    };
+      this.socket.onopen = () => {
+        debug('Websocket connection opened');
+        this.isClosed = false;
+        resolve();
+      };
 
-    this.socket.onclose = (e) => {
-      debug('Websocket onclose', e);
-      this.onClose();
-    };
+      this.socket.onclose = (e) => {
+        debug('Websocket onclose', e);
+        this.onClose();
+      };
 
-    this.socket.onmessage = (message) => {
-      this.handleMessage(message);
-    };
+      this.socket.onmessage = (message) => {
+        this.handleMessage(message);
+      };
 
-    this.socket.onerror = (e) => {
-      debug('Websocket error. Closing connection');
-      error(e?.message);
+      this.socket.onerror = (e) => {
+        debug('Websocket error. Closing connection');
+        error(e?.message);
 
-      this.onClose();
-    };
+        this.onClose();
+
+        reject(new Error('Websocket error. Closing connection'));
+      };
+    });
   }
 
   /**
@@ -112,14 +111,9 @@ export class WebsocketConnection {
    *
    * @param data - Data to send to the server.
    */
-  send(data: Data): Promise<void> {
-    return new Promise((resolve) => {
-      this.waitForConnection(() => {
-        debug('Sending websocket message', data);
-        this.socket?.send(data);
-        resolve();
-      });
-    });
+  send(data: Data) {
+    debug('Sending websocket message', data);
+    this.socket?.send(data);
   }
 
   /**
@@ -149,7 +143,7 @@ export class WebsocketConnection {
     const { data } = message;
     debug('Websocket message received', data);
 
-    if (this.callbacksAvailable) {
+    if (this.callbacksQueue.length) {
       this.callbacksQueue.shift().resolve(data);
       return;
     }
@@ -158,16 +152,15 @@ export class WebsocketConnection {
   }
 
   /**
-   * Wait for the websocket connection to be open. This prevents messages from being sent before the connection has
-   * been established with the server.
+   * Wait for the websocket connection to be open.
    *
-   * @param callback - Callback to execute when the connection is open.
+   * @param resolve - Promise to resolve when the connection is open.
    */
-  private waitForConnection(callback: () => void) {
-    if (this.connected) return callback();
+  private waitForConnection(resolve: () => void) {
+    if (this.connected) return resolve();
 
     setTimeout(() => {
-      this.waitForConnection(callback);
+      this.waitForConnection(resolve);
     }, 10);
   }
 }
