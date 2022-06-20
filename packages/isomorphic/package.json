@@ -1,6 +1,6 @@
 {
-  "name": "@cape/isomorphic",
-  "version": "0.0.1",
+  "name": "@capeprivacy/isomorphic",
+  "version": "0.0.4",
   "description": "",
   "browser": "dist-es/index.browser.js",
   "main": "dist-cjs/index.node.js",
@@ -13,7 +13,7 @@
     "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
     "test": "jest --coverage"
   },
-  "author": "",
+  "author": "Cape Privacy",
   "license": "ISC",
   "dependencies": {
     "cbor": "^8.1.0",

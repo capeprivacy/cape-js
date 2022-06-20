@@ -4,20 +4,23 @@
   "description": "The Cape Privacy JavaScript SDK",
   "private": true,
   "scripts": {
-    "build": "yarn workspaces run build",
+    "bootstrap": "lerna bootstrap",
+    "build": "lerna run build",
+    "clean": "lerna run clean",
+    "lerna": "lerna",
+    "lint": "yarn lint:eslint && yarn lint:prettier",
     "lint:eslint": "eslint . --ext .js,.ts",
-    "lint:fix": "yarn workspaces run lint:eslint -- --fix",
+    "lint:fix": "yarn run lint:eslint -- --fix",
     "lint:prettier": "npx prettier --check .",
     "lint:prettier:fix": "npx prettier --write .",
-    "lint": "yarn lint:eslint && yarn lint:prettier",
     "prepare": "husky install",
+    "publish": "yarn clean && yarn build && yarn test && lerna publish",
+    "publish:ci": "lerna publish from-git --yes --canary --preid next --force-publish=* --no-verify-access",
     "test": "jest --coverage",
     "test:ci": "jest --coverage --ci",
     "type-check": "yarn workspaces run type-check"
   },
   "workspaces": [
-    "packages/types",
-    "packages/isomorphic",
     "packages/*"
   ],
   "devDependencies": {
@@ -38,6 +41,7 @@
     "husky": "^8.0.1",
     "jest": "^28.1.1",
     "jest-environment-jsdom": "^28.1.1",
+    "lerna": "^5.1.4",
     "lint-staged": "^13.0.0",
     "prettier": "2.7.1",
     "rimraf": "^3.0.2",

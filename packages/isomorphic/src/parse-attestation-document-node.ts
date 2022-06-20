@@ -1,6 +1,6 @@
 import 'cbor-rn-prereqs'; // Fixes TextDecoder not found issue and must be imported before cbor
 import { decodeAllSync } from 'cbor';
-import type { AttestationDocument } from '@cape/types';
+import type { AttestationDocument } from '@capeprivacy/types';
 
 /**
  * Parses an attestation document and returns the decoded payload.

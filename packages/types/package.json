@@ -1,12 +1,11 @@
 {
-  "name": "@cape/types",
-  "version": "0.0.1",
+  "name": "@capeprivacy/types",
+  "version": "0.0.4",
   "description": "",
   "types": "index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.types.json"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/capeprivacy/cape-js.git"

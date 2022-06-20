@@ -1,6 +1,6 @@
 import { WebsocketConnection } from './websocket-connection';
-import { base64Decode, type BytesInput, getBytes, parseAttestationDocument } from '@cape/isomorphic';
-import type { WebSocketMessage } from '@cape/types';
+import { base64Decode, type BytesInput, getBytes, parseAttestationDocument } from '@capeprivacy/isomorphic';
+import type { WebSocketMessage } from '@capeprivacy/types';
 import { encrypt } from './encrypt';
 
 /**

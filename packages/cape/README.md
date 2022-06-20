@@ -1,4 +1,4 @@
-# Cape Privacy SDK for JavaScript
+# @capeprivacy/cape-sdk
 
 [![codecov](https://codecov.io/gh/capeprivacy/cape-js/branch/main/graph/badge.svg?token=faHLjMR1MK)](https://codecov.io/gh/capeprivacy/cape-js) ![build](https://github.com/capeprivacy/cape-js/actions/workflows/test.yml/badge.svg)
 
@@ -58,7 +58,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 Please make sure to update tests as appropriate.
 
-Read more about how to contribute to the Cape SDK in [CONTRIBUTING](./CONTRIBUTING.md).
+Read more about how to contribute to the Cape SDK in [CONTRIBUTING](https://github.com/capeprivacy/cape-js/tree/main/CONTRIBUTING.md).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

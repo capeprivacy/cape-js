@@ -1,5 +1,5 @@
 import { decodeAllSync } from 'cbor-web';
-import type { AttestationDocument } from '@cape/types';
+import type { AttestationDocument } from '@capeprivacy/types';
 
 /**
  * Parses an attestation document and returns the decoded payload.
