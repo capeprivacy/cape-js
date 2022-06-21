@@ -33,15 +33,45 @@ yarn add @capeprivacy/cape-sdk
 
 ## Usage
 
-Example [run.mjs](https://github.com/capeprivacy/cape-js/tree/main/packages/cape/examples/run.mjs):
-
 Replace `<AUTH_TOKEN>` and `<FUNCTION_ID>` with your values.
+
+### `run`
+
+Run is used to invoke a function once with a single input.
+
+Example [run.mjs](https://github.com/capeprivacy/cape-js/tree/main/packages/cape/examples/run.mjs):
 
 ```js
 import { Cape } from '@capeprivacy/cape-sdk';
 
 const client = new Cape({ authToken: '<AUTH_TOKEN>' });
-await client.run({ id: '<FUNCTION_ID>', data: 'Hello world' });
+await client.run({ id: '<FUNCTION_ID>', data: 'my-data' });
+```
+
+### `invoke`
+
+Invoke is used to run a function repeatedly with a multiple inputs. It gives you more control over the lifecycle of
+the function invocation.
+
+Example [invoke.mjs](https://github.com/capeprivacy/cape-js/tree/main/packages/cape/examples/invoke.mjs):
+
+```ts
+const client = new Cape({ authToken: '<AUTH_TOKEN>' });
+
+try {
+  await client.connect({ id: '<FUNCTION_ID>' });
+
+  const results = await Promise.all([
+    client.invoke({ data: 'my-data-1' }),
+    client.invoke({ data: 'my-data-2' }),
+    client.invoke({ data: 'my-data-3' }),
+  ]);
+  console.log('Cape run result:', results);
+} catch (err) {
+  console.error('Something went wrong.', err);
+} finally {
+  client.disconnect();
+}
 ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
