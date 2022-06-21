@@ -62,7 +62,7 @@ export abstract class Methods {
     this.nonce = generateNonce();
 
     // Send the nonce and auth token to the server to kick off the function.
-    await this.websocket.send(JSON.stringify({ nonce: this.nonce, auth_token: this.getAuthToken() }));
+    this.websocket.send(JSON.stringify({ nonce: this.nonce, auth_token: this.getAuthToken() }));
 
     // Wait for the server to send back the attestation document with the public key.
     const result = Methods.parseMessage(await this.websocket.receive());
@@ -131,7 +131,7 @@ export abstract class Methods {
       throw new Error('Unable to invoke the function, missing public key. Call Cape.connect() first.');
     }
     const cypherText = await encrypt(getBytes(data), this.publicKey, getBytes(''));
-    await this.websocket.send(cypherText);
+    this.websocket.send(cypherText);
     const result = Methods.parseMessage(await this.websocket.receive());
     return base64Decode(result.message);
   }
@@ -143,8 +143,7 @@ export abstract class Methods {
    * @returns The message from the server
    * @private
    */
-  private static parseMessage(frame: Data): Message {
-    console.log(frame, typeof frame);
+  private static parseMessage(frame: Data | undefined): Message {
     if (typeof frame !== 'string') {
       throw new Error('Invalid message received from the server.');
     }

@@ -1,4 +1,4 @@
-import WebSocket, { Data, OPEN } from 'isomorphic-ws';
+import WebSocket, { Data, MessageEvent, OPEN } from 'isomorphic-ws';
 import { debug, error } from 'loglevel';
 
 interface Callback {
@@ -52,7 +52,7 @@ export class WebsocketConnection {
     return this.messageQueue.length;
   }
 
-  receive(): Promise<Data> {
+  receive(): Promise<Data | undefined> {
     if (this.messagesAvailable) {
       return Promise.resolve(this.messageQueue.shift());
     }
@@ -94,6 +94,7 @@ export class WebsocketConnection {
 
         this.onClose();
 
+        // This will only reject whenever the initial onopen callback is not called.
         reject(new Error('Websocket error. Closing connection'));
       };
     });
@@ -136,31 +137,18 @@ export class WebsocketConnection {
   /**
    * Handle a message from the server.
    *
-   * @param message
+   * @param message - The incoming message from the server.
    * @private
    */
-  private handleMessage(message: WebSocket.MessageEvent) {
+  private handleMessage(message: MessageEvent) {
     const { data } = message;
     debug('Websocket message received', data);
 
     if (this.callbacksQueue.length) {
-      this.callbacksQueue.shift().resolve(data);
+      this.callbacksQueue.shift()?.resolve(data);
       return;
     }
 
     this.messageQueue.push(data);
-  }
-
-  /**
-   * Wait for the websocket connection to be open.
-   *
-   * @param resolve - Promise to resolve when the connection is open.
-   */
-  private waitForConnection(resolve: () => void) {
-    if (this.connected) return resolve();
-
-    setTimeout(() => {
-      this.waitForConnection(resolve);
-    }, 10);
   }
 }
