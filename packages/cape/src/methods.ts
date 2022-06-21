@@ -65,7 +65,7 @@ export abstract class Methods {
     this.websocket.send(JSON.stringify({ nonce: this.nonce, auth_token: this.getAuthToken() }));
 
     // Wait for the server to send back the attestation document with the public key.
-    const result = Methods.parseMessage(await this.websocket.receive());
+    const result = parseFrame(await this.websocket.receive());
     if (result.type !== 'attestation_doc') {
       throw new Error(`Expected attestation document but received ${result.type}.`);
     }
@@ -132,23 +132,22 @@ export abstract class Methods {
     }
     const cypherText = await encrypt(getBytes(data), this.publicKey, getBytes(''));
     this.websocket.send(cypherText);
-    const result = Methods.parseMessage(await this.websocket.receive());
+    const result = parseFrame(await this.websocket.receive());
     return base64Decode(result.message);
   }
+}
 
-  /**
-   * Parse the incoming frame from the server and return the message.
-   *
-   * @param frame - The incoming frame from the server
-   * @returns The message from the server
-   * @private
-   */
-  private static parseMessage(frame: Data | undefined): Message {
-    if (typeof frame !== 'string') {
-      throw new Error('Invalid message received from the server.');
-    }
-    return JSON.parse(frame);
+/**
+ * Parse the incoming frame from the server and return the message.
+ *
+ * @param frame - The incoming frame from the server
+ * @returns The message from the server
+ */
+function parseFrame(frame: Data | undefined): Message {
+  if (typeof frame !== 'string') {
+    throw new Error('Invalid message received from the server.');
   }
+  return JSON.parse(frame);
 }
 
 function generateNonce() {

@@ -3,11 +3,8 @@ import { Server } from 'mock-socket';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import crypto from 'crypto';
-import loglevel from 'loglevel';
 import { WebsocketConnection } from './websocket-connection';
 import { parseAttestationDocument } from '@capeprivacy/isomorphic';
-
-loglevel.setLevel('trace');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
@@ -104,7 +101,7 @@ describe('Cape', () => {
 
     test('should run a function without error', async () => {
       const id = 'ABC';
-      const capeApiUrl = 'ws://localhost:8000';
+      const capeApiUrl = 'ws://localhost:8829';
       const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
       let incomingMessageCount = 0;
 
@@ -146,7 +143,7 @@ describe('Cape', () => {
 
     test('when the public key is missing, it should reject', async () => {
       const cape = new Cape({ authToken });
-      cape.websocket = new WebsocketConnection('ws://localhost:8000');
+      cape.websocket = new WebsocketConnection('ws://localhost:1288');
 
       await expect(cape.invoke({ data: 'ping' })).rejects.toThrowError(
         'Unable to invoke the function, missing public key.',
@@ -155,7 +152,7 @@ describe('Cape', () => {
 
     test('can invoke several functions', async () => {
       const id = 'ABC';
-      const capeApiUrl = 'ws://localhost:8000';
+      const capeApiUrl = 'ws://localhost:1929';
       const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
       let incomingMessageCount = 0;
 
@@ -195,6 +192,33 @@ describe('Cape', () => {
       expect(result1).toBe('pong-2');
       expect(result2).toBe('pong-3');
       expect(result3).toBe('pong-4');
+
+      mockServer.stop();
+    });
+
+    test('when the server responds with an unknown message, it should throw an error', async () => {
+      const id = 'ABC';
+      const capeApiUrl = 'ws://localhost:1929';
+      const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', (data) => {
+          if (typeof data === 'string') {
+            const parsed = JSON.parse(data);
+            // First message contains a nonce, send back the attestation document.
+            if (parsed.nonce) {
+              socket.send(JSON.stringify({ message: attestationDocument, type: 'attestation_doc' }));
+            }
+          } else {
+            socket.send(new ArrayBuffer(25));
+          }
+        });
+      });
+
+      const client = new Cape({ authToken, capeApiUrl });
+      await client.connect({ id });
+
+      await expect(client.invoke({ data: 'ping' })).rejects.toThrowError('Invalid message received from the server.');
 
       mockServer.stop();
     });

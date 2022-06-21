@@ -1,8 +1,5 @@
 import { Server } from 'mock-socket';
 import { WebsocketConnection } from './websocket-connection';
-import loglevel from 'loglevel';
-
-loglevel.setLevel('trace');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
@@ -143,9 +140,13 @@ describe('WebSocketConnection', () => {
       const ws = new WebsocketConnection(url);
       await ws.connect();
 
+      expect(ws.messagesAvailable).toBe(3);
+
       await expect(ws.receive()).resolves.toBe('hello-1');
       await expect(ws.receive()).resolves.toBe('hello-2');
       await expect(ws.receive()).resolves.toBe('hello-3');
+
+      expect(ws.messagesAvailable).toBe(0);
 
       ws.close();
       mockServer.close();
