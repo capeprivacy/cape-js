@@ -6,7 +6,7 @@ jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
 
 describe('WebSocketConnection', () => {
   describe('#connect', () => {
-    it('should connect and disconnect', async () => {
+    test('should connect and disconnect', async () => {
       const url = 'ws://localhost:8000';
       const mockServer = new Server(url);
 
@@ -23,14 +23,14 @@ describe('WebSocketConnection', () => {
       mockServer.stop();
     });
 
-    it('should throw when the server does not connect', async () => {
+    test('should throw when the server does not connect', async () => {
       const url = 'ws://localhost:8082';
       const ws = new WebsocketConnection(url);
       await expect(ws.connect()).rejects.toThrowError('Websocket error. Closing connection');
     });
   });
 
-  it('should error when the server disconnects', async () => {
+  test('should error when the server disconnects', async () => {
     const url = 'ws://localhost:8001';
     const mockServer = new Server(url);
 
@@ -48,7 +48,7 @@ describe('WebSocketConnection', () => {
   });
 
   describe('#receive', () => {
-    it('when there are messages, should return the message', async () => {
+    test('when there are messages, should return the message', async () => {
       const url = 'ws://localhost:8280';
       const mockServer = new Server(url);
 
@@ -70,12 +70,12 @@ describe('WebSocketConnection', () => {
       mockServer.close();
     });
 
-    it('when the websocket server is not connected, it should throw an error', async () => {
+    test('when the websocket server is not connected, it should throw an error', async () => {
       const ws = new WebsocketConnection('ws://localhost:8000');
       await expect(() => ws.receive()).rejects.toThrowError('WebSocket connection not open');
     });
 
-    it('when the connection is open, but no messages are available, it should wait to resolve', (done) => {
+    test('when the connection is open, but no messages are available, it should wait to resolve', (done) => {
       const url = 'ws://localhost:8291';
       const mockServer = new Server(url);
 
@@ -100,7 +100,7 @@ describe('WebSocketConnection', () => {
       });
     });
 
-    it('when sending multiple messages, it should return each message', async () => {
+    test('when sending multiple messages, it should return each message', async () => {
       let counter = 0;
       const url = 'ws://localhost:8292';
       const mockServer = new Server(url);
@@ -127,7 +127,7 @@ describe('WebSocketConnection', () => {
       mockServer.close();
     });
 
-    it('should queue received messages', async () => {
+    test('should queue received messages', async () => {
       const url = 'ws://localhost:2818';
       const mockServer = new Server(url);
 
