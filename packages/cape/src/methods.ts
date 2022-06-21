@@ -94,10 +94,12 @@ export abstract class Methods {
    * ```
    */
   public async run({ id, data }: RunArguments): Promise<string> {
-    await this.connect({ id });
-    const response = await this.invoke({ data });
-    this.disconnect();
-    return response;
+    try {
+      await this.connect({ id });
+      return await this.invoke({ data });
+    } finally {
+      this.disconnect();
+    }
   }
 
   /**
