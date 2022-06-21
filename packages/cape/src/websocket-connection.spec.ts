@@ -129,5 +129,26 @@ describe('WebSocketConnection', () => {
       ws.close();
       mockServer.close();
     });
+
+    it('should queue received messages', async () => {
+      const url = 'ws://localhost:2818';
+      const mockServer = new Server(url);
+
+      mockServer.on('connection', (socket) => {
+        socket.send(`hello-1`);
+        socket.send(`hello-2`);
+        socket.send(`hello-3`);
+      });
+
+      const ws = new WebsocketConnection(url);
+      await ws.connect();
+
+      await expect(ws.receive()).resolves.toBe('hello-1');
+      await expect(ws.receive()).resolves.toBe('hello-2');
+      await expect(ws.receive()).resolves.toBe('hello-3');
+
+      ws.close();
+      mockServer.close();
+    });
   });
 });
