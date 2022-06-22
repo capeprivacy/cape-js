@@ -5,35 +5,35 @@ import { WebsocketConnection } from './websocket-connection';
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
 
 describe('WebSocketConnection', () => {
-  it('should connect and disconnect', async () => {
-    const url = 'ws://localhost:8000';
-    const mockServer = new Server(url);
-    mockServer.on('connection', (socket) => {
-      socket.on('message', (data) => {
-        if (typeof data === 'string') {
-          socket.send('world');
-        }
-      });
+  describe('#connect', () => {
+    test('should connect and disconnect', async () => {
+      const url = 'ws://localhost:8000';
+      const mockServer = new Server(url);
+
+      const ws = new WebsocketConnection(url);
+      await ws.connect();
+
+      expect(ws.connected).toBe(true);
+
+      ws.close();
+
+      expect(ws.connected).toBe(false);
+      expect(ws.isClosed).toBe(true);
+
+      mockServer.stop();
     });
 
-    const ws = new WebsocketConnection(url);
-    ws.open(
-      (message) => {
-        expect(message).toBe('world');
-        ws.close(true);
-      },
-      (graceful) => {
-        expect(graceful).toBe(true);
-        expect(ws.frames).toHaveLength(1);
-        mockServer.stop();
-      },
-    );
-    ws.send('hello');
+    test('should throw when the server does not connect', async () => {
+      const url = 'ws://localhost:8082';
+      const ws = new WebsocketConnection(url);
+      await expect(ws.connect()).rejects.toThrowError('Websocket error. Closing connection');
+    });
   });
 
-  it('should error when the server disconnects', async () => {
+  test('should error when the server disconnects', async () => {
     const url = 'ws://localhost:8001';
     const mockServer = new Server(url);
+
     mockServer.on('connection', (socket) => {
       socket.on('message', () => {
         socket.close({ code: 1011, reason: 'bye', wasClean: true });
@@ -41,36 +41,115 @@ describe('WebSocketConnection', () => {
     });
 
     const ws = new WebsocketConnection(url);
-    ws.open(
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      () => {},
-      (graceful) => {
-        expect(graceful).toBe(false);
-        expect(ws.frames).toHaveLength(0);
-        mockServer.stop();
-      },
-    );
+    await ws.connect();
+
     ws.send('hello');
+    ws.close();
   });
 
-  it('can close the connection', (done) => {
-    const url = 'ws://localhost:8002';
-    const mockServer = new Server(url);
-    mockServer.on('close', () => {
-      mockServer.stop();
-      done();
+  describe('#receive', () => {
+    test('when there are messages, should return the message', async () => {
+      const url = 'ws://localhost:8280';
+      const mockServer = new Server(url);
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', () => {
+          socket.send('world');
+        });
+      });
+
+      const ws = new WebsocketConnection(url);
+      await ws.connect();
+
+      ws.send('hello');
+
+      const resp = await ws.receive();
+      expect(resp).toBe('world');
+
+      ws.close();
+      mockServer.close();
     });
 
-    const ws = new WebsocketConnection(url);
-    ws.open(
-      () => {
-        // noop
-      },
-      (graceful) => {
-        expect(graceful).toBe(true);
-        expect(ws.frames).toHaveLength(0);
-      },
-    );
-    ws.close(true);
+    test('when the websocket server is not connected, it should throw an error', async () => {
+      const ws = new WebsocketConnection('ws://localhost:8000');
+      await expect(() => ws.receive()).rejects.toThrowError('WebSocket connection not open');
+    });
+
+    test('when the connection is open, but no messages are available, it should wait to resolve', (done) => {
+      const url = 'ws://localhost:8291';
+      const mockServer = new Server(url);
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', () => {
+          socket.send('world');
+        });
+      });
+
+      const ws = new WebsocketConnection(url);
+      ws.connect().then(() => {
+        ws.receive().then((message) => {
+          expect(message).toBe('world');
+          ws.close();
+          mockServer.close();
+          done();
+        });
+
+        setTimeout(() => {
+          ws.send('hello');
+        }, 100);
+      });
+    });
+
+    test('when sending multiple messages, it should return each message', async () => {
+      let counter = 0;
+      const url = 'ws://localhost:8292';
+      const mockServer = new Server(url);
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', () => {
+          counter++;
+          socket.send(`world-${counter}`);
+        });
+      });
+
+      const ws = new WebsocketConnection(url);
+      await ws.connect();
+
+      ws.send('hello-1');
+      ws.send('hello-2');
+      ws.send('hello-3');
+
+      await expect(ws.receive()).resolves.toBe('world-1');
+      await expect(ws.receive()).resolves.toBe('world-2');
+      await expect(ws.receive()).resolves.toBe('world-3');
+
+      ws.close();
+      mockServer.close();
+    });
+
+    test('should queue received messages', async () => {
+      const url = 'ws://localhost:2818';
+      const mockServer = new Server(url);
+
+      mockServer.on('connection', (socket) => {
+        socket.send(`hello-1`);
+        socket.send(`hello-2`);
+        socket.send(`hello-3`);
+      });
+
+      const ws = new WebsocketConnection(url);
+      await ws.connect();
+
+      expect(ws.messagesAvailable).toBe(3);
+
+      await expect(ws.receive()).resolves.toBe('hello-1');
+      await expect(ws.receive()).resolves.toBe('hello-2');
+      await expect(ws.receive()).resolves.toBe('hello-3');
+
+      expect(ws.messagesAvailable).toBe(0);
+
+      ws.close();
+      mockServer.close();
+    });
   });
 });
