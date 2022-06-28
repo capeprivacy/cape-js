@@ -1,6 +1,6 @@
 {
   "name": "@capeprivacy/cape-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "./dist-cjs/index.js",
   "module": "./dist-es/index.js",
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/capeprivacy/cape-js#readme",
   "dependencies": {
-    "@capeprivacy/isomorphic": "^0.1.0",
+    "@capeprivacy/isomorphic": "^0.1.1",
     "isomorphic-ws": "^4.0.1",
     "loglevel": "^1.8.0",
     "tink-crypto": "^0.1.0",
