@@ -9,8 +9,9 @@ import type { AttestationDocument } from '@capeprivacy/types';
  * @returns The attestation document.
  */
 export const parseAttestationDocument = (document: string): AttestationDocument => {
-  const payloadArray = decodeAllSync(Buffer.from(document, 'base64'), {
+  const payloadArray = decodeAllSync(document, {
     preferWeb: true, // Uses Uint8Array over Buffer needed for Tink
+    encoding: 'base64',
   })[0];
   if (!Array.isArray(payloadArray) || payloadArray.length !== 4) {
     throw new Error('Invalid attestation document');
