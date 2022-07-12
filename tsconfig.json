@@ -10,7 +10,7 @@
     "paths": {
       "@capeprivacy/*": ["packages/*/src"]
     },
-    "target": "es5"
+    "target": "ES6"
   },
   "exclude": ["node_modules/", "**/*.spec.ts"],
   "include": ["packages/**/*.ts"]

@@ -25,9 +25,9 @@
   "homepage": "https://github.com/capeprivacy/cape-js#readme",
   "dependencies": {
     "@capeprivacy/isomorphic": "^0.1.1",
+    "hpke-js": "^0.13.0",
     "isomorphic-ws": "^4.0.1",
     "loglevel": "^1.8.0",
-    "tink-crypto": "^0.1.0",
     "ws": "^8.8.0"
   },
   "devDependencies": {
