@@ -1,16 +1,16 @@
 import { Cape } from '../../../dist-es';
 
+// Fill with your own values.
+const authToken = '<AUTH_TOKEN>';
+const id = '<FUNCTION_ID>';
+const data = '<DATA>';
+
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
 app.innerHTML = `
   <h1>Cape Browser Demo</h1>
 `;
-
-// Fill with your own values.
-const authToken = '<AUTH_TOKEN>';
-const id = '<FUNCTION_ID>';
-const data = '<DATA>';
 
 const client = new Cape({ authToken });
 
