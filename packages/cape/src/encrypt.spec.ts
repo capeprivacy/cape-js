@@ -8,10 +8,9 @@ const decoder = new TextDecoder();
 describe('encrypt', () => {
   test('encrypt and decrypt the text', async () => {
     const text = 'hello world';
-    const rkp = await suite.generateKeyPair();
-    const plainText = encoder.encode(text);
-    const { cipherText, encapsulatedKey } = await encrypt(plainText, (rkp.publicKey as XCryptoKey).key);
-    const pt = await suite.open({ recipientKey: rkp, enc: encapsulatedKey }, cipherText);
-    expect(text).toBe(decoder.decode(pt));
+    const keyPair = await suite.generateKeyPair();
+    const { cipherText, encapsulatedKey } = await encrypt(encoder.encode(text), (keyPair.publicKey as XCryptoKey).key);
+    const plainText = await suite.open({ recipientKey: keyPair, enc: encapsulatedKey }, cipherText);
+    expect(decoder.decode(plainText)).toBe(text);
   });
 });
