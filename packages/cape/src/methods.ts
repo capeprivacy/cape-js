@@ -2,7 +2,7 @@ import { WebsocketConnection } from './websocket-connection';
 import { base64Decode, type BytesInput, getBytes, parseAttestationDocument } from '@capeprivacy/isomorphic';
 import { encrypt } from './encrypt';
 import { Data } from 'isomorphic-ws';
-import { mergeUint8arrays } from './merge-uint8arrays';
+import { mergeUint8Arrays } from './merge-uint8-arrays';
 
 interface ConnectArgs {
   /**
@@ -134,7 +134,7 @@ export abstract class Methods {
       throw new Error('Unable to invoke the function, missing public key. Call Cape.connect() first.');
     }
     const { cipherText, encapsulatedKey } = await encrypt(getBytes(data), this.publicKey);
-    this.websocket.send(mergeUint8arrays(encapsulatedKey, cipherText));
+    this.websocket.send(mergeUint8Arrays(encapsulatedKey, cipherText));
     const result = parseFrame(await this.websocket.receive());
     return base64Decode(result.message);
   }
