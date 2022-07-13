@@ -1,8 +1,8 @@
+import { type Data } from 'isomorphic-ws';
 import { WebsocketConnection } from './websocket-connection';
 import { base64Decode, type BytesInput, getBytes, parseAttestationDocument } from '@capeprivacy/isomorphic';
-import { encrypt } from './encrypt';
-import { Data } from 'isomorphic-ws';
 import { concat } from './bytes';
+import { encrypt } from './encrypt';
 
 interface ConnectArgs {
   /**
@@ -55,22 +55,27 @@ export abstract class Methods {
     if (this.websocket) {
       throw new Error('Unable to instantiate another websocket instance, already connected to the server.');
     }
-    // Set up the connection to the server
-    this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`));
-    await this.websocket.connect();
+    try {
+      // Set up the connection to the server
+      this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`));
+      await this.websocket.connect();
 
-    // Generate the nonce for the connection.
-    this.nonce = generateNonce();
+      // Generate the nonce for the connection.
+      this.nonce = generateNonce();
 
-    // Send the nonce and auth token to the server to kick off the function.
-    this.websocket.send(JSON.stringify({ nonce: this.nonce, auth_token: this.getAuthToken() }));
+      // Send the nonce and auth token to the server to kick off the function.
+      this.websocket.send(JSON.stringify({ nonce: this.nonce, auth_token: this.getAuthToken() }));
 
-    // Wait for the server to send back the attestation document with the public key.
-    const result = parseFrame(await this.websocket.receive());
-    if (result.type !== 'attestation_doc') {
-      throw new Error(`Expected attestation document but received ${result.type}.`);
+      // Wait for the server to send back the attestation document with the public key.
+      const result = parseFrame(await this.websocket.receive());
+      if (result.type !== 'attestation_doc') {
+        throw new Error(`Expected attestation document but received ${result.type}.`);
+      }
+      this.publicKey = parseAttestationDocument(result.message).public_key;
+    } catch (e) {
+      this.disconnect();
+      throw e;
     }
-    this.publicKey = parseAttestationDocument(result.message).public_key;
   }
 
   /**
@@ -133,10 +138,15 @@ export abstract class Methods {
     if (!this.publicKey) {
       throw new Error('Unable to invoke the function, missing public key. Call Cape.connect() first.');
     }
-    const { cipherText, encapsulatedKey } = await encrypt(getBytes(data), this.publicKey);
-    this.websocket.send(concat(encapsulatedKey, cipherText));
-    const result = parseFrame(await this.websocket.receive());
-    return base64Decode(result.message);
+    try {
+      const { cipherText, encapsulatedKey } = await encrypt(getBytes(data), this.publicKey);
+      this.websocket.send(concat(encapsulatedKey, cipherText));
+      const result = parseFrame(await this.websocket.receive());
+      return base64Decode(result.message);
+    } catch (e) {
+      this.disconnect();
+      throw e;
+    }
   }
 }
 
