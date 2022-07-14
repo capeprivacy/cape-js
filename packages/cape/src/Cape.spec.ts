@@ -20,6 +20,24 @@ describe('Cape', () => {
       );
     });
 
+    test('when the server sends an invalid attestation document, it automatically disconnects', async () => {
+      const id = 'DEF';
+      const capeApiUrl = 'ws://localhost:8282';
+      const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
+      const spy = jest.spyOn(Cape.prototype, 'disconnect');
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', () => {
+          socket.send(JSON.stringify({ message: '', type: 'attestation_doc' }));
+        });
+      });
+
+      const cape = new Cape({ authToken, capeApiUrl });
+      await expect(cape.connect({ id })).rejects.toThrowError('Invalid attestation document');
+      expect(spy).toHaveBeenCalled();
+      jest.restoreAllMocks();
+    });
+
     test('when the websocket server is already instantiated, it should throw an error', async () => {
       const id = 'ABC';
       const capeApiUrl = 'ws://localhost:8021';
@@ -185,10 +203,11 @@ describe('Cape', () => {
       mockServer.stop();
     });
 
-    test('when the server responds with an unknown message, it should throw an error', async () => {
+    test('when the server responds with an unknown message, it should throw an error and disconnect', async () => {
       const id = 'ABC';
       const capeApiUrl = 'ws://localhost:1929';
       const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
+      const spy = jest.spyOn(Cape.prototype, 'disconnect');
 
       mockServer.on('connection', (socket) => {
         socket.on('message', (data) => {
@@ -208,7 +227,9 @@ describe('Cape', () => {
       await client.connect({ id });
 
       await expect(client.invoke({ data: 'ping' })).rejects.toThrowError('Invalid message received from the server.');
+      expect(spy).toHaveBeenCalled();
 
+      jest.restoreAllMocks();
       mockServer.stop();
     });
   });
