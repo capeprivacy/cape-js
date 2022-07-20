@@ -5,6 +5,8 @@ import * as crypto from 'crypto';
 
 beforeEach(() => {
   const name = 'nodeEngine';
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: crypto.webcrypto }));
 });
 

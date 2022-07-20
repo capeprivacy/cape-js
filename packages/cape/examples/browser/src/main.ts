@@ -11,6 +11,8 @@ const app = document.querySelector<HTMLDivElement>('#app')!;
 const client = new Cape({ authToken });
 
 try {
+  verifySignature('hi');
+
   await client.connect({ id });
   const response = await client.invoke({ data });
   app.insertAdjacentHTML(
