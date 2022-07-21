@@ -1,4 +1,19 @@
-export type BytesInput = string | number | Buffer | ArrayBuffer | Uint8Array | Uint16Array | Uint32Array;
+import { isPlainObject } from 'is-plain-object';
+
+type Obj = Record<string, unknown>;
+
+export type BytesInput =
+  | string
+  | string[]
+  | number
+  | number[]
+  | Buffer
+  | ArrayBuffer
+  | Uint8Array
+  | Uint16Array
+  | Uint32Array
+  | Obj
+  | Obj[];
 
 /**
  * Convert the input to a Uint8Array.
@@ -16,6 +31,9 @@ export const getBytes =
     }
     if (ArrayBuffer.isView(input)) {
       return new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
+    }
+    if (Array.isArray(input) || isPlainObject(input)) {
+      return new Uint8Array(encoder.encode(JSON.stringify(input)));
     }
     return new Uint8Array(encoder.encode(input.toString()));
   };
