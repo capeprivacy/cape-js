@@ -1,4 +1,5 @@
 import { Methods } from './methods';
+import loglevel from 'loglevel';
 
 export interface CapeInit {
   /**
@@ -10,6 +11,10 @@ export interface CapeInit {
    * @internal
    */
   capeApiUrl?: string;
+  /**
+   * Enable verbose logging.
+   */
+  verbose?: boolean;
 }
 
 export class Cape extends Methods {
@@ -18,8 +23,12 @@ export class Cape extends Methods {
 
   static DEFAULT_CAPE_API_URL = 'wss://cape.run';
 
-  constructor({ authToken, capeApiUrl }: CapeInit) {
+  constructor({ authToken, capeApiUrl, verbose }: CapeInit) {
     super();
+
+    if (verbose) {
+      loglevel.setLevel(loglevel.levels.TRACE);
+    }
 
     this.authToken = authToken;
     this.capeApiUrl = capeApiUrl || Cape.DEFAULT_CAPE_API_URL;
