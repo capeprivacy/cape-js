@@ -2,6 +2,7 @@ import { Cape } from './Cape';
 import { Server } from 'mock-socket';
 import { WebsocketConnection } from './websocket-connection';
 import { parseAttestationDocument } from '@capeprivacy/isomorphic';
+import loglevel from 'loglevel';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
@@ -12,6 +13,11 @@ const attestationDocument =
 const publicKey = parseAttestationDocument(attestationDocument).public_key;
 
 describe('Cape', () => {
+  test('setting verbose to TRUE sets the log level to trace', () => {
+    new Cape({ verbose: true, authToken });
+    expect(loglevel.getLevel()).toBe(loglevel.levels.TRACE);
+  });
+
   describe('#connect', () => {
     test('when the id is not set, it should throw an error', async () => {
       const cape = new Cape({ authToken });
