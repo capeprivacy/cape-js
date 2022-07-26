@@ -50,5 +50,8 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "pkijs": "^3.0.5"
   }
 }
