@@ -2300,7 +2300,7 @@ asap@^2.0.0:
 
 asn1js@^3.0.5:
   version "3.0.5"
-  resolved "https://registry.npmjs.org/asn1js/-/asn1js-3.0.5.tgz"
+  resolved "https://registry.yarnpkg.com/asn1js/-/asn1js-3.0.5.tgz#5ea36820443dbefb51cc7f88a2ebb5b462114f38"
   integrity sha512-FVnvrKJwpt9LP2lAMl8qZswRNm3T4q9CON+bxldk2iwk3FFpuwhx2FfinyitizWHsVYyaY+y5JzDR0rCMV5yTQ==
   dependencies:
     pvtsutils "^1.3.2"
@@ -2521,7 +2521,7 @@ byte-size@^7.0.0:
 
 bytestreamjs@^2.0.0:
   version "2.0.0"
-  resolved "https://registry.npmjs.org/bytestreamjs/-/bytestreamjs-2.0.0.tgz"
+  resolved "https://registry.yarnpkg.com/bytestreamjs/-/bytestreamjs-2.0.0.tgz#ee1b3c348967d4c3ffa45911a64e51a1fd24fc3b"
   integrity sha512-TyOlxeS92FcMOaJwAVq5gwqW0vfkWUv5W+ErwdbBzolcUN/9XYpCKWvCV21jjzXU550D9Wt4GgE8Pr1vVbR+wQ==
 
 cacache@^15.0.5, cacache@^15.2.0:
@@ -6414,7 +6414,7 @@ pkg-dir@^4.2.0:
 
 pkijs@^3.0.5:
   version "3.0.5"
-  resolved "https://registry.npmjs.org/pkijs/-/pkijs-3.0.5.tgz"
+  resolved "https://registry.yarnpkg.com/pkijs/-/pkijs-3.0.5.tgz#64134f45a92633841b2200b2ece01931209a6c56"
   integrity sha512-J6P30yzU7qSbuJIBaclwN93WbyoxjVlkYMgjQmE9wWkPUTHVu2cH6lkjWcIr2WAub5KH38BA1Eyeb4s9apUPTg==
   dependencies:
     asn1js "^3.0.5"
@@ -6545,14 +6545,14 @@ punycode@^2.1.0, punycode@^2.1.1:
 
 pvtsutils@^1.3.2:
   version "1.3.2"
-  resolved "https://registry.npmjs.org/pvtsutils/-/pvtsutils-1.3.2.tgz"
+  resolved "https://registry.yarnpkg.com/pvtsutils/-/pvtsutils-1.3.2.tgz#9f8570d132cdd3c27ab7d51a2799239bf8d8d5de"
   integrity sha512-+Ipe2iNUyrZz+8K/2IOo+kKikdtfhRKzNpQbruF2URmqPtoqAs8g3xS7TJvFF2GcPXjh7DkqMnpVveRFq4PgEQ==
   dependencies:
     tslib "^2.4.0"
 
 pvutils@^1.1.3:
   version "1.1.3"
-  resolved "https://registry.npmjs.org/pvutils/-/pvutils-1.1.3.tgz"
+  resolved "https://registry.yarnpkg.com/pvutils/-/pvutils-1.1.3.tgz#f35fc1d27e7cd3dfbd39c0826d173e806a03f5a3"
   integrity sha512-pMpnA0qRdFp32b1sJl1wOJNxZLQ2cbQx+k6tjNtZ8CpvVhNqEPRgivZ2WOUev2YMajecdH7ctUPDvEe87nariQ==
 
 q@^1.5.1:
