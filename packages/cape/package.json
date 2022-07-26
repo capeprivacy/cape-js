@@ -2,15 +2,15 @@
   "name": "@capeprivacy/cape-sdk",
   "version": "0.2.1",
   "description": "",
-  "main": "./dist-cjs/index.js",
-  "module": "./dist-es/index.js",
-  "types": "./dist-types/index.d.ts",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "concurrently 'npm run build:cjs' 'npm run build:es' 'npm run build:types'",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:es": "tsc -p tsconfig.es.json",
+    "build": "concurrently 'yarn build:esm' 'yarn build:cjs' 'yarn build:types'",
+    "build:esm": "node ../../scripts/build.es.mjs ./src/index.ts ./dist/index.esm.js",
+    "build:cjs": "node ../../scripts/build.cjs.mjs ./src/index.ts ./dist/index.cjs.js",
     "build:types": "tsc -p tsconfig.types.json",
-    "clean": "rimraf ./dist-* && rimraf *.tsbuildinfo",
+    "clean": "rimraf ./dist && rimraf *.tsbuildinfo",
     "test": "jest --coverage"
   },
   "repository": {
