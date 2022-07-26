@@ -16,6 +16,7 @@
   "author": "Cape Privacy",
   "license": "ISC",
   "dependencies": {
+    "@types/isomorphic-fetch": "^0.0.36",
     "cbor": "^8.1.0",
     "cbor-rn-prereqs": "^8.1.0",
     "cbor-web": "^8.1.0",
