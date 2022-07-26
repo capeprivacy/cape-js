@@ -1,4 +1,4 @@
-import WebSocket, { Data, MessageEvent, OPEN } from 'isomorphic-ws';
+import WebSocket, { Data, MessageEvent } from 'isomorphic-ws';
 import { debug, error } from 'loglevel';
 
 interface Callback {
@@ -40,7 +40,7 @@ export class WebsocketConnection {
    * Is the websocket connection open?
    */
   get connected(): boolean {
-    return !!this.socket && this.socket.readyState === OPEN;
+    return !!this.socket && this.socket.readyState === WebSocket.OPEN;
   }
 
   // TODO: WebSocket connection timeout
