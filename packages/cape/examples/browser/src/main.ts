@@ -8,10 +8,6 @@ const data = '<DATA>';
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-app.innerHTML = `
-  <h1>Cape Browser Demo</h1>
-`;
-
 const client = new Cape({ authToken });
 
 try {
