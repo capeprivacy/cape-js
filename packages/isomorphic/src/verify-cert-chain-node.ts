@@ -41,8 +41,8 @@ export const getAWSRootCert = async (url: string): Promise<Buffer> => {
   const f = unzipped['root.pem'];
   const pem = new TextDecoder().decode(f);
 
-  var der = pem.replace('-----BEGIN CERTIFICATE-----', '');
-  var der = der.replace('-----END CERTIFICATE-----', '');
+  let der = pem.replace('-----BEGIN CERTIFICATE-----', '');
+  der = der.replace('-----END CERTIFICATE-----', '');
 
   return Buffer.from(der.trim(), 'base64');
 };

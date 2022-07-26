@@ -1,6 +1,5 @@
 import type { AttestationDocument } from '@capeprivacy/types';
 import { Certificate, CertificateChainValidationEngine, CertificateChainValidationEngineVerifyResult } from 'pkijs';
-import fetch from 'isomorphic-fetch';
 
 export const verifyCertChain = async (
   doc: AttestationDocument,
