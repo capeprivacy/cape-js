@@ -44,8 +44,8 @@ rfMCMQCi85sWBbJwKKXdS6BptQFuZbT73o/gBh1qUxl/nNr12UO8Yfwr6wPLb+6N
 IwLz3/Y=
 -----END CERTIFICATE-----`;
 
-  var der = pem.replace('-----BEGIN CERTIFICATE-----', '');
-  var der = der.replace('-----END CERTIFICATE-----', '');
+  let der = pem.replace('-----BEGIN CERTIFICATE-----', '');
+  der = der.replace('-----END CERTIFICATE-----', '');
 
   const enc = new TextEncoder();
   return enc.encode(window.atob(der.trim()));
