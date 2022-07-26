@@ -1,4 +1,4 @@
-import WebSocket, { Data, MessageEvent } from 'isomorphic-ws';
+import WebSocket, { type Data, type MessageEvent } from 'isomorphic-ws';
 import { debug, error } from 'loglevel';
 
 interface Callback {
