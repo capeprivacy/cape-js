@@ -24,6 +24,8 @@
     "packages/*"
   ],
   "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
+    "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
     "@swc/core": "^1.2.203",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.1",
@@ -31,6 +33,7 @@
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "concurrently": "^7.2.1",
+    "esbuild": "^0.14.50",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-typescript": "^3.2.5",

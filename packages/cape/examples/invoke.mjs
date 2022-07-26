@@ -1,4 +1,4 @@
-import { Cape } from '../dist-cjs/index.js';
+import { Cape } from '../dist/index.cjs.js';
 
 const client = new Cape({ authToken: '<AUTH_TOKEN>' });
 

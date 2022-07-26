@@ -1,4 +1,4 @@
-import { Cape } from '../dist-cjs/index.js';
+import { Cape } from '../dist/index.cjs.js';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';

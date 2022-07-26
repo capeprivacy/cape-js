@@ -1,4 +1,4 @@
-import { Cape } from '../../../dist-es';
+import { Cape } from '../../../dist/index.esm.js';
 
 // Fill with your own values.
 const authToken = '<AUTH_TOKEN>';
