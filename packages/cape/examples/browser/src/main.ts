@@ -1,4 +1,4 @@
-import { Cape } from '../../../dist/index.esm.js';
+import { Cape } from '@capeprivacy/cape-sdk';
 
 // Fill with your own values.
 const authToken = '<AUTH_TOKEN>';

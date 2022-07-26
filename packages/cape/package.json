@@ -4,11 +4,15 @@
   "description": "",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.esm.js",
+  "browser": {
+    "./dist/index.esm.js": "./dist/browser.esm.js",
+    "./dist/index.cjs.js": "./dist/browser.cjs.js"
+  },
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "concurrently 'yarn build:esm' 'yarn build:cjs' 'yarn build:types'",
-    "build:esm": "node ../../scripts/build.es.mjs ./src/index.ts ./dist/index.esm.js",
-    "build:cjs": "node ../../scripts/build.cjs.mjs ./src/index.ts ./dist/index.cjs.js",
+    "build": "concurrently 'yarn build:browser' 'yarn build:node' 'yarn build:types'",
+    "build:browser": "node ../../scripts/build.browser.mjs ./src/index.ts ./dist",
+    "build:node": "node ../../scripts/build.node.mjs ./src/index.ts ./dist",
     "build:types": "tsc -p tsconfig.types.json",
     "clean": "rimraf ./dist && rimraf *.tsbuildinfo",
     "test": "jest --coverage"
