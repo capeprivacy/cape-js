@@ -2,6 +2,11 @@ import { build } from 'esbuild';
 import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import { join } from 'node:path';
+import alias from 'esbuild-plugin-alias';
+
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 const src = process.argv[2];
 const out = process.argv[3];
@@ -12,6 +17,7 @@ const options = {
   entryPoints: [src],
   platform: 'browser',
   plugins: [
+    alias({ crypto: require.resolve('crypto-browserify') }),
     NodeModulesPolyfillPlugin(),
     NodeGlobalsPolyfillPlugin({
       buffer: true,

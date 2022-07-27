@@ -36,6 +36,7 @@
     "@typescript-eslint/parser": "^5.28.0",
     "concurrently": "^7.2.1",
     "esbuild": "^0.14.50",
+    "esbuild-plugin-alias": "^0.2.1",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-typescript": "^3.2.5",
@@ -55,5 +56,8 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "crypto-browserify": "^3.12.0"
   }
 }

@@ -43,3 +43,5 @@ export interface WebSocketMessage {
   type: WebSocketMessageType;
   message: string;
 }
+
+export type Signature = [string, Buffer, Buffer, Buffer];
