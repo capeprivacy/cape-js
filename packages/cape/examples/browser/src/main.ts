@@ -1,4 +1,4 @@
-import { Cape } from '../../../dist/index.esm.js';
+import { Cape } from '@capeprivacy/cape-sdk';
 
 // Fill with your own values.
 const authToken = '<AUTH_TOKEN>';
@@ -7,10 +7,6 @@ const data = '<DATA>';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const app = document.querySelector<HTMLDivElement>('#app')!;
-
-app.innerHTML = `
-  <h1>Cape Browser Demo</h1>
-`;
 
 const client = new Cape({ authToken });
 

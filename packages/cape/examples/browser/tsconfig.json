@@ -14,7 +14,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@capeprivacy/cape-sdk": "../../dist/browser.esm.js"
+    }
   },
   "include": ["src"]
 }

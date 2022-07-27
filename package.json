@@ -26,6 +26,7 @@
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
     "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
+    "@hyrious/esbuild-plugin-commonjs": "^0.2.1",
     "@swc/core": "^1.2.203",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.1",

@@ -26,6 +26,22 @@ describe('Cape', () => {
       );
     });
 
+    test('when the server sends an error, it should throw an error', async () => {
+      const id = 'GHI';
+      const capeApiUrl = 'ws://localhost:82812';
+      const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
+      const error = 'Something went really wrong.';
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', () => {
+          socket.send(JSON.stringify({ message: null, error }));
+        });
+      });
+
+      const cape = new Cape({ authToken, capeApiUrl });
+      await expect(cape.connect({ id })).rejects.toThrowError(error);
+    });
+
     test('when the server sends an invalid attestation document, it automatically disconnects', async () => {
       const id = 'DEF';
       const capeApiUrl = 'ws://localhost:8282';
@@ -34,7 +50,7 @@ describe('Cape', () => {
 
       mockServer.on('connection', (socket) => {
         socket.on('message', () => {
-          socket.send(JSON.stringify({ message: '', type: 'attestation_doc' }));
+          socket.send(JSON.stringify({ message: { message: '', type: 'attestation_doc' } }));
         });
       });
 
@@ -51,7 +67,7 @@ describe('Cape', () => {
 
       mockServer.on('connection', (socket) => {
         socket.on('message', () => {
-          socket.send(JSON.stringify({ message: attestationDocument, type: 'attestation_doc' }));
+          socket.send(JSON.stringify({ message: { message: attestationDocument, type: 'attestation_doc' } }));
         });
       });
 
@@ -72,7 +88,7 @@ describe('Cape', () => {
 
       mockServer.on('connection', (socket) => {
         socket.on('message', () => {
-          socket.send(JSON.stringify({ message: 'pong' }));
+          socket.send(JSON.stringify({ message: { message: 'pong' } }));
         });
       });
 
@@ -90,7 +106,7 @@ describe('Cape', () => {
 
       mockServer.on('connection', (socket) => {
         socket.on('message', () => {
-          socket.send(JSON.stringify({ message: attestationDocument, type: 'attestation_doc' }));
+          socket.send(JSON.stringify({ message: { message: attestationDocument, type: 'attestation_doc' } }));
         });
       });
 
@@ -125,11 +141,13 @@ describe('Cape', () => {
           if (typeof data === 'string') {
             const parsed = JSON.parse(data);
             // First message contains a nonce, send back the attestation document.
-            if (parsed.nonce) {
-              socket.send(JSON.stringify({ message: attestationDocument, type: 'attestation_doc' }));
+            if (parsed.message.nonce) {
+              socket.send(JSON.stringify({ message: { message: attestationDocument, type: 'attestation_doc' } }));
             }
           } else {
-            socket.send(JSON.stringify({ message: Buffer.from('pong').toString('base64'), type: 'function_result' }));
+            socket.send(
+              JSON.stringify({ message: { message: Buffer.from('pong').toString('base64'), type: 'function_result' } }),
+            );
           }
         });
       });
@@ -176,14 +194,16 @@ describe('Cape', () => {
           if (typeof data === 'string') {
             const parsed = JSON.parse(data);
             // First message contains a nonce, send back the attestation document.
-            if (parsed.nonce) {
-              socket.send(JSON.stringify({ message: attestationDocument, type: 'attestation_doc' }));
+            if (parsed.message.nonce) {
+              socket.send(JSON.stringify({ message: { message: attestationDocument, type: 'attestation_doc' } }));
             }
           } else {
             socket.send(
               JSON.stringify({
-                message: Buffer.from(`pong-${incomingMessageCount}`).toString('base64'),
-                type: 'function_result',
+                message: {
+                  message: Buffer.from(`pong-${incomingMessageCount}`).toString('base64'),
+                  type: 'function_result',
+                },
               }),
             );
           }
@@ -211,7 +231,7 @@ describe('Cape', () => {
 
     test('when the server responds with an unknown message, it should throw an error and disconnect', async () => {
       const id = 'ABC';
-      const capeApiUrl = 'ws://localhost:1929';
+      const capeApiUrl = 'ws://localhost:1282';
       const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
       const spy = jest.spyOn(Cape.prototype, 'disconnect');
 
@@ -220,8 +240,8 @@ describe('Cape', () => {
           if (typeof data === 'string') {
             const parsed = JSON.parse(data);
             // First message contains a nonce, send back the attestation document.
-            if (parsed.nonce) {
-              socket.send(JSON.stringify({ message: attestationDocument, type: 'attestation_doc' }));
+            if (parsed.message.nonce) {
+              socket.send(JSON.stringify({ message: { message: attestationDocument, type: 'attestation_doc' } }));
             }
           } else {
             socket.send(new ArrayBuffer(25));
@@ -238,5 +258,31 @@ describe('Cape', () => {
       jest.restoreAllMocks();
       mockServer.stop();
     });
+  });
+
+  test('when the server responds with an error, it should throw the error', async () => {
+    const id = 'ABC';
+    const capeApiUrl = 'ws://localhost:8122';
+    const mockServer = new Server(`${capeApiUrl}/v1/run/${id}`);
+    const error = 'Something went wrong';
+
+    mockServer.on('connection', (socket) => {
+      socket.on('message', (data) => {
+        if (typeof data === 'string') {
+          const parsed = JSON.parse(data);
+          // First message contains a nonce, send back the attestation document.
+          if (parsed.message.nonce) {
+            socket.send(JSON.stringify({ message: { message: attestationDocument, type: 'attestation_doc' } }));
+          }
+        } else {
+          socket.send(JSON.stringify({ message: null, error }));
+        }
+      });
+    });
+
+    const client = new Cape({ authToken, capeApiUrl });
+    await client.connect({ id });
+
+    await expect(client.invoke({ data: 'ping' })).rejects.toThrowError(error);
   });
 });

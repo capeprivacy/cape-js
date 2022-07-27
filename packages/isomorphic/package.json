@@ -2,13 +2,17 @@
   "name": "@capeprivacy/isomorphic",
   "version": "0.2.1",
   "description": "",
-  "browser": "dist/index.browser.js",
-  "main": "dist/index.node.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "browser": {
+    "./dist/index.js": "./dist/browser.esm.js",
+    "./dist/index.mjs": "./dist/browser.cjs.js"
+  },
   "types": "dist/index.node.d.ts",
   "scripts": {
-    "build": "concurrently 'yarn build:esm' 'yarn build:cjs' 'yarn build:types'",
-    "build:esm": "node ../../scripts/build.es.mjs ./src/index.browser.ts ./dist/index.browser.js",
-    "build:cjs": "node ../../scripts/build.cjs.mjs ./src/index.node.ts ./dist/index.node.js",
+    "build": "concurrently 'yarn build:browser' 'yarn build:node' 'yarn build:types'",
+    "build:browser": "node ../../scripts/build.browser.mjs ./src/index.browser.ts ./dist",
+    "build:node": "node ../../scripts/build.node.mjs ./src/index.node.ts ./dist",
     "build:types": "tsc -p tsconfig.types.json",
     "clean": "rimraf ./dist && rimraf *.tsbuildinfo",
     "test": "jest --coverage"

@@ -33,8 +33,11 @@ interface InvokeArgs {
 }
 
 interface Message {
-  type: string;
-  message: string;
+  message: {
+    type: string;
+    message: string;
+  };
+  error: string;
 }
 
 export abstract class Methods {
@@ -64,14 +67,18 @@ export abstract class Methods {
       this.nonce = generateNonce();
 
       // Send the nonce and auth token to the server to kick off the function.
-      this.websocket.send(JSON.stringify({ nonce: this.nonce, auth_token: this.getAuthToken() }));
+      this.websocket.send(JSON.stringify({ message: { nonce: this.nonce, auth_token: this.getAuthToken() } }));
 
       // Wait for the server to send back the attestation document with the public key.
       const result = parseFrame(await this.websocket.receive());
-      if (result.type !== 'attestation_doc') {
-        throw new Error(`Expected attestation document but received ${result.type}.`);
+      if (result.error) {
+        throw new Error(result.error);
       }
-      this.publicKey = parseAttestationDocument(result.message).public_key;
+      const { type, message } = result.message;
+      if (type !== 'attestation_doc') {
+        throw new Error(`Expected attestation document but received ${type}.`);
+      }
+      this.publicKey = parseAttestationDocument(message).public_key;
     } catch (e) {
       this.disconnect();
       throw e;
@@ -142,7 +149,10 @@ export abstract class Methods {
       const { cipherText, encapsulatedKey } = await encrypt(getBytes(data), this.publicKey);
       this.websocket.send(concat(encapsulatedKey, cipherText));
       const result = parseFrame(await this.websocket.receive());
-      return base64Decode(result.message);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      return base64Decode(result.message.message);
     } catch (e) {
       this.disconnect();
       throw e;
