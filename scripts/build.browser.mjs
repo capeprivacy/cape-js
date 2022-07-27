@@ -19,7 +19,7 @@ const options = {
   ],
   target: ['chrome90', 'firefox90', 'safari11'],
   color: true,
-  watch: watch,
+  watch,
 };
 
 await Promise.all([
