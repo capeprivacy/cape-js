@@ -7,12 +7,11 @@ const out = process.argv[3];
 
 const options = {
   bundle: true,
+  color: true,
   entryPoints: [src],
-  format: 'cjs',
   mainFields: ['main', 'module'],
   outfile: out,
   platform: 'node',
-  sourcemap: true,
 };
 
 await Promise.all([

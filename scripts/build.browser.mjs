@@ -9,17 +9,15 @@ const out = process.argv[3];
 const options = {
   bundle: true,
   entryPoints: [src],
-  format: 'esm',
   platform: 'browser',
   plugins: [
     NodeModulesPolyfillPlugin(),
     NodeGlobalsPolyfillPlugin({
       buffer: true,
-      crypto: false, // Depend on WebCrypto API instead of a polyfill
-      url: false,
     }),
   ],
   target: ['chrome90', 'firefox90', 'safari11'],
+  color: true,
 };
 
 await Promise.all([
