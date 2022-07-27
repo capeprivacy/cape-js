@@ -16,10 +16,13 @@
   "author": "Cape Privacy",
   "license": "ISC",
   "dependencies": {
+    "@types/isomorphic-fetch": "^0.0.36",
     "cbor": "^8.1.0",
     "cbor-rn-prereqs": "^8.1.0",
     "cbor-web": "^8.1.0",
+    "fflate": "^0.7.3",
     "is-plain-object": "^5.0.0",
+    "isomorphic-fetch": "^3.0.0",
     "pkijs": "^3.0.5"
   }
 }
