@@ -5,6 +5,7 @@ import { join } from 'node:path';
 
 const src = process.argv[2];
 const out = process.argv[3];
+const watch = process.argv[4] === 'watch';
 
 const options = {
   bundle: true,
@@ -18,6 +19,7 @@ const options = {
   ],
   target: ['chrome90', 'firefox90', 'safari11'],
   color: true,
+  watch,
 };
 
 await Promise.all([
