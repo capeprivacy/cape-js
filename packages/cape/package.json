@@ -2,11 +2,11 @@
   "name": "@capeprivacy/cape-sdk",
   "version": "0.2.1",
   "description": "",
-  "main": "./dist/index.cjs.js",
-  "module": "./dist/index.esm.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "browser": {
-    "./dist/index.esm.js": "./dist/browser.esm.js",
-    "./dist/index.cjs.js": "./dist/browser.cjs.js"
+    "./dist/index.mjs": "./dist/browser.esm.js",
+    "./dist/index.js": "./dist/browser.cjs.js"
   },
   "types": "./dist/index.d.ts",
   "scripts": {
