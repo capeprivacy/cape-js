@@ -18,7 +18,8 @@
     "publish:ci": "lerna publish from-git --yes --canary --preid next --force-publish=* --no-verify-access",
     "test": "jest --coverage",
     "test:ci": "jest --coverage --ci",
-    "type-check": "yarn workspaces run type-check"
+    "type-check": "yarn workspaces run type-check",
+    "watch": "lerna run watch --parallel --stream"
   },
   "workspaces": [
     "packages/*"

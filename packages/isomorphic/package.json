@@ -11,6 +11,7 @@
   "types": "dist/index.node.d.ts",
   "scripts": {
     "build": "concurrently 'yarn build:browser' 'yarn build:node' 'yarn build:types'",
+    "watch": "concurrently 'yarn build:browser watch' 'yarn build:node watch'",
     "build:browser": "node ../../scripts/build.browser.mjs ./src/index.browser.ts ./dist",
     "build:node": "node ../../scripts/build.node.mjs ./src/index.node.ts ./dist",
     "build:types": "tsc -p tsconfig.types.json",

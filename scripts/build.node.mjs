@@ -4,6 +4,7 @@ import { commonjs } from '@hyrious/esbuild-plugin-commonjs';
 
 const src = process.argv[2];
 const out = process.argv[3];
+const watch = process.argv[4] === 'watch';
 
 const options = {
   bundle: true,
@@ -12,6 +13,7 @@ const options = {
   mainFields: ['main', 'module'],
   outfile: out,
   platform: 'node',
+  watch,
 };
 
 await Promise.all([
