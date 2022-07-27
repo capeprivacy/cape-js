@@ -5,8 +5,8 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "browser": {
-    "./dist/index.js": "./dist/browser.esm.js",
-    "./dist/index.mjs": "./dist/browser.cjs.js"
+    "./dist/index.mjs": "./dist/browser.esm.js",
+    "./dist/index.js": "./dist/browser.cjs.js"
   },
   "types": "dist/index.node.d.ts",
   "scripts": {
