@@ -12,6 +12,6 @@
     "vite": "^2.9.9"
   },
   "dependencies": {
-    "tink-crypto": "^0.1.0"
+    "buffer": "^6.0.3"
   }
 }

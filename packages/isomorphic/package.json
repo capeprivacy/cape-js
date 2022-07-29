@@ -21,13 +21,20 @@
   "author": "Cape Privacy",
   "license": "ISC",
   "dependencies": {
-    "@types/isomorphic-fetch": "^0.0.36",
+    "buffer": "^6.0.3",
     "cbor": "^8.1.0",
     "cbor-rn-prereqs": "^8.1.0",
-    "cbor-web": "^8.1.0",
+    "cose-js": "^0.8.4",
+    "elliptic": "^6.5.4",
     "fflate": "^0.7.3",
     "is-plain-object": "^5.0.0",
     "isomorphic-fetch": "^3.0.0",
     "pkijs": "^3.0.5"
+  },
+  "devDependencies": {
+    "@types/cose-js": "^0.8.0",
+    "@types/isomorphic-fetch": "^0.0.36",
+    "@types/elliptic": "^6.4.14",
+    "@types/pkijs": "^0.0.14"
   }
 }

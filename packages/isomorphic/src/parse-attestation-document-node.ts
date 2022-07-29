@@ -1,6 +1,6 @@
+import type { AttestationDocument } from '@capeprivacy/types';
 import 'cbor-rn-prereqs'; // Fixes TextDecoder not found issue and must be imported before cbor
 import { decodeAllSync } from 'cbor';
-import type { AttestationDocument } from '@capeprivacy/types';
 
 /**
  * Parses an attestation document and returns the decoded payload.
@@ -10,7 +10,6 @@ import type { AttestationDocument } from '@capeprivacy/types';
  */
 export const parseAttestationDocument = (document: string): AttestationDocument => {
   const payloadArray = decodeAllSync(document, {
-    preferWeb: true, // Uses Uint8Array over Buffer needed for Tink
     encoding: 'base64',
   })[0];
   if (!Array.isArray(payloadArray) || payloadArray.length !== 4) {
