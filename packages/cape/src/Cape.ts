@@ -21,7 +21,7 @@ export class Cape extends Methods {
   private readonly authToken: string;
   private readonly capeApiUrl: string;
 
-  static DEFAULT_CAPE_API_URL = 'wss://cape.run';
+  static DEFAULT_CAPE_API_URL = 'wss://hackathon.capeprivacy.com';
 
   constructor({ authToken, capeApiUrl, verbose }: CapeInit) {
     super();

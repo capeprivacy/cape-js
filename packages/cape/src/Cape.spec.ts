@@ -3,9 +3,18 @@ import { Server } from 'mock-socket';
 import { WebsocketConnection } from './websocket-connection';
 import { parseAttestationDocument } from '@capeprivacy/isomorphic';
 import loglevel from 'loglevel';
+import * as pkijs from 'pkijs';
+import * as crypto from 'crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
+
+beforeEach(() => {
+  const name = 'nodeEngine';
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: crypto.webcrypto }));
+});
 
 const authToken = 'abc';
 const attestationDocument =

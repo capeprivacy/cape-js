@@ -3,7 +3,7 @@ import { Certificate, CertificateChainValidationEngine, CertificateChainValidati
 
 export const verifyCertChain = async (
   doc: AttestationDocument,
-  rootCert: Uint8Array,
+  rootCert: Buffer,
   checkDate?: Date,
 ): Promise<CertificateChainValidationEngineVerifyResult> => {
   if (checkDate == undefined) {
@@ -27,7 +27,7 @@ export const verifyCertChain = async (
   return await certChainVerificationEngine.verify();
 };
 
-export const getAWSRootCert = async (): Promise<Uint8Array> => {
+export const getAWSRootCert = async (): Promise<Buffer> => {
   const pem = `-----BEGIN CERTIFICATE-----
 MIICETCCAZagAwIBAgIRAPkxdWgbkK/hHUbMtOTn+FYwCgYIKoZIzj0EAwMwSTEL
 MAkGA1UEBhMCVVMxDzANBgNVBAoMBkFtYXpvbjEMMAoGA1UECwwDQVdTMRswGQYD
@@ -47,5 +47,5 @@ IwLz3/Y=
   der = der.replace('-----END CERTIFICATE-----', '');
 
   const enc = new TextEncoder();
-  return enc.encode(window.atob(der.trim()));
+  return Buffer.from(der.trim(), 'base64'); //enc.encode(window.atob(der.trim()));
 };
