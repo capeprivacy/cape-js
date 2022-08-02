@@ -2,6 +2,7 @@ import type { AttestationDocument } from '@capeprivacy/types';
 import { Certificate, CertificateChainValidationEngine, CertificateChainValidationEngineVerifyResult } from 'pkijs';
 import fetch from 'isomorphic-fetch';
 import * as fflate from 'fflate';
+import { TextDecoder } from 'util';
 
 export const verifyCertChain = async (
   doc: AttestationDocument,
@@ -37,7 +38,7 @@ export const getAWSRootCert = async (url: string): Promise<Buffer> => {
 
   const buf = await res.arrayBuffer();
 
-  const unzipped = fflate.unzipSync(new Uint8Array(buf));
+  const unzipped = fflate.unzipSync(new Uint8Array(buf), {});
   const f = unzipped['root.pem'];
   const pem = new TextDecoder().decode(f);
 

@@ -1,6 +1,14 @@
 import { type Data } from 'isomorphic-ws';
 import { WebsocketConnection } from './websocket-connection';
-import { base64Decode, type BytesInput, getBytes, parseAttestationDocument } from '@capeprivacy/isomorphic';
+import {
+  base64Decode,
+  type BytesInput,
+  getBytes,
+  parseAttestationDocument,
+  verifySignature,
+  verifyCertChain,
+  getAWSRootCert,
+} from '@capeprivacy/isomorphic';
 import { concat } from './bytes';
 import { encrypt } from './encrypt';
 
@@ -46,6 +54,7 @@ export abstract class Methods {
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
   nonce?: string;
+  checkDate?: Date;
 
   /**
    * Connect to the Cape server.
@@ -78,7 +87,18 @@ export abstract class Methods {
       if (type !== 'attestation_doc') {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
-      this.publicKey = parseAttestationDocument(message).public_key;
+      const doc = parseAttestationDocument(message);
+
+      verifySignature(Buffer.from(message, 'base64'), doc.certificate);
+
+      const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
+
+      const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
+      if (!certResult.result) {
+        throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
+      }
+
+      this.publicKey = doc.public_key;
     } catch (e) {
       this.disconnect();
       throw e;

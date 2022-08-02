@@ -3,9 +3,18 @@ import { Server } from 'mock-socket';
 import { WebsocketConnection } from './websocket-connection';
 import { parseAttestationDocument } from '@capeprivacy/isomorphic';
 import loglevel from 'loglevel';
+import * as pkijs from 'pkijs';
+import * as crypto from 'crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
+
+beforeEach(() => {
+  const name = 'nodeEngine';
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: crypto.webcrypto }));
+});
 
 const authToken = 'abc';
 const attestationDocument =
@@ -14,13 +23,13 @@ const publicKey = parseAttestationDocument(attestationDocument).public_key;
 
 describe('Cape', () => {
   test('setting verbose to TRUE sets the log level to trace', () => {
-    new Cape({ verbose: true, authToken });
+    new Cape({ verbose: true, authToken, checkDate: new Date('2022-07-12T21:34:04.000Z') });
     expect(loglevel.getLevel()).toBe(loglevel.levels.TRACE);
   });
 
   describe('#connect', () => {
     test('when the id is not set, it should throw an error', async () => {
-      const cape = new Cape({ authToken });
+      const cape = new Cape({ authToken, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       await expect(() => cape.connect({ id: '' })).rejects.toThrowError(
         'Unable to connect to the server, missing function id.',
       );
@@ -38,7 +47,7 @@ describe('Cape', () => {
         });
       });
 
-      const cape = new Cape({ authToken, capeApiUrl });
+      const cape = new Cape({ authToken, capeApiUrl, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       await expect(cape.connect({ id })).rejects.toThrowError(error);
     });
 
@@ -54,7 +63,7 @@ describe('Cape', () => {
         });
       });
 
-      const cape = new Cape({ authToken, capeApiUrl });
+      const cape = new Cape({ authToken, capeApiUrl, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       await expect(cape.connect({ id })).rejects.toThrowError('Invalid attestation document');
       expect(spy).toHaveBeenCalled();
       jest.restoreAllMocks();
@@ -71,7 +80,7 @@ describe('Cape', () => {
         });
       });
 
-      const cape = new Cape({ authToken, capeApiUrl });
+      const cape = new Cape({ authToken, capeApiUrl, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       await cape.connect({ id });
 
       await expect(() => cape.connect({ id })).rejects.toThrowError(
@@ -92,7 +101,7 @@ describe('Cape', () => {
         });
       });
 
-      const client = new Cape({ authToken, capeApiUrl });
+      const client = new Cape({ authToken, capeApiUrl, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       await expect(client.connect({ id })).rejects.toThrowError('Expected attestation document but received undefined');
 
       client.disconnect();
@@ -110,7 +119,7 @@ describe('Cape', () => {
         });
       });
 
-      const client = new Cape({ authToken, capeApiUrl });
+      const client = new Cape({ authToken, capeApiUrl, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       await client.connect({ id });
 
       expect(client.publicKey).toEqual(publicKey);
@@ -122,7 +131,7 @@ describe('Cape', () => {
 
   describe('#run', () => {
     test('when the function id is missing, it should reject', async () => {
-      const cape = new Cape({ authToken });
+      const cape = new Cape({ authToken, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - we are testing the reject behavior
       await expect(cape.run({})).rejects.toThrowError('Unable to connect to the server, missing function id.');
@@ -152,7 +161,7 @@ describe('Cape', () => {
         });
       });
 
-      const client = new Cape({ authToken, capeApiUrl });
+      const client = new Cape({ authToken, capeApiUrl, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       const result = await client.run({ id, data: 'ping' });
 
       expect(incomingMessageCount).toBe(2);
@@ -166,14 +175,14 @@ describe('Cape', () => {
 
   describe('#invoke', () => {
     test('when the websocket is not connected, it should reject', async () => {
-      const cape = new Cape({ authToken });
+      const cape = new Cape({ authToken, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       await expect(cape.invoke({ data: 'ping' })).rejects.toThrowError(
         'Unable to invoke the function, not connected to the server.',
       );
     });
 
     test('when the public key is missing, it should reject', async () => {
-      const cape = new Cape({ authToken });
+      const cape = new Cape({ authToken, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       cape.websocket = new WebsocketConnection('ws://localhost:1288');
 
       await expect(cape.invoke({ data: 'ping' })).rejects.toThrowError(
@@ -210,7 +219,7 @@ describe('Cape', () => {
         });
       });
 
-      const client = new Cape({ authToken, capeApiUrl });
+      const client = new Cape({ authToken, capeApiUrl, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       await client.connect({ id });
 
       const result1 = await client.invoke({ data: 'ping' });
@@ -249,7 +258,7 @@ describe('Cape', () => {
         });
       });
 
-      const client = new Cape({ authToken, capeApiUrl });
+      const client = new Cape({ authToken, capeApiUrl, checkDate: new Date('2022-07-12T21:34:04.000Z') });
       await client.connect({ id });
 
       await expect(client.invoke({ data: 'ping' })).rejects.toThrowError('Invalid message received from the server.');
@@ -280,7 +289,7 @@ describe('Cape', () => {
       });
     });
 
-    const client = new Cape({ authToken, capeApiUrl });
+    const client = new Cape({ authToken, capeApiUrl, checkDate: new Date('2022-07-12T21:34:04.000Z') });
     await client.connect({ id });
 
     await expect(client.invoke({ data: 'ping' })).rejects.toThrowError(error);
