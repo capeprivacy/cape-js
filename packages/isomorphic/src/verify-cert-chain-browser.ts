@@ -46,5 +46,5 @@ IwLz3/Y=
   let der = pem.replace('-----BEGIN CERTIFICATE-----', '');
   der = der.replace('-----END CERTIFICATE-----', '');
 
-  return Buffer.from(der.trim(), 'base64'); //enc.encode(window.atob(der.trim()));
+  return Buffer.from(der.trim(), 'base64');
 };
