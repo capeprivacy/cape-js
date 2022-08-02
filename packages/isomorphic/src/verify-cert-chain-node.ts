@@ -2,6 +2,7 @@ import type { AttestationDocument } from '@capeprivacy/types';
 import { Certificate, CertificateChainValidationEngine, CertificateChainValidationEngineVerifyResult } from 'pkijs';
 import fetch from 'isomorphic-fetch';
 import * as fflate from 'fflate';
+import { TextDecoder } from 'util';
 
 export const verifyCertChain = async (
   doc: AttestationDocument,
