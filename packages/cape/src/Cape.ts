@@ -15,6 +15,12 @@ export interface CapeInit {
    * Enable verbose logging.
    */
   verbose?: boolean;
+
+  /**
+   * Enable a specific date to check the certificate against.
+   * Will default to the current time.
+   */
+  checkDate?: Date;
 }
 
 export class Cape extends Methods {
@@ -23,7 +29,7 @@ export class Cape extends Methods {
 
   static DEFAULT_CAPE_API_URL = 'wss://hackathon.capeprivacy.com';
 
-  constructor({ authToken, capeApiUrl, verbose }: CapeInit) {
+  constructor({ authToken, capeApiUrl, verbose, checkDate }: CapeInit) {
     super();
 
     if (verbose) {
@@ -32,6 +38,7 @@ export class Cape extends Methods {
 
     this.authToken = authToken;
     this.capeApiUrl = capeApiUrl || Cape.DEFAULT_CAPE_API_URL;
+    this.checkDate = checkDate;
   }
 
   getCanonicalPath(path: string): string {

@@ -54,6 +54,7 @@ export abstract class Methods {
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
   nonce?: string;
+  checkDate?: Date;
 
   /**
    * Connect to the Cape server.
@@ -92,7 +93,7 @@ export abstract class Methods {
 
       const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
 
-      const certResult = await verifyCertChain(doc, rootCert);
+      const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
       if (!certResult.result) {
         throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
       }
