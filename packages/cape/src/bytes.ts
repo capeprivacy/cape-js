@@ -4,12 +4,12 @@
  */
 export function concat(...arrays: Uint8Array[]) {
   let len = 0;
-  for (let arr of arrays) {
+  for (const arr of arrays) {
       len += arr.length;
   }
-  let result = new Uint8Array(len);
+  const result = new Uint8Array(len);
   let offset = 0;
-  for (let arr of arrays) {
+  for (const arr of arrays) {
       result.set(arr, offset);
       offset += arr.length;
   }
