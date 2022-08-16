@@ -2,7 +2,7 @@
  * Concat two or more Uint8Arrays into a single Uint8Array.
  * @param arr an array of Uint8Array's
  */
-export function concat(...arr: Uint8Array[]) {
+export function concat(...arrays: Uint8Array[]) {
   let len = 0;
   for (let arr of arrays) {
       len += arr.length;
