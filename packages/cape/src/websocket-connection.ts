@@ -7,6 +7,7 @@ interface Callback {
 }
 
 export class WebsocketConnection {
+  private readonly options: WebSocket.ClientOptions;
   /**
    * The WebSocket instance.
    * @private
@@ -32,8 +33,9 @@ export class WebsocketConnection {
    */
   isClosed = false;
 
-  constructor(url: string) {
+  constructor(url: string, options: WebSocket.ClientOptions = {}) {
     this.url = url;
+    this.options = options;
   }
 
   /**
@@ -71,7 +73,7 @@ export class WebsocketConnection {
    */
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.socket = new WebSocket(this.url);
+      this.socket = new WebSocket(this.url, this.options);
 
       this.socket.onopen = () => {
         debug('Websocket connection opened');

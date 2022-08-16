@@ -3,11 +3,11 @@ import { WebsocketConnection } from './websocket-connection';
 import {
   base64Decode,
   type BytesInput,
+  getAWSRootCert,
   getBytes,
   parseAttestationDocument,
-  verifySignature,
   verifyCertChain,
-  getAWSRootCert,
+  verifySignature,
 } from '@capeprivacy/isomorphic';
 import { concat } from './bytes';
 import { encrypt } from './encrypt';
@@ -67,16 +67,26 @@ export abstract class Methods {
     if (this.websocket) {
       throw new Error('Unable to instantiate another websocket instance, already connected to the server.');
     }
+
+    const authToken = this.getAuthToken();
+    if (!authToken || authToken.length === 0) {
+      throw new Error('Missing auth token.');
+    }
+
     try {
       // Set up the connection to the server
-      this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`));
+      this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), {
+        headers: {
+          'Sec-Websocket-Protocol': `auth, ${authToken}`,
+        },
+      });
       await this.websocket.connect();
 
       // Generate the nonce for the connection.
       this.nonce = generateNonce();
 
       // Send the nonce and auth token to the server to kick off the function.
-      this.websocket.send(JSON.stringify({ message: { nonce: this.nonce, auth_token: this.getAuthToken() } }));
+      this.websocket.send(JSON.stringify({ message: { nonce: this.nonce } }));
 
       // Wait for the server to send back the attestation document with the public key.
       const result = parseFrame(await this.websocket.receive());
@@ -89,7 +99,7 @@ export abstract class Methods {
       }
       const doc = parseAttestationDocument(message);
 
-      verifySignature(Buffer.from(message, 'base64'), doc.certificate);
+      await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
 
       const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
 
