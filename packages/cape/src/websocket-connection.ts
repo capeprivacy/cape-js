@@ -7,7 +7,7 @@ interface Callback {
 }
 
 export class WebsocketConnection {
-  private readonly options: WebSocket.ClientOptions;
+  private readonly options?: WebSocket.ClientOptions;
   /**
    * The WebSocket instance.
    * @private
@@ -33,7 +33,7 @@ export class WebsocketConnection {
    */
   isClosed = false;
 
-  constructor(url: string, options: WebSocket.ClientOptions = {}) {
+  constructor(url: string, options?: WebSocket.ClientOptions) {
     this.url = url;
     this.options = options;
   }
