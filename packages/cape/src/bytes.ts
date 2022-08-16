@@ -5,13 +5,13 @@
 export function concat(...arrays: Uint8Array[]) {
   let len = 0;
   for (const arr of arrays) {
-      len += arr.length;
+    len += arr.length;
   }
   const result = new Uint8Array(len);
   let offset = 0;
   for (const arr of arrays) {
-      result.set(arr, offset);
-      offset += arr.length;
+    result.set(arr, offset);
+    offset += arr.length;
   }
   return result;
 }
