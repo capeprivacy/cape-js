@@ -73,7 +73,7 @@ export class WebsocketConnection {
    */
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.socket = new WebSocket(this.url, this.options);
+      this.socket = new WebSocket(this.url, '', this.options);
 
       this.socket.onopen = () => {
         debug('Websocket connection opened');
