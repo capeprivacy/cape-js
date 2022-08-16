@@ -3,9 +3,15 @@
  * @param arr an array of Uint8Array's
  */
 export function concat(...arr: Uint8Array[]) {
-  const flat = arr.reduce<number[]>((acc, cur) => {
-    acc.push(...cur);
-    return acc;
-  }, []);
-  return new Uint8Array(flat);
+  let len = 0;
+  for (let arr of arrays) {
+      len += arr.length;
+  }
+  let result = new Uint8Array(len);
+  let offset = 0;
+  for (let arr of arrays) {
+      result.set(arr, offset);
+      offset += arr.length;
+  }
+  return result;
 }
