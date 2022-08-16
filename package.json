@@ -58,7 +58,6 @@
     "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
-    "crypto-browserify": "^3.12.0",
-    "yarn": "^1.22.19"
+    "crypto-browserify": "^3.12.0"
   }
 }
