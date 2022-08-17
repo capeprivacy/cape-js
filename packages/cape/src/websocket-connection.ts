@@ -8,6 +8,11 @@ interface Callback {
 
 export class WebsocketConnection {
   /**
+   * The WebSocket connection protocols
+   * @private
+   */
+  private readonly subprotocols: string[];
+  /**
    * The WebSocket instance.
    * @private
    */
@@ -32,8 +37,9 @@ export class WebsocketConnection {
    */
   isClosed = false;
 
-  constructor(url: string) {
+  constructor(url: string, subprotocols: string[]) {
     this.url = url;
+    this.subprotocols = subprotocols;
   }
 
   /**
@@ -71,10 +77,11 @@ export class WebsocketConnection {
    */
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.socket = new WebSocket(this.url);
+      this.socket = new WebSocket(this.url, this.subprotocols);
 
       this.socket.onopen = () => {
-        debug('Websocket connection opened');
+        debug('Websocket connection opened.');
+        debug('Websocket sub protocol selected: ', this.socket?.protocol);
         this.isClosed = false;
         resolve();
       };

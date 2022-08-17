@@ -35,6 +35,11 @@ describe('Cape', () => {
       );
     });
 
+    test('when no auth token is present, it should throw an error', async () => {
+      const cape = new Cape({ authToken: '', checkDate: new Date('2022-07-12T21:34:04.000Z') });
+      await expect(() => cape.connect({ id: 'test' })).rejects.toThrowError('Missing auth token.');
+    });
+
     test('when the server sends an error, it should throw an error', async () => {
       const id = 'GHI';
       const capeApiUrl = 'ws://localhost:82812';
