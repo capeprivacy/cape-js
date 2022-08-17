@@ -1,0 +1,7 @@
+packages/*/examples
+jest.config.ts
+tsconfig.types.json
+attestation.bin
+root.pem
+setupTests.ts
+coverage
