@@ -81,7 +81,7 @@ export class WebsocketConnection {
 
       this.socket.onopen = () => {
         debug('Websocket connection opened.');
-        debug('Websocket sub protocol selected: ', this.socket.protocol);
+        debug('Websocket sub protocol selected: ', this.socket?.protocol);
         this.isClosed = false;
         resolve();
       };
