@@ -8,6 +8,11 @@ interface Callback {
 
 export class WebsocketConnection {
   /**
+   * The WebSocket connection protocols
+   * @private
+   */
+  private readonly subprotocols: string[];
+  /**
    * The WebSocket instance.
    * @private
    */
