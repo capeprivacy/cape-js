@@ -1618,8 +1618,8 @@
     "@swc/core-win32-x64-msvc" "1.2.222"
 
 "@swc/jest@^0.2.21":
-  version "0.2.21"
-  resolved "https://registry.npmjs.org/@swc/jest/-/jest-0.2.21.tgz"
+  version "0.2.22"
+  resolved "https://registry.yarnpkg.com/@swc/jest/-/jest-0.2.22.tgz#70d02ac648c21a442016d7a0aa485577335a4c9a"
   dependencies:
     "@jest/create-cache-key-function" "^27.4.2"
 
