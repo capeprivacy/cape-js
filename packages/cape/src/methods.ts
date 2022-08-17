@@ -11,6 +11,7 @@ import {
 } from '@capeprivacy/isomorphic';
 import { concat } from './bytes';
 import { encrypt } from './encrypt';
+import { randomBytes } from 'crypto';
 
 interface ConnectArgs {
   /**
@@ -199,6 +200,9 @@ function parseFrame(frame: Data | undefined): Message {
   return JSON.parse(frame);
 }
 
+/**
+ * Generate a fixed length of bytes for the nonce.
+ */
 function generateNonce() {
-  return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
+  return randomBytes(12).toString('base64');
 }
