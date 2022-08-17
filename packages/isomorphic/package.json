@@ -1,6 +1,6 @@
 {
   "name": "@capeprivacy/isomorphic",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -33,8 +33,8 @@
   },
   "devDependencies": {
     "@types/cose-js": "^0.8.0",
-    "@types/isomorphic-fetch": "^0.0.36",
     "@types/elliptic": "^6.4.14",
+    "@types/isomorphic-fetch": "^0.0.36",
     "@types/pkijs": "^0.0.14"
   }
 }
