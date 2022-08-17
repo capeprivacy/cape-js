@@ -75,11 +75,7 @@ export abstract class Methods {
 
     try {
       // Set up the connection to the server
-      this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), {
-        headers: {
-          'Sec-Websocket-Protocol': `auth, ${authToken}`,
-        },
-      });
+      this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), ['cape.runtime', authToken]);
       await this.websocket.connect();
 
       // Generate the nonce for the connection.
