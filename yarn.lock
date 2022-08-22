@@ -3316,16 +3316,16 @@ eslint-import-resolver-node@^0.3.6:
     resolve "^1.20.0"
 
 eslint-import-resolver-typescript@^3.2.5:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/eslint-import-resolver-typescript/-/eslint-import-resolver-typescript-3.4.1.tgz#072e5f7b4bf5d62d32d0b3a071fe551b45d15454"
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/eslint-import-resolver-typescript/-/eslint-import-resolver-typescript-3.5.0.tgz#490ba48cafc5a2fb209bbc7e360defb4c292ed59"
   dependencies:
     debug "^4.3.4"
     enhanced-resolve "^5.10.0"
     get-tsconfig "^4.2.0"
     globby "^13.1.2"
-    is-core-module "^2.9.0"
+    is-core-module "^2.10.0"
     is-glob "^4.0.3"
-    synckit "^0.8.1"
+    synckit "^0.8.3"
 
 eslint-module-utils@^2.7.3:
   version "2.7.3"
@@ -4183,9 +4183,9 @@ is-ci@^2.0.0:
   dependencies:
     ci-info "^2.0.0"
 
-is-core-module@^2.5.0, is-core-module@^2.8.1, is-core-module@^2.9.0:
-  version "2.9.0"
-  resolved "https://registry.npmjs.org/is-core-module/-/is-core-module-2.9.0.tgz"
+is-core-module@^2.10.0, is-core-module@^2.5.0, is-core-module@^2.8.1:
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/is-core-module/-/is-core-module-2.10.0.tgz#9012ede0a91c69587e647514e1d5277019e728ed"
   dependencies:
     has "^1.0.3"
 
@@ -6920,9 +6920,9 @@ symbol-tree@^3.2.4:
   version "3.2.4"
   resolved "https://registry.npmjs.org/symbol-tree/-/symbol-tree-3.2.4.tgz"
 
-synckit@^0.8.1:
-  version "0.8.1"
-  resolved "https://registry.npmjs.org/synckit/-/synckit-0.8.1.tgz"
+synckit@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/synckit/-/synckit-0.8.3.tgz#f36ca23fb7cbcf2b2b78c9e553ce6764dc6aa415"
   dependencies:
     "@pkgr/utils" "^2.3.0"
     tslib "^2.4.0"
