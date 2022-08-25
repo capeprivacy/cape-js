@@ -94,6 +94,6 @@ Read more about how to contribute to the Cape SDK in [CONTRIBUTING](./CONTRIBUTI
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+[Apache 2.0](https://github.com/capeprivacy/cape-js/blob/main/LICENSE)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
