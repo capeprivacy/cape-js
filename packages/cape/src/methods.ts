@@ -51,8 +51,8 @@ interface Message {
 
 export abstract class Methods {
   public abstract getCanonicalPath(path: string): string;
-  public abstract getAuthToken(): string;
-  public abstract getFunctionToken(): string;
+  public abstract getAuthToken(): string | undefined;
+  public abstract getFunctionToken(): string | undefined;
 
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
