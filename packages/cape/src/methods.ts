@@ -1,17 +1,17 @@
-import { type Data } from 'isomorphic-ws';
-import { WebsocketConnection } from './websocket-connection';
 import {
   base64Decode,
-  type BytesInput,
   getAWSRootCert,
   getBytes,
   parseAttestationDocument,
   verifyCertChain,
   verifySignature,
+  type BytesInput,
 } from '@capeprivacy/isomorphic';
+import { randomBytes } from 'crypto';
+import { type Data } from 'isomorphic-ws';
 import { concat } from './bytes';
 import { encrypt } from './encrypt';
-import { randomBytes } from 'crypto';
+import { WebsocketConnection } from './websocket-connection';
 
 interface ConnectArgs {
   /**
@@ -52,10 +52,29 @@ interface Message {
 export abstract class Methods {
   public abstract getCanonicalPath(path: string): string;
   public abstract getAuthToken(): string;
+  public abstract getFunctionToken(): string;
+
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
+
+  /**
+   * Get the authentication token and protocol for the websocket connection.
+   */
+  private getAuthentication(): [string, string] {
+    const functionToken = this.getFunctionToken();
+    if (functionToken && functionToken.length > 0) {
+      return ['cape.function', functionToken];
+    }
+
+    const authToken = this.getAuthToken();
+    if (authToken && authToken.length > 0) {
+      return ['cape.runtime', authToken];
+    }
+
+    throw new Error('Missing auth token.');
+  }
 
   /**
    * Connect to the Cape server.
@@ -69,14 +88,9 @@ export abstract class Methods {
       throw new Error('Unable to instantiate another websocket instance, already connected to the server.');
     }
 
-    const authToken = this.getAuthToken();
-    if (!authToken || authToken.length === 0) {
-      throw new Error('Missing auth token.');
-    }
-
     try {
       // Set up the connection to the server
-      this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), ['cape.runtime', authToken]);
+      this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), this.getAuthentication());
       await this.websocket.connect();
 
       // Generate the nonce for the connection.
