@@ -46,7 +46,7 @@
     "eslint-plugin-sort-export-all": "^1.2.2",
     "husky": "^8.0.1",
     "jest": "^28.1.1",
-    "jest-environment-jsdom": "^28.1.1",
+    "jest-environment-jsdom": "^29.0.1",
     "lerna": "^5.1.4",
     "lint-staged": "^13.0.0",
     "prettier": "2.7.1",
