@@ -1,2 +1,4 @@
 examples
 coverage
+*.log
+jest.config.*
