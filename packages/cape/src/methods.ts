@@ -19,9 +19,9 @@ interface ConnectArgs {
    */
   id: string;
   /**
-   * The function checksum to check.
+   * The function Checksum to check.
    */
-  functionCheckSum: string;
+  functionChecksum: string;
 }
 
 /**
@@ -33,9 +33,9 @@ interface RunArguments {
    */
   id: string;
   /**
-   * The function CheckSum to validate.
+   * The function Checksum to validate.
    */
-  functionCheckSum: string;
+  functionChecksum: string;
   /**
    * The function input data.
    */
@@ -87,7 +87,7 @@ export abstract class Methods {
   /**
    * Connect to the Cape server.
    */
-  public async connect({ id, functionCheckSum }: ConnectArgs): Promise<void> {
+  public async connect({ id, functionChecksum }: ConnectArgs): Promise<void> {
     // Ensure we have the required function ID. If not, reject and terminate the control flow.
     if (!id || id.length === 0) {
       throw new Error('Unable to connect to the server, missing function id.');
@@ -96,7 +96,7 @@ export abstract class Methods {
       throw new Error('Unable to instantiate another websocket instance, already connected to the server.');
     }
 
-    console.log('checkSum', functionCheckSum);
+    console.log('Checksum', functionChecksum);
 
     try {
       // Set up the connection to the server
@@ -158,9 +158,9 @@ export abstract class Methods {
    * const result = await client.run({ id: 'my-function-id', data: 'my-function-input' });
    * ```
    */
-  public async run({ id, functionCheckSum, data }: RunArguments): Promise<string> {
+  public async run({ id, functionChecksum, data }: RunArguments): Promise<string> {
     try {
-      await this.connect({ id, functionCheckSum });
+      await this.connect({ id, functionChecksum });
       return await this.invoke({ data });
     } finally {
       this.disconnect();
