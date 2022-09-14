@@ -68,7 +68,8 @@ export class Cape extends Methods {
   getFunctionToken(): string | undefined {
     return this.functionToken;
   }
-  getfunctionChecksum(): string | undefined {
+
+  getFunctionChecksum(): string | undefined {
     return this.functionChecksum;
   }
 }

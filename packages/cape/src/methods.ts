@@ -18,10 +18,6 @@ interface ConnectArgs {
    * The function ID to run.
    */
   id: string;
-  /**
-   * The function Checksum to check.
-   */
-  functionChecksum: string;
 }
 
 /**
@@ -32,10 +28,6 @@ interface RunArguments {
    * The function ID to run.
    */
   id: string;
-  /**
-   * The function Checksum to validate.
-   */
-  functionChecksum: string;
   /**
    * The function input data.
    */
@@ -61,6 +53,7 @@ export abstract class Methods {
   public abstract getCanonicalPath(path: string): string;
   public abstract getAuthToken(): string | undefined;
   public abstract getFunctionToken(): string | undefined;
+  public abstract getFunctionChecksum(): string | undefined;
 
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
@@ -87,7 +80,7 @@ export abstract class Methods {
   /**
    * Connect to the Cape server.
    */
-  public async connect({ id, functionChecksum }: ConnectArgs): Promise<void> {
+  public async connect({ id }: ConnectArgs): Promise<void> {
     // Ensure we have the required function ID. If not, reject and terminate the control flow.
     if (!id || id.length === 0) {
       throw new Error('Unable to connect to the server, missing function id.');
@@ -96,7 +89,13 @@ export abstract class Methods {
       throw new Error('Unable to instantiate another websocket instance, already connected to the server.');
     }
 
-    console.log('Checksum', functionChecksum);
+    let functionChecksum: string;
+    const fetchedChecksum = this.getFunctionChecksum();
+    if (fetchedChecksum === undefined) {
+      functionChecksum = '';
+    } else {
+      functionChecksum = fetchedChecksum;
+    }
 
     try {
       // Set up the connection to the server
@@ -119,8 +118,14 @@ export abstract class Methods {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
       const doc = parseAttestationDocument(message);
-      console.log('attestation doc:', doc);
+      const obj = JSON.parse(new TextDecoder().decode(doc.user_data));
+      const userData = obj.func_checksum;
+      const buffer = Buffer.from(userData, 'base64');
+      const bufString = buffer.toString('hex');
 
+      if (functionChecksum != '' && functionChecksum != bufString) {
+        throw new Error(`Error validating function checksum, got ${bufString}, wanted: ${functionChecksum}.`);
+      }
       await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
 
       const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
@@ -158,9 +163,9 @@ export abstract class Methods {
    * const result = await client.run({ id: 'my-function-id', data: 'my-function-input' });
    * ```
    */
-  public async run({ id, functionChecksum, data }: RunArguments): Promise<string> {
+  public async run({ id, data }: RunArguments): Promise<string> {
     try {
-      await this.connect({ id, functionChecksum });
+      await this.connect({ id });
       return await this.invoke({ data });
     } finally {
       this.disconnect();
