@@ -18,6 +18,10 @@ interface ConnectArgs {
    * The function ID to run.
    */
   id: string;
+  /**
+   * The function checksum to check.
+   */
+  functionCheckSum: string;
 }
 
 /**
@@ -28,6 +32,10 @@ interface RunArguments {
    * The function ID to run.
    */
   id: string;
+  /**
+   * The function CheckSum to validate.
+   */
+  functionCheckSum: string;
   /**
    * The function input data.
    */
@@ -79,7 +87,7 @@ export abstract class Methods {
   /**
    * Connect to the Cape server.
    */
-  public async connect({ id }: ConnectArgs): Promise<void> {
+  public async connect({ id, functionCheckSum }: ConnectArgs): Promise<void> {
     // Ensure we have the required function ID. If not, reject and terminate the control flow.
     if (!id || id.length === 0) {
       throw new Error('Unable to connect to the server, missing function id.');
@@ -87,6 +95,8 @@ export abstract class Methods {
     if (this.websocket) {
       throw new Error('Unable to instantiate another websocket instance, already connected to the server.');
     }
+
+    console.log('checkSum', functionCheckSum);
 
     try {
       // Set up the connection to the server
@@ -109,6 +119,7 @@ export abstract class Methods {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
       const doc = parseAttestationDocument(message);
+      console.log('attestation doc:', doc);
 
       await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
 
@@ -147,9 +158,9 @@ export abstract class Methods {
    * const result = await client.run({ id: 'my-function-id', data: 'my-function-input' });
    * ```
    */
-  public async run({ id, data }: RunArguments): Promise<string> {
+  public async run({ id, functionCheckSum, data }: RunArguments): Promise<string> {
     try {
-      await this.connect({ id });
+      await this.connect({ id, functionCheckSum });
       return await this.invoke({ data });
     } finally {
       this.disconnect();
