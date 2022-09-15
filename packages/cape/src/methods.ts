@@ -90,7 +90,7 @@ export abstract class Methods {
     }
 
     const functionChecksum = this.getFunctionChecksum() || '';
-   
+
     try {
       // Set up the connection to the server
       this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), this.getAuthentication());
@@ -112,7 +112,11 @@ export abstract class Methods {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
       const doc = parseAttestationDocument(message);
-      const obj = JSON.parse(new TextDecoder().decode(doc.user_data));
+      const decoder = new TextDecoder('utf-8', { fatal: false });
+      console.log('decoder function', decoder.decode);
+      const decoded = decoder.decode(doc.user_data);
+      console.log('decoded', decoded);
+      const obj = JSON.parse(decoded);
       const userData = obj.func_checksum;
       const buffer = Buffer.from(userData, 'base64');
       const bufString = buffer.toString('hex');
