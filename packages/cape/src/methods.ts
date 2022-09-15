@@ -117,7 +117,7 @@ export abstract class Methods {
       const buffer = Buffer.from(userData, 'base64');
       const bufString = buffer.toString('hex');
 
-      if (functionChecksum != '' && functionChecksum != bufString) {
+      if (functionChecksum !== '' && functionChecksum !== bufString) {
         throw new Error(`Error validating function checksum, got ${bufString}, wanted: ${functionChecksum}.`);
       }
       await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
