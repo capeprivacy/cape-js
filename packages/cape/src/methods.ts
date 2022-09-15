@@ -89,14 +89,8 @@ export abstract class Methods {
       throw new Error('Unable to instantiate another websocket instance, already connected to the server.');
     }
 
-    let functionChecksum: string;
-    const fetchedChecksum = this.getFunctionChecksum();
-    if (fetchedChecksum === undefined) {
-      functionChecksum = '';
-    } else {
-      functionChecksum = fetchedChecksum;
-    }
-
+    const functionChecksum = this.getFunctionChecksum() || '';
+   
     try {
       // Set up the connection to the server
       this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), this.getAuthentication());
