@@ -1,4 +1,3 @@
-import { TextDecoder } from 'util';
 import { parseAttestationDocument } from '@capeprivacy/isomorphic';
 import * as crypto from 'crypto';
 import loglevel from 'loglevel';
