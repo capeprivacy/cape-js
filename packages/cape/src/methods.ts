@@ -114,9 +114,7 @@ export abstract class Methods {
       }
       const doc = parseAttestationDocument(message);
       const decoder = new TextDecoder('utf-8', { fatal: true });
-      console.log('decoder function', decoder.decode);
       const decoded = decoder.decode(doc.user_data);
-      console.log('decoded', decoded);
       const obj = JSON.parse(decoded);
       const userData = obj.func_checksum;
       const buffer = Buffer.from(userData, 'base64');
