@@ -110,7 +110,7 @@ const obj = JSON.parse(decoded);
 const userDataField = obj.func_checksum;
 console.log('parsed user data', userDataField);
 const host = 'ws://localhost';
-const checkDate = new Date('2022-07-12T21:34:04.000Z');
+const checkDate = new Date('2022-09-15T17:44:24.000Z');
 const functionChecksum = '66731e5ccf226680dd5c98a1d1ad52b7a4c986984042d0672d8f3153130b34a8';
 
 describe('Cape', () => {
