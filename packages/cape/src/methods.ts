@@ -12,6 +12,7 @@ import { type Data } from 'isomorphic-ws';
 import { concat } from './bytes';
 import { encrypt } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
+import { TextDecoder } from 'util';
 
 interface ConnectArgs {
   /**
@@ -112,7 +113,7 @@ export abstract class Methods {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
       const doc = parseAttestationDocument(message);
-      const decoder = new TextDecoder('utf-8', { fatal: false });
+      const decoder = new TextDecoder('utf-8', { fatal: true });
       console.log('decoder function', decoder.decode);
       const decoded = decoder.decode(doc.user_data);
       console.log('decoded', decoded);
