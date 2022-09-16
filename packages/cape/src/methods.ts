@@ -12,7 +12,7 @@ import { type Data } from 'isomorphic-ws';
 import { concat } from './bytes';
 import { encrypt } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
-
+import * as util from 'util';
 interface ConnectArgs {
   /**
    * The function ID to run.
@@ -53,6 +53,7 @@ export abstract class Methods {
   public abstract getCanonicalPath(path: string): string;
   public abstract getAuthToken(): string | undefined;
   public abstract getFunctionToken(): string | undefined;
+  public abstract getFunctionChecksum(): string | undefined;
 
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
@@ -88,6 +89,8 @@ export abstract class Methods {
       throw new Error('Unable to instantiate another websocket instance, already connected to the server.');
     }
 
+    const functionChecksum = this.getFunctionChecksum() || '';
+
     try {
       // Set up the connection to the server
       this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), this.getAuthentication());
@@ -109,7 +112,16 @@ export abstract class Methods {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
       const doc = parseAttestationDocument(message);
+      const decoder = new util.TextDecoder();
+      const decoded = decoder.decode(doc.user_data);
+      const obj = JSON.parse(decoded);
+      const userData = obj.func_checksum;
+      const buffer = Buffer.from(userData, 'base64');
+      const bufString = buffer.toString('hex');
 
+      if (functionChecksum !== '' && functionChecksum !== bufString) {
+        throw new Error(`Error validating function checksum, got ${bufString}, wanted: ${functionChecksum}.`);
+      }
       await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
 
       const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
