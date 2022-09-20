@@ -79,6 +79,7 @@ export abstract class Methods {
 
   /**
    * Connect to the Cape server.
+   * Note that the connection with automatically close after 60 seconds of inactivity.
    */
   public async connect({ id }: ConnectArgs): Promise<void> {
     // Ensure we have the required function ID. If not, reject and terminate the control flow.
