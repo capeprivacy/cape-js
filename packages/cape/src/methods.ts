@@ -54,6 +54,7 @@ export abstract class Methods {
   public abstract getAuthToken(): string | undefined;
   public abstract getFunctionToken(): string | undefined;
   public abstract getFunctionChecksum(): string | undefined;
+  // public abstract getEncryptKey: string | undefined;
 
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
@@ -91,51 +92,14 @@ export abstract class Methods {
     }
 
     const functionChecksum = this.getFunctionChecksum() || '';
-
-    try {
-      // Set up the connection to the server
-      this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), this.getAuthentication());
-      await this.websocket.connect();
-
-      // Generate the nonce for the connection.
-      this.nonce = generateNonce();
-
-      // Send the nonce and auth token to the server to kick off the function.
-      this.websocket.send(JSON.stringify({ message: { nonce: this.nonce } }));
-
-      // Wait for the server to send back the attestation document with the public key.
-      const result = parseFrame(await this.websocket.receive());
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      const { type, message } = result.message;
-      if (type !== 'attestation_doc') {
-        throw new Error(`Expected attestation document but received ${type}.`);
-      }
-      const doc = parseAttestationDocument(message);
-      const decoder = new TextDecoder();
-      const decoded = decoder.decode(doc.user_data);
-      const obj = JSON.parse(decoded);
-      const userData = obj.func_checksum;
-      const buffer = Buffer.from(userData, 'base64');
-      const bufString = buffer.toString('hex');
-
-      if (functionChecksum !== '' && functionChecksum !== bufString) {
-        throw new Error(`Error validating function checksum, got ${bufString}, wanted: ${functionChecksum}.`);
-      }
-      await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
-
-      const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
-
-      const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
-      if (!certResult.result) {
-        throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
-      }
-
-      this.publicKey = doc.public_key;
-    } catch (e) {
-      this.disconnect();
-      throw e;
+    const path = this.getCanonicalPath(`/v1/run/${id}`);
+    const attestationUserData = await this.connect_(path);
+    const obj = JSON.parse(attestationUserData);
+    const userData = obj.func_checksum;
+    const buffer = Buffer.from(userData, 'base64');
+    const bufString = buffer.toString('hex');
+    if (functionChecksum !== '' && functionChecksum !== bufString) {
+      throw new Error(`Error validating function checksum, got ${bufString}, wanted: ${functionChecksum}.`);
     }
   }
 
@@ -212,6 +176,72 @@ export abstract class Methods {
       throw e;
     }
   }
+
+  /**
+   * Retrieve a Cape key using your authentication token or function token. This method will manage the entire lifecycle for you.
+   *
+   * @returns The retrieved key.
+   *
+   * @example
+   * ```ts
+   * const client = new Cape({ authToken: 'my-auth-token' });
+   * const result = await client.key({ id: 'my-function-id', data: 'my-function-input' });
+   * ```
+   */
+  public async key(): Promise<void> {
+    const path = this.getCanonicalPath(`/v1/key`);
+
+    const attestationUserData = await this.connect_(path);
+    const obj = JSON.parse(attestationUserData);
+    const userData = obj.key;
+    const buffer = Buffer.from(userData, 'base64');
+    console.log('user data', buffer);
+  }
+
+  /**
+   * Connect to the Cape server with a specific endpoint and return the embedded user data field.
+   * Note that the connection with automatically close after 60 seconds of inactivity.
+   */
+  private async connect_(endpoint: string): Promise<string> {
+    try {
+      // Set up the connection to the server
+      this.websocket = new WebsocketConnection(endpoint, this.getAuthentication());
+      await this.websocket.connect();
+
+      // Generate the nonce for the connection.
+      this.nonce = generateNonce();
+
+      // Send the nonce and auth token to the server to kick off the function.
+      this.websocket.send(JSON.stringify({ message: { nonce: this.nonce } }));
+
+      // Wait for the server to send back the attestation document with the public key.
+      const result = parseFrame(await this.websocket.receive());
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      const { type, message } = result.message;
+      if (type !== 'attestation_doc') {
+        throw new Error(`Expected attestation document but received ${type}.`);
+      }
+      const doc = parseAttestationDocument(message);
+      const decoder = new TextDecoder();
+      const decodedUserData = decoder.decode(doc.user_data);
+
+      await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
+
+      const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
+
+      const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
+      if (!certResult.result) {
+        throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
+      }
+      this.publicKey = doc.public_key;
+      return decodedUserData;
+    } catch (e) {
+      this.disconnect();
+      throw e;
+    }
+  }
 }
 
 /**
@@ -232,4 +262,16 @@ function parseFrame(frame: Data | undefined): Message {
  */
 function generateNonce() {
   return randomBytes(12).toString('base64');
+}
+
+/**
+ * Utility function for changing public key to displayble format.
+ */
+function str2ab(str: string) {
+  var arrBuff = new ArrayBuffer(str.length);
+  var bytes = new Uint8Array(arrBuff);
+  for (var iii = 0; iii < str.length; iii++) {
+    bytes[iii] = str.charCodeAt(iii);
+  }
+  return bytes;
 }
