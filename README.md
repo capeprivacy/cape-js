@@ -74,6 +74,8 @@ try {
 }
 ```
 
+Please note that there is a 60-second inactivity timeout on the enclave connection. You may need to monitor the connection status and reconnect if there is a significant wait between inputs.
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## TypeScript
