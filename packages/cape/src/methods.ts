@@ -60,6 +60,7 @@ export abstract class Methods {
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
+  encryptKey?: Uint8Array;
 
   /**
    * Get the authentication token and protocol for the websocket connection.
@@ -179,13 +180,12 @@ export abstract class Methods {
 
   /**
    * Retrieve a Cape key using your authentication token or function token. This method will manage the entire lifecycle for you.
-   *
-   * @returns The retrieved key.
+   * The returned key is stored in the `client` object
    *
    * @example
    * ```ts
    * const client = new Cape({ authToken: 'my-auth-token' });
-   * const result = await client.key({ id: 'my-function-id', data: 'my-function-input' });
+   * await client.key({ id: 'my-function-id', data: 'my-function-input' });
    * ```
    */
   public async key(): Promise<void> {
@@ -194,8 +194,7 @@ export abstract class Methods {
     const attestationUserData = await this.connect_(path);
     const obj = JSON.parse(attestationUserData);
     const userData = obj.key;
-    const buffer = Buffer.from(userData, 'base64');
-    console.log('user data', buffer);
+    this.encryptKey = base64ToUint8Array(userData);
   }
 
   /**
@@ -265,13 +264,14 @@ function generateNonce() {
 }
 
 /**
- * Utility function for changing public key to displayble format.
+ * Utility function for changing string key to Uint8Array
  */
-function str2ab(str: string) {
-  var arrBuff = new ArrayBuffer(str.length);
-  var bytes = new Uint8Array(arrBuff);
-  for (var iii = 0; iii < str.length; iii++) {
-    bytes[iii] = str.charCodeAt(iii);
+function base64ToUint8Array(base64: string) {
+  const binary_string = window.atob(base64);
+  const len = binary_string.length;
+  const bytes = new Uint8Array(len);
+  for (var i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
   }
   return bytes;
 }
