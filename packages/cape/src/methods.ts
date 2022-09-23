@@ -3,6 +3,7 @@ import {
   getAWSRootCert,
   getBytes,
   parseAttestationDocument,
+  TextDecoder,
   verifyCertChain,
   verifySignature,
   type BytesInput,
@@ -12,7 +13,6 @@ import { type Data } from 'isomorphic-ws';
 import { concat } from './bytes';
 import { encrypt } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
-import * as util from 'util';
 interface ConnectArgs {
   /**
    * The function ID to run.
@@ -113,7 +113,7 @@ export abstract class Methods {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
       const doc = parseAttestationDocument(message);
-      const decoder = new util.TextDecoder();
+      const decoder = new TextDecoder();
       const decoded = decoder.decode(doc.user_data);
       const obj = JSON.parse(decoded);
       const userData = obj.func_checksum;
