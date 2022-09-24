@@ -1,5 +1,4 @@
 import { TextEncoder } from 'util';
-import { TextDecoder } from '@capeprivacy/isomorphic';
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
 import { randomBytes, publicEncrypt } from 'crypto';
 import CryptoJS from 'crypto-js';
@@ -64,22 +63,6 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
   const encrypted = publicEncrypt(keyBuffer, buffer);
   const cipherText = new Uint8Array(encrypted);
   return cipherText;
-}
-
-function toString(words: CryptoJS.lib.WordArray) {
-  return CryptoJS.enc.Base64.stringify(words);
-}
-
-/**
- * Helper function to convert everything to base64 string
- */
-function arrayToBase64_(array: Uint8Array) {
-  var binary = '';
-  var len = array.byteLength;
-  for (var i = 0; i < len; i++) {
-    binary += String.fromCharCode(array[i]);
-  }
-  return window.btoa(binary);
 }
 
 /**
