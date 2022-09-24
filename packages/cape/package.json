@@ -30,6 +30,8 @@
   "homepage": "https://github.com/capeprivacy/cape-js#readme",
   "dependencies": {
     "@capeprivacy/isomorphic": "^0.6.1",
+    "@types/crypto-js": "^4.1.1",
+    "crypto-js": "^4.1.1",
     "cryptojs": "^2.5.3",
     "hpke-js": "^0.13.0",
     "isomorphic-ws": "^5.0.0",
