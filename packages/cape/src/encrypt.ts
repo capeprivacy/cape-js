@@ -1,7 +1,8 @@
 import { TextEncoder } from 'util';
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
-import { randomBytes, publicEncrypt } from 'crypto';
-import CryptoJS from 'crypto-js';
+import { randomBytes, publicEncrypt, constants } from 'crypto';
+
+import * as forge from 'node-forge';
 interface EncryptResponse {
   cipherText: Uint8Array;
   encapsulatedKey: Uint8Array;
@@ -37,77 +38,33 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
  * @param plainText The plain text input to encrypt.
  */
 export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse> {
-  const plainTextString = byteArrayToWordArray(plainText);
+  // byteArrayToWordArray(plainText);
   // Generate a new key
-  const key = new TextEncoder().encode('AES256Key-32Characters1234567890');
-  // randomBytes(32);
-  const keyString = byteArrayToWordArray(key);
+  const key = randomBytes(32);
+  const cipher = forge.cipher.createCipher('AES-GCM', forge.util.binary.raw.encode(key));
 
   // aesGCM uses 12 byte nonce.
-  const iv = byteArrayToWordArray(new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]));
-  // CryptoJS.lib.WordArray.random(12);
-
-  // Library encrypt call expects everything in wordarray format.
-  const encrypted = CryptoJS.AES.encrypt(plainTextString, keyString, { iv: iv });
-  const ivArray = wordArrayToByteArray(iv, null);
-  const ciphertextArray = wordArrayToByteArray(encrypted.ciphertext, null);
-  const mergedArray = new Uint8Array(ivArray.length + ciphertextArray.length);
-  mergedArray.set(ivArray);
-  mergedArray.set(ciphertextArray, ivArray.length);
-  return { cipherText: mergedArray, encapsulatedKey: new Uint8Array(key) };
+  const iv = randomBytes(12);
+  cipher.start({ iv: forge.util.binary.raw.encode(iv) });
+  cipher.update(forge.util.createBuffer(plainText));
+  cipher.finish();
+  const ciphertextByteArray = forge.util.binary.raw.decode(cipher.output.getBytes());
+  const tagByteArray = forge.util.binary.raw.decode(cipher.mode.tag.getBytes());
+  console.log('tagByteArray', tagByteArray);
+  const ciphertext = new Uint8Array([...iv, ...ciphertextByteArray, ...tagByteArray]);
+  return { cipherText: ciphertext, encapsulatedKey: new Uint8Array(key) };
 }
 
 export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promise<Uint8Array> {
   const keyBuffer = Buffer.from(key);
-  const buffer = Buffer.from(plainText);
-  const encrypted = publicEncrypt(keyBuffer, buffer);
+  const encrypted = publicEncrypt(
+    {
+      key: keyBuffer,
+      padding: constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: 'sha256',
+    },
+    Buffer.from(plainText),
+  );
   const cipherText = new Uint8Array(encrypted);
   return cipherText;
-}
-
-/**
- * Helper function to convert byte array to word array since
- * CryptoJS doesn't support this by default.
- * referenced from https://gist.github.com/artjomb/7ef1ee574a411ba0dd1933c1ef4690d1
- */
-export function byteArrayToWordArray(ba: Uint8Array) {
-  var wa = [],
-    i;
-  for (i = 0; i < ba.length; i++) {
-    wa[(i / 4) | 0] |= ba[i] << (24 - 8 * i);
-  }
-
-  return CryptoJS.lib.WordArray.create(wa, ba.length);
-}
-
-function wordToByteArray(word, length) {
-  var ba = [],
-    i,
-    xFF = 0xff;
-  if (length > 0) ba.push(word >>> 24);
-  if (length > 1) ba.push((word >>> 16) & xFF);
-  if (length > 2) ba.push((word >>> 8) & xFF);
-  if (length > 3) ba.push(word & xFF);
-
-  return ba;
-}
-
-export function wordArrayToByteArray(wordArray, length) {
-  if (wordArray.hasOwnProperty('sigBytes') && wordArray.hasOwnProperty('words')) {
-    length = wordArray.sigBytes;
-    wordArray = wordArray.words;
-  }
-
-  var result = [],
-    bytes,
-    i = 0;
-  while (length > 0) {
-    bytes = wordToByteArray(wordArray[i], Math.min(4, length));
-    length -= bytes.length;
-    result.push(bytes);
-    i++;
-  }
-  // Known to have problems with large files.
-  // https://stackoverflow.com/questions/58937464/cryptojs-maximum-call-stack-size-exceeded-in-wordarray-to-bytearray-conversion/58937696#58937696
-  return [].concat.apply([], result);
 }
