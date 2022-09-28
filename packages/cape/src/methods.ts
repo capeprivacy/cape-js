@@ -11,7 +11,7 @@ import {
 import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
 import { concat } from './bytes';
-import { encrypt } from './encrypt';
+import { encrypt, capeEncrypt } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
 import { TextEncoder } from 'util';
 interface ConnectArgs {
@@ -181,12 +181,12 @@ export abstract class Methods {
 
   /**
    * Retrieve a Cape key using your authentication token or function token. This method will manage the entire lifecycle for you.
-   * The returned key is stored in the `client` object
+   * The returned key is stored in the `client` object as a parameter for encrypt.
    *
    * @example
    * ```ts
    * const client = new Cape({ authToken: 'my-auth-token' });
-   * await client.key({ id: 'my-function-id', data: 'my-function-input' });
+   * await key = client.key();
    * ```
    */
   public async key(): Promise<string> {
@@ -200,6 +200,28 @@ export abstract class Methods {
     console.log(keyString);
     this.encryptKey = new TextEncoder().encode(keyString);
     return keyString;
+  }
+
+  /**
+   * Encrypt the
+   * The returned key is stored in the `client` object
+   *
+   * @example
+   * ```ts
+   * const myInput = <YOUR_INPUT>;
+   * const client = new Cape({ authToken: 'my-auth-token' });
+   * await key = client.key();
+   * const encrypted = client.encrypt(myInput)
+   *
+   * ```
+   */
+  public async encrypt(input: string): Promise<string> {
+    if (this.encryptKey == null) {
+      await this.key();
+    }
+    const bytesToEncrypt = new TextEncoder().encode(input);
+
+    return await capeEncrypt(this.encryptKey, bytesToEncrypt);
   }
 
   /**

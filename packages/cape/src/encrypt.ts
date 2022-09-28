@@ -69,3 +69,14 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
   const cipherText = new Uint8Array(encrypted);
   return cipherText;
 }
+
+export async function capeEncrypt(capeKey: Uint8Array, plainText: Uint8Array): Promise<string> {
+  const { cipherText, encapsulatedKey } = await aesEncrypt(plainText);
+
+  const keyCipherText = await rsaEncrypt(encapsulatedKey, capeKey);
+
+  const fullCipherText = new Uint8Array([...keyCipherText, ...cipherText]);
+  const fullCipherTextString = Buffer.from(fullCipherText).toString('base64');
+
+  return 'cape:' + fullCipherTextString;
+}
