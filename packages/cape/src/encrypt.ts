@@ -1,4 +1,3 @@
-import { TextEncoder } from 'util';
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
 import { randomBytes, publicEncrypt, constants } from 'crypto';
 
@@ -40,19 +39,21 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
 export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse> {
   // byteArrayToWordArray(plainText);
   // Generate a new key
-  const key = randomBytes(32);
-  const cipher = forge.cipher.createCipher('AES-GCM', forge.util.binary.raw.encode(key));
+  const key = forge.random.getBytesSync(32);
+  const cipher = forge.cipher.createCipher('AES-GCM', key);
 
   // aesGCM uses 12 byte nonce.
-  const iv = randomBytes(12);
-  cipher.start({ iv: forge.util.binary.raw.encode(iv) });
+  const iv = forge.random.getBytesSync(12);
+  cipher.start({ iv: iv });
   cipher.update(forge.util.createBuffer(plainText));
   cipher.finish();
   const ciphertextByteArray = forge.util.binary.raw.decode(cipher.output.getBytes());
   const tagByteArray = forge.util.binary.raw.decode(cipher.mode.tag.getBytes());
   console.log('tagByteArray', tagByteArray);
-  const ciphertext = new Uint8Array([...iv, ...ciphertextByteArray, ...tagByteArray]);
-  return { cipherText: ciphertext, encapsulatedKey: new Uint8Array(key) };
+  const ivArray = forge.util.binary.raw.decode(iv);
+  const keyArray = forge.util.binary.raw.decode(key);
+  const ciphertext = new Uint8Array([...ivArray, ...ciphertextByteArray, ...tagByteArray]);
+  return { cipherText: ciphertext, encapsulatedKey: keyArray };
 }
 
 export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promise<Uint8Array> {

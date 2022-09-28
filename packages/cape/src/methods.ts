@@ -13,6 +13,7 @@ import { type Data } from 'isomorphic-ws';
 import { concat } from './bytes';
 import { encrypt } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
+import { TextEncoder } from 'util';
 interface ConnectArgs {
   /**
    * The function ID to run.
@@ -188,13 +189,17 @@ export abstract class Methods {
    * await client.key({ id: 'my-function-id', data: 'my-function-input' });
    * ```
    */
-  public async key(): Promise<void> {
+  public async key(): Promise<string> {
     const path = this.getCanonicalPath(`/v1/key`);
 
     const attestationUserData = await this.connect_(path);
     const obj = JSON.parse(attestationUserData);
     const userData = obj.key;
-    this.encryptKey = base64ToUint8Array(userData);
+    console.log('time', this.checkDate);
+    const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(userData) + '\n-----END PUBLIC KEY-----';
+    console.log(keyString);
+    this.encryptKey = new TextEncoder().encode(keyString);
+    return keyString;
   }
 
   /**
@@ -222,6 +227,7 @@ export abstract class Methods {
       if (type !== 'attestation_doc') {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
+      console.log('message', message);
       const doc = parseAttestationDocument(message);
       const decoder = new TextDecoder();
       const decodedUserData = decoder.decode(doc.user_data);
@@ -264,14 +270,18 @@ function generateNonce() {
 }
 
 /**
- * Utility function for changing string key to Uint8Array
+ * Utility function for adding a newline character every n characters in string.
+ * @param data - The string to format.
+ * @param numChar - number of characters before adding a new line, default is 65.
+ * @returns The result string
  */
-function base64ToUint8Array(base64: string) {
-  const binary_string = window.atob(base64);
-  const len = binary_string.length;
-  const bytes = new Uint8Array(len);
-  for (var i = 0; i < len; i++) {
-    bytes[i] = binary_string.charCodeAt(i);
+function addNewLines(orgStr: string, numChar: number = 65) {
+  var result = '';
+  while (orgStr.length > numChar - 1) {
+    result += orgStr.substring(0, numChar - 1) + '\n';
+    orgStr = orgStr.substring(numChar - 1);
   }
-  return bytes;
+  // Append the last portion remaining from orgString.
+  result += orgStr;
+  return result;
 }

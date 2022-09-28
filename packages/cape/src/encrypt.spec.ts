@@ -26,10 +26,10 @@ describe('encrypt', () => {
     const parsedIv = encrypted.cipherText.slice(0, 12);
     console.log('iv', parsedIv);
     // Manipuate the ciphertext to not include iv and tag.
-    var forgeTag = forge.util.createBuffer(
-      encrypted.cipherText.slice(encrypted.cipherText.length - 16, encrypted.cipherText.length),
+    const forgeTag = forge.util.createBuffer(
+      encrypted.cipherText.subarray(encrypted.cipherText.length - 16, encrypted.cipherText.length),
     );
-    var ciphertext = forge.util.createBuffer(encrypted.cipherText.slice(0, encrypted.cipherText.length - 16));
+    const ciphertext = forge.util.createBuffer(encrypted.cipherText.slice(0, encrypted.cipherText.length - 16));
     const forgeKey = forge.util.binary.raw.encode(key);
     const forgeIv = forge.util.binary.raw.encode(parsedIv);
     const cipher = forge.cipher.createDecipher('AES-GCM', forgeKey);
@@ -37,7 +37,7 @@ describe('encrypt', () => {
     cipher.update(ciphertext);
     cipher.finish();
     const decrypted = cipher.output;
-    console.log('decrypted', decrypted);
+    console.log('decrypted', decrypted.data.toString());
   });
 
   test('rsa encrypt', async () => {
@@ -49,11 +49,8 @@ describe('encrypt', () => {
     const inputString = 'word arrays are terrible';
     const input = encoder.encode('word arrays are terrible');
     const key = publicKey.export({ type: 'spki', format: 'pem' });
-
+    console.log('pub key', key.toString());
     const keyBytes = encoder.encode(key.toString());
-    // new Uint8Array(key);
-    // encoded key is giberish.
-    // console.log("encoded", decoder.decode(keyBytes))
 
     const encryptedBytes = await rsaEncrypt(input, keyBytes);
 
