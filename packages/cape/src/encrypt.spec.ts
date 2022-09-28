@@ -26,18 +26,18 @@ describe('encrypt', () => {
     const parsedIv = encrypted.cipherText.slice(0, 12);
     console.log('iv', parsedIv);
     // Manipuate the ciphertext to not include iv and tag.
-    var forgeTag = forge.util.createBuffer(
-      encrypted.cipherText.slice(encrypted.cipherText.length - 16, encrypted.cipherText.length),
-    );
-    var ciphertext = forge.util.createBuffer(encrypted.cipherText.slice(0, encrypted.cipherText.length - 16));
-    const forgeKey = forge.util.binary.raw.encode(key);
-    const forgeIv = forge.util.binary.raw.encode(parsedIv);
-    const cipher = forge.cipher.createDecipher('AES-GCM', forgeKey);
-    cipher.start({ iv: forgeIv, tag: forgeTag });
-    cipher.update(ciphertext);
-    cipher.finish();
-    const decrypted = cipher.output;
-    console.log('decrypted', decrypted);
+    // var forgeTag = forge.util.createBuffer(
+    //   encrypted.cipherText.slice(encrypted.cipherText.length - 16, encrypted.cipherText.length),
+    // );
+    // var ciphertext = forge.util.createBuffer(encrypted.cipherText.slice(12, encrypted.cipherText.length - 16));
+    // const forgeKey = forge.util.binary.raw.encode(key);
+    // const forgeIv = forge.util.binary.raw.encode(parsedIv);
+    // const cipher = forge.cipher.createDecipher('AES-GCM', forgeKey);
+    // cipher.start({ iv: forgeIv, tag: forgeTag });
+    // cipher.update(ciphertext);
+    // cipher.finish();
+    // const decrypted = cipher.output;
+    // console.log('decrypted', decrypted.toString());
   });
 
   test('rsa encrypt', async () => {

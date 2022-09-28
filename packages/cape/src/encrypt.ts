@@ -1,4 +1,5 @@
-import { TextEncoder } from 'util';
+import { base64Decode } from './../../isomorphic/src/base64-decode-browser';
+import { TextEncoder, TextDecoder } from 'util';
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
 import { randomBytes, publicEncrypt, constants } from 'crypto';
 
@@ -40,12 +41,18 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
 export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse> {
   // byteArrayToWordArray(plainText);
   // Generate a new key
-  const key = randomBytes(32);
-  const cipher = forge.cipher.createCipher('AES-GCM', forge.util.binary.raw.encode(key));
+  const key = new TextEncoder().encode('AES256Key-32Characters1234567890');
+  const base64KeyString = Buffer.from(key).toString('base64');
+  console.log('coded key', base64KeyString);
+  // const stringKey = new TextDecoder().decode(key);
+  // randomBytes(32);
+  const cipher = forge.cipher.createCipher('AES-GCM', base64KeyString);
 
   // aesGCM uses 12 byte nonce.
-  const iv = randomBytes(12);
-  cipher.start({ iv: forge.util.binary.raw.encode(iv) });
+  const iv = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+  const base64IvString = Buffer.from(iv).toString('base64');
+  // const iv = randomBytes(12);
+  cipher.start({ iv: base64IvString });
   cipher.update(forge.util.createBuffer(plainText));
   cipher.finish();
   const ciphertextByteArray = forge.util.binary.raw.decode(cipher.output.getBytes());
