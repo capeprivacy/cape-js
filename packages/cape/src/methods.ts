@@ -4,6 +4,7 @@ import {
   getBytes,
   parseAttestationDocument,
   TextDecoder,
+  TextEncoder,
   verifyCertChain,
   verifySignature,
   type BytesInput,
@@ -13,7 +14,6 @@ import { type Data } from 'isomorphic-ws';
 import { concat } from './bytes';
 import { encrypt, capeEncrypt } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
-import { TextEncoder } from 'util';
 interface ConnectArgs {
   /**
    * The function ID to run.
@@ -55,7 +55,7 @@ export abstract class Methods {
   public abstract getAuthToken(): string | undefined;
   public abstract getFunctionToken(): string | undefined;
   public abstract getFunctionChecksum(): string | undefined;
-  // public abstract getEncryptKey: string | undefined;
+  public abstract getEncryptKey(): Uint8Array | undefined;
 
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
@@ -190,16 +190,18 @@ export abstract class Methods {
    * ```
    */
   public async key(): Promise<string> {
-    const path = this.getCanonicalPath(`/v1/key`);
+    try {
+      const path = this.getCanonicalPath(`/v1/key`);
 
-    const attestationUserData = await this.connect_(path);
-    const obj = JSON.parse(attestationUserData);
-    const userData = obj.key;
-    console.log('time', this.checkDate);
-    const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(userData) + '\n-----END PUBLIC KEY-----';
-    console.log(keyString);
-    this.encryptKey = new TextEncoder().encode(keyString);
-    return keyString;
+      const attestationUserData = await this.connect_(path);
+      const obj = JSON.parse(attestationUserData);
+      const userData = obj.key;
+      const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(userData) + '\n-----END PUBLIC KEY-----';
+      this.encryptKey = new TextEncoder().encode(keyString);
+      return keyString;
+    } finally {
+      this.disconnect();
+    }
   }
 
   /**
@@ -220,8 +222,8 @@ export abstract class Methods {
       await this.key();
     }
     const bytesToEncrypt = new TextEncoder().encode(input);
-
-    return await capeEncrypt(this.encryptKey, bytesToEncrypt);
+    const key = this.getEncryptKey() || new Uint8Array();
+    return await capeEncrypt(key, bytesToEncrypt);
   }
 
   /**
@@ -249,7 +251,6 @@ export abstract class Methods {
       if (type !== 'attestation_doc') {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
-      console.log('message', message);
       const doc = parseAttestationDocument(message);
       const decoder = new TextDecoder();
       const decodedUserData = decoder.decode(doc.user_data);
@@ -297,8 +298,8 @@ function generateNonce() {
  * @param numChar - number of characters before adding a new line, default is 65.
  * @returns The result string
  */
-function addNewLines(orgStr: string, numChar: number = 65) {
-  var result = '';
+function addNewLines(orgStr: string, numChar = 65) {
+  let result = '';
   while (orgStr.length > numChar - 1) {
     result += orgStr.substring(0, numChar - 1) + '\n';
     orgStr = orgStr.substring(numChar - 1);

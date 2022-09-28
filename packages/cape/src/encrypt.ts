@@ -1,5 +1,5 @@
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
-import { randomBytes, publicEncrypt, constants } from 'crypto';
+import { publicEncrypt, constants } from 'crypto';
 
 import * as forge from 'node-forge';
 interface EncryptResponse {
@@ -49,13 +49,18 @@ export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse
   cipher.finish();
   const ciphertextByteArray = forge.util.binary.raw.decode(cipher.output.getBytes());
   const tagByteArray = forge.util.binary.raw.decode(cipher.mode.tag.getBytes());
-  console.log('tagByteArray', tagByteArray);
   const ivArray = forge.util.binary.raw.decode(iv);
   const keyArray = forge.util.binary.raw.decode(key);
   const ciphertext = new Uint8Array([...ivArray, ...ciphertextByteArray, ...tagByteArray]);
   return { cipherText: ciphertext, encapsulatedKey: keyArray };
 }
 
+/**
+ * Encrypts the given input using the provided public key.
+ *
+ * @param plainText The plain text input to encrypt.
+ * @param key The provided public key
+ */
 export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promise<Uint8Array> {
   const keyBuffer = Buffer.from(key);
   const encrypted = publicEncrypt(
@@ -70,6 +75,11 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
   return cipherText;
 }
 
+/**
+ * Cape encrypt takes an input and outputs a string that can be decrypted in the enclave.
+ *
+ * @param plainText The plain text input to encrypt.
+ */
 export async function capeEncrypt(capeKey: Uint8Array, plainText: Uint8Array): Promise<string> {
   const { cipherText, encapsulatedKey } = await aesEncrypt(plainText);
 

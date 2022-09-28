@@ -342,12 +342,9 @@ describe('Cape', () => {
       const port = await getPortPromise({ host });
       const capeApiUrl = `${host}:${port}`;
       const mockServer = new Server(`${capeApiUrl}/v1/key`);
-      let incomingMessageCount = 0;
 
       mockServer.on('connection', (socket) => {
         socket.on('message', (data) => {
-          incomingMessageCount++;
-
           if (typeof data === 'string') {
             const parsed = JSON.parse(data);
             // First message contains a nonce, send back the attestation document.
@@ -380,6 +377,43 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
 -----END PUBLIC KEY-----`;
       expect(result).toBe(expected);
 
+      mockServer.stop();
+    });
+  });
+
+  describe('#encrypt', () => {
+    test('when token is missing, should reject', async () => {
+      const cape = new Cape({ checkDate: keyCheckDate });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - we are testing the reject behavior
+      await expect(cape.run({})).rejects.toThrowError('Unable to connect to the server, missing function id.');
+    });
+
+    test('should fetch a key and encrypt success', async () => {
+      const port = await getPortPromise({ host });
+      const capeApiUrl = `${host}:${port}`;
+      const mockServer = new Server(`${capeApiUrl}/v1/key`);
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', (data) => {
+          if (typeof data === 'string') {
+            const parsed = JSON.parse(data);
+            // First message contains a nonce, send back the attestation document.
+            if (parsed.message.nonce) {
+              socket.send(JSON.stringify({ message: { message: keyAttestationDocument, type: 'attestation_doc' } }));
+            }
+          } else {
+            socket.send(
+              JSON.stringify({ message: { message: Buffer.from('pong').toString('base64'), type: 'function_result' } }),
+            );
+          }
+        });
+      });
+
+      const client = new Cape({ authToken, capeApiUrl, checkDate: keyCheckDate });
+      const encrypted = await client.encrypt('my message');
+      const result = encrypted.includes('cape');
+      expect(result).toBe(true);
       mockServer.stop();
     });
   });

@@ -72,4 +72,7 @@ export class Cape extends Methods {
   getFunctionChecksum(): string | undefined {
     return this.functionChecksum;
   }
+  public getEncryptKey(): Uint8Array | undefined {
+    return this.encryptKey;
+  }
 }

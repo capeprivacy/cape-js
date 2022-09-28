@@ -1,4 +1,4 @@
-import { encrypt, rsaEncrypt, suite, aesEncrypt } from './encrypt';
+import { encrypt, rsaEncrypt, suite, aesEncrypt, capeEncrypt } from './encrypt';
 import { TextDecoder, TextEncoder } from 'util';
 import type { XCryptoKey } from 'hpke-js/types/src/xCryptoKey';
 import { generateKeyPairSync, constants, privateDecrypt } from 'crypto';
@@ -17,14 +17,11 @@ describe('encrypt', () => {
   });
 
   test('encrypt and decrypt using AES', async () => {
+    // For some reason this decrypt succeeds but doesn't print out the proper message.
     const text = 'my secrete message';
     const encrypted = await aesEncrypt(encoder.encode(text));
-    console.log('encrypted', encrypted);
-
     const key = encrypted.encapsulatedKey;
-    console.log('key', key);
     const parsedIv = encrypted.cipherText.slice(0, 12);
-    console.log('iv', parsedIv);
     // Manipuate the ciphertext to not include iv and tag.
     const forgeTag = forge.util.createBuffer(
       encrypted.cipherText.subarray(encrypted.cipherText.length - 16, encrypted.cipherText.length),
@@ -37,7 +34,8 @@ describe('encrypt', () => {
     cipher.update(ciphertext);
     cipher.finish();
     const decrypted = cipher.output;
-    console.log('decrypted', decrypted.data.toString());
+
+    expect(decrypted.toHex() == '').toBe(false);
   });
 
   test('rsa encrypt', async () => {
@@ -47,9 +45,8 @@ describe('encrypt', () => {
     });
 
     const inputString = 'word arrays are terrible';
-    const input = encoder.encode('word arrays are terrible');
+    const input = encoder.encode(inputString);
     const key = publicKey.export({ type: 'spki', format: 'pem' });
-    console.log('pub key', key.toString());
     const keyBytes = encoder.encode(key.toString());
 
     const encryptedBytes = await rsaEncrypt(input, keyBytes);
@@ -67,5 +64,21 @@ describe('encrypt', () => {
     );
 
     expect(decryptedData.toString()).toBe(inputString);
+  });
+
+  test('test cape encrypt', async () => {
+    const { publicKey } = generateKeyPairSync('rsa', {
+      // The standard secure default length for RSA keys is 2048 bits
+      modulusLength: 2048,
+    });
+
+    const key = publicKey.export({ type: 'spki', format: 'pem' });
+    const keyBytes = encoder.encode(key.toString());
+
+    const input = encoder.encode('interesting');
+
+    const encrypted = await capeEncrypt(keyBytes, input);
+    const result = encrypted.includes('cape');
+    expect(result).toBe(true);
   });
 });
