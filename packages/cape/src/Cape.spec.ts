@@ -23,8 +23,13 @@ const attestationDocument =
 const publicKey = parseAttestationDocument(attestationDocument).public_key;
 const host = 'ws://localhost';
 const checkDate = new Date('2022-09-15T17:44:24.000Z');
+// CheckDate can be found by logging the notBefore and notAfter time in the certificate
+// by adding console.log("not after:", cert.notAfter, "not before:", cert.notBefore);
+// in https://github.com/capeprivacy/cape-js/blob/main/packages/isomorphic/src/verify-cert-chain-node.ts#L18
 const functionChecksum = '66731e5ccf226680dd5c98a1d1ad52b7a4c986984042d0672d8f3153130b34a8';
-
+const keyAttestationDocument =
+  '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aG96OEdlb3VYQ21Sb1lUL2NyZklqTnE0Rm5LYjZNTXNHT2RUMWFTL1VVWU81a3Z0ejcvZ1RYRTc5UmZRVVJXU3Q2b0kzaEJKUWcvNjI5anUxWVZwbFhJSUtRVnlacXdTYWloWTZodFc5SFM0UDlMUEVzRk9JUEZ2dDArb2d3Y1lmdWI2K25CbEJPOC9VZDFUSkNsMW85TWdrTWY1WVZqQUVuWThJanh1SmpHSTZmNTNmb0xTZC9TdW91OEJPK2ZDa2UxcDgyQnY3ZmpwQmx3ejNsdkRtcXp6Y21GNTZMOFJ1L25YRDZ2eEJwMzRNa093TklLclpXVHhuTGJnR0twazFrMFQrMkdwMnZhaERlcUhuL0JHbXRCUkV6YmNEYjJvTnBuaWtCZjBlVkpBRUdNOEovcHdRWFV0MmFmUnBTSitQRFQ3TmgzbTE5OU5naFVTSGJFenpBdm9pYjlCVnJsWUp2cnZJbGRCVU1wYm9YRkZuMEhPa3U0T2NkcENEdXlhdWtsQ01GbkswWW5xT1V6WEJva1hRbGtScU81SEd4U044b2JZbUJXUkRPTGtOeDN3QWhoRGtyUitzeEZwcWsrck1GUGpZeDNraEJSVzFGdU1ERHNLVFliVXJSSFdJMG9SdDE3TnBKZ0JsUlFXRUpmUzByWVRScGo1SUFLNnBCSlI4V1IwOFdwb09UVzAzY3V0RXo1U2ZJb25KQUZBUGhub3FwNndzQjUvN0pUemNpQStxQU1DQXdFQUFRPT0ifWVub25jZUys25/+h31cnMm/gRVYYOeaEuTsh6/fWWwkwyx+Cyh11qS8AOXgaCd2Se6uN4l9xkjWHG7llOfNPOq7h+WapsyDr2PyO7viZjjotu1k+9wCdGrYLSORjYEVdXVuSfFyvFVPuovu7fGSiROzmq0rkg==';
+const keyCheckDate = new Date('2022-09-28T16:34:00.000Z');
 describe('Cape', () => {
   test('setting verbose to TRUE sets the log level to trace', () => {
     new Cape({ verbose: true, authToken, checkDate });
@@ -321,6 +326,94 @@ describe('Cape', () => {
       expect(spy).toHaveBeenCalled();
 
       jest.restoreAllMocks();
+      mockServer.stop();
+    });
+  });
+
+  describe('#key', () => {
+    test('when token is missing, should reject', async () => {
+      const cape = new Cape({ checkDate: keyCheckDate });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - we are testing the reject behavior
+      await expect(cape.run({})).rejects.toThrowError('Unable to connect to the server, missing function id.');
+    });
+
+    test('should fetch a key without error', async () => {
+      const port = await getPortPromise({ host });
+      const capeApiUrl = `${host}:${port}`;
+      const mockServer = new Server(`${capeApiUrl}/v1/key`);
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', (data) => {
+          if (typeof data === 'string') {
+            const parsed = JSON.parse(data);
+            // First message contains a nonce, send back the attestation document.
+            if (parsed.message.nonce) {
+              socket.send(JSON.stringify({ message: { message: keyAttestationDocument, type: 'attestation_doc' } }));
+            }
+          } else {
+            socket.send(
+              JSON.stringify({ message: { message: Buffer.from('pong').toString('base64'), type: 'function_result' } }),
+            );
+          }
+        });
+      });
+
+      const client = new Cape({ authToken, capeApiUrl, checkDate: keyCheckDate });
+      const result = await client.key();
+      const expected = `-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnV8eokFPI6Nx+MJ+4iBG
++5Ms1W2qadbuKf8pFL3s8aEsLp4MSH7809b8nsLhgxtbs+nBh1CNaoOxkxY2bhhH
+Kv8gmnkP0kuH0dRKz9Egf0R3CV+vA+lnRnZThoz8GeouXCmRoYT/crfIjNq4FnKb
+6MMsGOdT1aS/UUYO5kvtz7/gTXE79RfQURWSt6oI3hBJQg/629ju1YVplXIIKQVy
+ZqwSaihY6htW9HS4P9LPEsFOIPFvt0+ogwcYfub6+nBlBO8/Ud1TJCl1o9MgkMf5
+YVjAEnY8IjxuJjGI6f53foLSd/Suou8BO+fCke1p82Bv7fjpBlwz3lvDmqzzcmF5
+6L8Ru/nXD6vxBp34MkOwNIKrZWTxnLbgGKpk1k0T+2Gp2vahDeqHn/BGmtBREzbc
+Db2oNpnikBf0eVJAEGM8J/pwQXUt2afRpSJ+PDT7Nh3m199NghUSHbEzzAvoib9B
+VrlYJvrvIldBUMpboXFFn0HOku4OcdpCDuyauklCMFnK0YnqOUzXBokXQlkRqO5H
+GxSN8obYmBWRDOLkNx3wAhhDkrR+sxFpqk+rMFPjYx3khBRW1FuMDDsKTYbUrRHW
+I0oRt17NpJgBlRQWEJfS0rYTRpj5IAK6pBJR8WR08WpoOTW03cutEz5SfIonJAFA
+Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
+-----END PUBLIC KEY-----`;
+      expect(result).toBe(expected);
+
+      mockServer.stop();
+    });
+  });
+
+  describe('#encrypt', () => {
+    test('when token is missing, should reject', async () => {
+      const cape = new Cape({ checkDate: keyCheckDate });
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - we are testing the reject behavior
+      await expect(cape.run({})).rejects.toThrowError('Unable to connect to the server, missing function id.');
+    });
+
+    test('should fetch a key and encrypt success', async () => {
+      const port = await getPortPromise({ host });
+      const capeApiUrl = `${host}:${port}`;
+      const mockServer = new Server(`${capeApiUrl}/v1/key`);
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', (data) => {
+          if (typeof data === 'string') {
+            const parsed = JSON.parse(data);
+            // First message contains a nonce, send back the attestation document.
+            if (parsed.message.nonce) {
+              socket.send(JSON.stringify({ message: { message: keyAttestationDocument, type: 'attestation_doc' } }));
+            }
+          } else {
+            socket.send(
+              JSON.stringify({ message: { message: Buffer.from('pong').toString('base64'), type: 'function_result' } }),
+            );
+          }
+        });
+      });
+
+      const client = new Cape({ authToken, capeApiUrl, checkDate: keyCheckDate });
+      const encrypted = await client.encrypt('my message');
+      const result = encrypted.includes('cape');
+      expect(result).toBe(true);
       mockServer.stop();
     });
   });

@@ -4,6 +4,7 @@ import {
   getBytes,
   parseAttestationDocument,
   TextDecoder,
+  TextEncoder,
   verifyCertChain,
   verifySignature,
   type BytesInput,
@@ -11,7 +12,7 @@ import {
 import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
 import { concat } from './bytes';
-import { encrypt } from './encrypt';
+import { encrypt, capeEncrypt } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
 interface ConnectArgs {
   /**
@@ -54,11 +55,13 @@ export abstract class Methods {
   public abstract getAuthToken(): string | undefined;
   public abstract getFunctionToken(): string | undefined;
   public abstract getFunctionChecksum(): string | undefined;
+  public abstract getEncryptKey(): Uint8Array | undefined;
 
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
+  encryptKey?: Uint8Array;
 
   /**
    * Get the authentication token and protocol for the websocket connection.
@@ -91,51 +94,14 @@ export abstract class Methods {
     }
 
     const functionChecksum = this.getFunctionChecksum() || '';
-
-    try {
-      // Set up the connection to the server
-      this.websocket = new WebsocketConnection(this.getCanonicalPath(`/v1/run/${id}`), this.getAuthentication());
-      await this.websocket.connect();
-
-      // Generate the nonce for the connection.
-      this.nonce = generateNonce();
-
-      // Send the nonce and auth token to the server to kick off the function.
-      this.websocket.send(JSON.stringify({ message: { nonce: this.nonce } }));
-
-      // Wait for the server to send back the attestation document with the public key.
-      const result = parseFrame(await this.websocket.receive());
-      if (result.error) {
-        throw new Error(result.error);
-      }
-      const { type, message } = result.message;
-      if (type !== 'attestation_doc') {
-        throw new Error(`Expected attestation document but received ${type}.`);
-      }
-      const doc = parseAttestationDocument(message);
-      const decoder = new TextDecoder();
-      const decoded = decoder.decode(doc.user_data);
-      const obj = JSON.parse(decoded);
-      const userData = obj.func_checksum;
-      const buffer = Buffer.from(userData, 'base64');
-      const bufString = buffer.toString('hex');
-
-      if (functionChecksum !== '' && functionChecksum !== bufString) {
-        throw new Error(`Error validating function checksum, got ${bufString}, wanted: ${functionChecksum}.`);
-      }
-      await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
-
-      const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
-
-      const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
-      if (!certResult.result) {
-        throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
-      }
-
-      this.publicKey = doc.public_key;
-    } catch (e) {
-      this.disconnect();
-      throw e;
+    const path = this.getCanonicalPath(`/v1/run/${id}`);
+    const attestationUserData = await this.connect_(path);
+    const obj = JSON.parse(attestationUserData);
+    const userData = obj.func_checksum;
+    const buffer = Buffer.from(userData, 'base64');
+    const bufString = buffer.toString('hex');
+    if (functionChecksum !== '' && functionChecksum !== bufString) {
+      throw new Error(`Error validating function checksum, got ${bufString}, wanted: ${functionChecksum}.`);
     }
   }
 
@@ -212,6 +178,98 @@ export abstract class Methods {
       throw e;
     }
   }
+
+  /**
+   * Retrieve a Cape key using your authentication token or function token. This method will manage the entire lifecycle for you.
+   * The returned key is stored in the `client` object as a parameter for encrypt.
+   *
+   * @example
+   * ```ts
+   * const client = new Cape({ authToken: 'my-auth-token' });
+   * await key = client.key();
+   * ```
+   */
+  public async key(): Promise<string> {
+    try {
+      const path = this.getCanonicalPath(`/v1/key`);
+
+      const attestationUserData = await this.connect_(path);
+      const obj = JSON.parse(attestationUserData);
+      const userData = obj.key;
+      const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(userData) + '\n-----END PUBLIC KEY-----';
+      this.encryptKey = new TextEncoder().encode(keyString);
+      return keyString;
+    } finally {
+      this.disconnect();
+    }
+  }
+
+  /**
+   * Encrypt the
+   * The returned key is stored in the `client` object
+   *
+   * @example
+   * ```ts
+   * const myInput = <YOUR_INPUT>;
+   * const client = new Cape({ authToken: 'my-auth-token' });
+   * await key = client.key();
+   * const encrypted = client.encrypt(myInput)
+   *
+   * ```
+   */
+  public async encrypt(input: string): Promise<string> {
+    if (this.encryptKey == null) {
+      await this.key();
+    }
+    const bytesToEncrypt = new TextEncoder().encode(input);
+    const key = this.getEncryptKey() || new Uint8Array();
+    return await capeEncrypt(key, bytesToEncrypt);
+  }
+
+  /**
+   * Connect to the Cape server with a specific endpoint and return the embedded user data field.
+   * Note that the connection with automatically close after 60 seconds of inactivity.
+   */
+  private async connect_(endpoint: string): Promise<string> {
+    try {
+      // Set up the connection to the server
+      this.websocket = new WebsocketConnection(endpoint, this.getAuthentication());
+      await this.websocket.connect();
+
+      // Generate the nonce for the connection.
+      this.nonce = generateNonce();
+
+      // Send the nonce and auth token to the server to kick off the function.
+      this.websocket.send(JSON.stringify({ message: { nonce: this.nonce } }));
+
+      // Wait for the server to send back the attestation document with the public key.
+      const result = parseFrame(await this.websocket.receive());
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      const { type, message } = result.message;
+      if (type !== 'attestation_doc') {
+        throw new Error(`Expected attestation document but received ${type}.`);
+      }
+      const doc = parseAttestationDocument(message);
+      const decoder = new TextDecoder();
+      const decodedUserData = decoder.decode(doc.user_data);
+
+      await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
+
+      const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
+
+      const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
+      if (!certResult.result) {
+        throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
+      }
+      this.publicKey = doc.public_key;
+      return decodedUserData;
+    } catch (e) {
+      this.disconnect();
+      throw e;
+    }
+  }
 }
 
 /**
@@ -232,4 +290,21 @@ function parseFrame(frame: Data | undefined): Message {
  */
 function generateNonce() {
   return randomBytes(12).toString('base64');
+}
+
+/**
+ * Utility function for adding a newline character every n characters in string.
+ * @param data - The string to format.
+ * @param numChar - number of characters before adding a new line, default is 65.
+ * @returns The result string
+ */
+function addNewLines(orgStr: string, numChar = 65) {
+  let result = '';
+  while (orgStr.length > numChar - 1) {
+    result += orgStr.substring(0, numChar - 1) + '\n';
+    orgStr = orgStr.substring(numChar - 1);
+  }
+  // Append the last portion remaining from orgString.
+  result += orgStr;
+  return result;
 }
