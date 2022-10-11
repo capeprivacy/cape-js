@@ -1895,20 +1895,16 @@
   version "6.0.3"
   resolved "https://registry.npmjs.org/@types/parse5/-/parse5-6.0.3.tgz"
 
-"@types/pkijs@^0.0.14":
-  version "0.0.14"
-  resolved "https://registry.npmjs.org/@types/pkijs/-/pkijs-0.0.14.tgz"
+"@types/pkijs@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/pkijs/-/pkijs-3.0.1.tgz#10d1c6d665f94a3e7c5beaf7a06f1467db2686e2"
+  integrity sha512-nU8Mbfd8pf+5ccBHGanBXo0wpsLjGNd5FuFxuqxkDwqq1vNvs1PzBc2mlNH3tTg7BuVxXxc5GJKwB3Kv/ULLeA==
   dependencies:
-    "@types/pvutils" "*"
-    asn1js "^3.0.2"
+    pkijs "*"
 
 "@types/prettier@^2.1.5":
   version "2.6.3"
   resolved "https://registry.npmjs.org/@types/prettier/-/prettier-2.6.3.tgz"
-
-"@types/pvutils@*":
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/@types/pvutils/-/pvutils-1.0.1.tgz"
 
 "@types/stack-utils@^2.0.0":
   version "2.0.1"
@@ -2286,7 +2282,7 @@ asn1@^0.2.4:
   dependencies:
     safer-buffer "~2.1.0"
 
-asn1js@^3.0.2, asn1js@^3.0.5:
+asn1js@^3.0.5:
   version "3.0.5"
   resolved "https://registry.npmjs.org/asn1js/-/asn1js-3.0.5.tgz"
   dependencies:
@@ -6624,9 +6620,10 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-pkijs@^3.0.5:
-  version "3.0.7"
-  resolved "https://registry.yarnpkg.com/pkijs/-/pkijs-3.0.7.tgz#cfb2534672c9ddf629be94832eb919e3a8e10190"
+pkijs@*, pkijs@^3.0.5:
+  version "3.0.8"
+  resolved "https://registry.yarnpkg.com/pkijs/-/pkijs-3.0.8.tgz#fbffa7d99274406590593fdfdfa4e11b09c50bc2"
+  integrity sha512-fvl/pOgq31CPkb1HNm8y/YPRt01FCWQdfk7UIfW8TMUCrwGZydDYu9f3azH1k9wofjoI7bWXWraORk/7TkT4ug==
   dependencies:
     asn1js "^3.0.5"
     bytestreamjs "^2.0.0"
