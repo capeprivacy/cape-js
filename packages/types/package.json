@@ -1,6 +1,6 @@
 {
   "name": "@capeprivacy/types",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "",
   "types": "index.d.ts",
   "scripts": {
