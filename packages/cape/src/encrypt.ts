@@ -1,5 +1,6 @@
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
 import { publicEncrypt, constants } from 'crypto';
+import { debug } from 'loglevel';
 
 import * as forge from 'node-forge';
 interface EncryptResponse {
@@ -41,6 +42,7 @@ export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse
   // Generate a new key
   const key = forge.random.getBytesSync(32);
   const cipher = forge.cipher.createCipher('AES-GCM', key);
+  debug('Created AES encryption material.');
 
   // aesGCM uses 12 byte nonce.
   const iv = forge.random.getBytesSync(12);
@@ -52,6 +54,7 @@ export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse
   const ivArray = forge.util.binary.raw.decode(iv);
   const keyArray = forge.util.binary.raw.decode(key);
   const ciphertext = new Uint8Array([...ivArray, ...ciphertextByteArray, ...tagByteArray]);
+  debug('Completed AES encryption of input. Ciphertext length is: ', ciphertext.length);
   return { cipherText: ciphertext, encapsulatedKey: keyArray };
 }
 
@@ -71,6 +74,7 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
     },
     Buffer.from(plainText),
   );
+  debug('Finished RSA encryption.');
   const cipherText = new Uint8Array(encrypted);
   return cipherText;
 }
@@ -82,11 +86,11 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
  */
 export async function capeEncrypt(capeKey: Uint8Array, plainText: Uint8Array): Promise<string> {
   const { cipherText, encapsulatedKey } = await aesEncrypt(plainText);
-
+  debug('CapeEncrypt encrypting AES key with public key: ', capeKey);
   const keyCipherText = await rsaEncrypt(encapsulatedKey, capeKey);
 
   const fullCipherText = new Uint8Array([...keyCipherText, ...cipherText]);
   const fullCipherTextString = Buffer.from(fullCipherText).toString('base64');
-
+  debug('CapeEncrypt finished, encrypted string: ', fullCipherTextString);
   return 'cape:' + fullCipherTextString;
 }
