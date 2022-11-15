@@ -40,12 +40,15 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
 export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse> {
   // byteArrayToWordArray(plainText);
   // Generate a new key
-  const key = forge.random.getBytesSync(32);
+  const key = 'AES256Key-32Characters1234567890';
+
   const cipher = forge.cipher.createCipher('AES-GCM', key);
   debug('Created AES encryption material.');
 
   // aesGCM uses 12 byte nonce.
-  const iv = forge.random.getBytesSync(12);
+  const iv = '012345678910';
+
+  // forge.random.getBytesSync(12);
   cipher.start({ iv: iv });
   cipher.update(forge.util.createBuffer(plainText));
   cipher.finish();
@@ -80,6 +83,22 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
 }
 
 /**
+ * Encrypts the given input using the provided public key.
+ *
+ * @param plainText The plain text input to encrypt.
+ * @param key The provided public key
+ */
+export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promise<Uint8Array> {
+  const publicKey = forge.pki.publicKeyFromPem(key);
+  const toBeEncrypted = forge.util.binary.raw.encode(plainText);
+  const encrypted = publicKey.encrypt(toBeEncrypted);
+  debug('Finished RSA encryption.');
+
+  const cipherText = new Uint8Array(new TextEncoder().encode(encrypted));
+  return cipherText;
+}
+
+/**
  * Cape encrypt takes an input and outputs a string that can be decrypted in the enclave.
  *
  * @param plainText The plain text input to encrypt.
@@ -87,8 +106,9 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
 export async function capeEncrypt(capeKey: Uint8Array, plainText: Uint8Array): Promise<string> {
   const { cipherText, encapsulatedKey } = await aesEncrypt(plainText);
   debug('CapeEncrypt encrypting AES key with public key: ', capeKey);
+  debug('CapeEncrypt encapsulated key: ', encapsulatedKey);
   const keyCipherText = await rsaEncrypt(encapsulatedKey, capeKey);
-
+  debug('CapeEncrypt keyciphertext: ', keyCipherText);
   const fullCipherText = new Uint8Array([...keyCipherText, ...cipherText]);
   const fullCipherTextString = Buffer.from(fullCipherText).toString('base64');
   debug('CapeEncrypt finished, encrypted string: ', fullCipherTextString);
