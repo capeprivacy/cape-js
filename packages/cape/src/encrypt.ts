@@ -1,3 +1,5 @@
+import { encode } from 'cbor';
+import { TextEncoder, TextDecoder } from '@capeprivacy/isomorphic';
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
 import { publicEncrypt, constants } from 'crypto';
 import { debug } from 'loglevel';
@@ -90,11 +92,14 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
  */
 export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promise<Uint8Array> {
   const publicKey = forge.pki.publicKeyFromPem(key);
-  const toBeEncrypted = forge.util.binary.raw.encode(plainText);
-  const encrypted = publicKey.encrypt(toBeEncrypted);
+  const toBeEncrypted = new TextDecoder().decode(plainText);
+  // forge.util.binary.raw.encode(plainText);
+  const encrypted = publicKey.encrypt(toBeEncrypted, 'RSA-OAEP', {
+    md: forge.md.sha256.create(),
+  });
   debug('Finished RSA encryption.');
 
-  const cipherText = new Uint8Array(new TextEncoder().encode(encrypted));
+  const cipherText = new TextEncoder().encode(encrypted);
   return cipherText;
 }
 
@@ -103,11 +108,15 @@ export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promi
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function capeEncrypt(capeKey: Uint8Array, plainText: Uint8Array): Promise<string> {
-  const { cipherText, encapsulatedKey } = await aesEncrypt(plainText);
+export async function capeEncrypt(capeKey: string, plainText: string): Promise<string> {
+  const plainTextBytes = new TextEncoder().encode(plainText);
+  const { cipherText, encapsulatedKey } = await aesEncrypt(plainTextBytes);
   debug('CapeEncrypt encrypting AES key with public key: ', capeKey);
   debug('CapeEncrypt encapsulated key: ', encapsulatedKey);
-  const keyCipherText = await rsaEncrypt(encapsulatedKey, capeKey);
+  // const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, capeKey);
+  const keyBytes = new TextEncoder().encode(capeKey);
+  const keyCipherText = await rsaEncrypt(encapsulatedKey, keyBytes);
+
   debug('CapeEncrypt keyciphertext: ', keyCipherText);
   const fullCipherText = new Uint8Array([...keyCipherText, ...cipherText]);
   const fullCipherTextString = Buffer.from(fullCipherText).toString('base64');

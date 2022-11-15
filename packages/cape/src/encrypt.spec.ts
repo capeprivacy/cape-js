@@ -18,8 +18,8 @@ describe('encrypt', () => {
 
   test('encrypt and decrypt using AES', async () => {
     // For some reason this decrypt succeeds but doesn't print out the proper message.
-    const text = 'my secrete message';
-    const encrypted = await aesEncrypt(encoder.encode(text));
+    const text = encoder.encode('my secrete message');
+    const encrypted = await aesEncrypt(text);
     const key = encrypted.encapsulatedKey;
     const parsedIv = encrypted.cipherText.slice(0, 12);
     // Manipuate the ciphertext to not include iv and tag.
@@ -97,25 +97,20 @@ describe('encrypt', () => {
 
     const encryptedData = await forgeRsaEncrypt(input, pubPem);
 
-    const encryptedDataInString = new Uint8Array(new TextDecoder().decode(encryptedData));
-
-    const decrypted = keypair.privateKey.decrypt(new Uint8Array(new TextEncoder().encode(encryptedData)));
-
+    const encryptedDataInString = decoder.decode(encryptedData);
+    const decryptedData = keypair.privateKey.decrypt(encryptedDataInString, 'RSA-OAEP', {
+      md: forge.md.sha256.create(),
+    });
+    console.log('decrypted', decryptedData);
     expect(decryptedData.toString()).toBe(inputString);
   });
 
   test('test cape encrypt', async () => {
-    const { publicKey } = generateKeyPairSync('rsa', {
-      // The standard secure default length for RSA keys is 2048 bits
-      modulusLength: 2048,
-    });
+    let keypair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
+    const pubPem = forge.pki.publicKeyToPem(keypair.publicKey);
+    const input = 'interesting';
 
-    const key = publicKey.export({ type: 'spki', format: 'pem' });
-    const keyBytes = encoder.encode(key.toString());
-
-    const input = encoder.encode('interesting');
-
-    const encrypted = await capeEncrypt(keyBytes, input);
+    const encrypted = await capeEncrypt(pubPem, input);
     const result = encrypted.includes('cape');
     expect(result).toBe(true);
   });
