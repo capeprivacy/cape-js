@@ -3,8 +3,11 @@ import { TextEncoder, TextDecoder } from '@capeprivacy/isomorphic';
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
 import { publicEncrypt, constants } from 'crypto';
 import { debug } from 'loglevel';
-
 import * as forge from 'node-forge';
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
 interface EncryptResponse {
   cipherText: Uint8Array;
   encapsulatedKey: Uint8Array;
@@ -91,18 +94,13 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
  * @param key The provided public key
  */
 export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promise<Uint8Array> {
-  const publicKey = forge.pki.publicKeyFromPem(key);
-  const toBeEncrypted = new TextDecoder().decode(plainText);
-  // forge.util.binary.raw.encode(plainText);
-  const encrypted = publicKey.encrypt(toBeEncrypted, 'RSA-OAEP', {
-    md: forge.md.sha256.create(),
-    label: '', // Force the label to be empty.
-    mgf1: forge.md.sha256.create(),
-  });
-  debug('Finished RSA encryption.');
-
-  const cipherText = new TextEncoder().encode(encrypted);
-  return cipherText;
+  return forge.util.binary.raw.decode(
+    forge.pki.publicKeyFromPem(key).encrypt(decoder.decode(plainText), 'RSA-OAEP', {
+      md: forge.md.sha256.create(),
+      label: '', // Force the label to be empty.
+      mgf1: forge.md.sha256.create(),
+    }),
+  );
 }
 
 /**
@@ -111,12 +109,12 @@ export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promi
  * @param plainText The plain text input to encrypt.
  */
 export async function capeEncrypt(capeKey: string, plainText: string): Promise<string> {
-  const plainTextBytes = new TextEncoder().encode(plainText);
+  const plainTextBytes = encoder.encode(plainText);
   const { cipherText, encapsulatedKey } = await aesEncrypt(plainTextBytes);
   debug('CapeEncrypt encrypting AES key with public key: ', capeKey);
   debug('CapeEncrypt encapsulated key: ', encapsulatedKey);
   // const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, capeKey);
-  const keyBytes = new TextEncoder().encode(capeKey);
+  const keyBytes = encoder.encode(capeKey);
   const keyCipherText = await rsaEncrypt(encapsulatedKey, keyBytes);
 
   debug('CapeEncrypt keyciphertext: ', keyCipherText);
