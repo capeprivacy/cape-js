@@ -1,7 +1,11 @@
+import { TextEncoder, TextDecoder } from '@capeprivacy/isomorphic';
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
-import { publicEncrypt, constants } from 'crypto';
-
+import { debug } from 'loglevel';
 import * as forge from 'node-forge';
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
 interface EncryptResponse {
   cipherText: Uint8Array;
   encapsulatedKey: Uint8Array;
@@ -37,13 +41,14 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
  * @param plainText The plain text input to encrypt.
  */
 export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse> {
-  // byteArrayToWordArray(plainText);
   // Generate a new key
   const key = forge.random.getBytesSync(32);
+
   const cipher = forge.cipher.createCipher('AES-GCM', key);
 
   // aesGCM uses 12 byte nonce.
   const iv = forge.random.getBytesSync(12);
+
   cipher.start({ iv: iv });
   cipher.update(forge.util.createBuffer(plainText));
   cipher.finish();
@@ -52,6 +57,7 @@ export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse
   const ivArray = forge.util.binary.raw.decode(iv);
   const keyArray = forge.util.binary.raw.decode(key);
   const ciphertext = new Uint8Array([...ivArray, ...ciphertextByteArray, ...tagByteArray]);
+  debug('Completed AES encryption of input. Ciphertext length is: ', ciphertext.length);
   return { cipherText: ciphertext, encapsulatedKey: keyArray };
 }
 
@@ -61,18 +67,14 @@ export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse
  * @param plainText The plain text input to encrypt.
  * @param key The provided public key
  */
-export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promise<Uint8Array> {
-  const keyBuffer = Buffer.from(key);
-  const encrypted = publicEncrypt(
-    {
-      key: keyBuffer,
-      padding: constants.RSA_PKCS1_OAEP_PADDING,
-      oaepHash: 'sha256',
-    },
-    Buffer.from(plainText),
+export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promise<Uint8Array> {
+  return forge.util.binary.raw.decode(
+    forge.pki.publicKeyFromPem(key).encrypt(decoder.decode(plainText), 'RSA-OAEP', {
+      md: forge.md.sha256.create(),
+      label: '', // Force the label to be empty.
+      mgf1: forge.md.sha256.create(),
+    }),
   );
-  const cipherText = new Uint8Array(encrypted);
-  return cipherText;
 }
 
 /**
@@ -80,13 +82,13 @@ export async function rsaEncrypt(plainText: Uint8Array, key: Uint8Array): Promis
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function capeEncrypt(capeKey: Uint8Array, plainText: Uint8Array): Promise<string> {
-  const { cipherText, encapsulatedKey } = await aesEncrypt(plainText);
+export async function capeEncrypt(capeKey: string, plainText: string): Promise<string> {
+  const plainTextBytes = encoder.encode(plainText);
+  const { cipherText, encapsulatedKey } = await aesEncrypt(plainTextBytes);
+  const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, capeKey);
 
-  const keyCipherText = await rsaEncrypt(encapsulatedKey, capeKey);
-
+  debug('CapeEncrypt keyciphertext: ', keyCipherText);
   const fullCipherText = new Uint8Array([...keyCipherText, ...cipherText]);
   const fullCipherTextString = Buffer.from(fullCipherText).toString('base64');
-
   return 'cape:' + fullCipherTextString;
 }

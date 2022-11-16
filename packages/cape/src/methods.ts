@@ -218,12 +218,8 @@ export abstract class Methods {
    * ```
    */
   public async encrypt(input: string): Promise<string> {
-    if (this.encryptKey == null) {
-      await this.key();
-    }
-    const bytesToEncrypt = new TextEncoder().encode(input);
-    const key = this.getEncryptKey() || new Uint8Array();
-    return await capeEncrypt(key, bytesToEncrypt);
+    const key = await this.key();
+    return await capeEncrypt(key, input);
   }
 
   /**

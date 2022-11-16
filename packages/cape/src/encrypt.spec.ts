@@ -1,4 +1,4 @@
-import { encrypt, rsaEncrypt, suite, aesEncrypt, capeEncrypt } from './encrypt';
+import { encrypt, suite, aesEncrypt, capeEncrypt, forgeRsaEncrypt } from './encrypt';
 import { TextDecoder, TextEncoder } from 'util';
 import type { XCryptoKey } from 'hpke-js/types/src/xCryptoKey';
 import { generateKeyPairSync, constants, privateDecrypt } from 'crypto';
@@ -18,8 +18,8 @@ describe('encrypt', () => {
 
   test('encrypt and decrypt using AES', async () => {
     // For some reason this decrypt succeeds but doesn't print out the proper message.
-    const text = 'my secrete message';
-    const encrypted = await aesEncrypt(encoder.encode(text));
+    const text = encoder.encode('my secrete message');
+    const encrypted = await aesEncrypt(text);
     const key = encrypted.encapsulatedKey;
     const parsedIv = encrypted.cipherText.slice(0, 12);
     // Manipuate the ciphertext to not include iv and tag.
@@ -38,18 +38,21 @@ describe('encrypt', () => {
     expect(decrypted.toHex() == '').toBe(false);
   });
 
-  test('rsa encrypt', async () => {
+  // We use the key pair generated using crypto library, which was working to
+  // encrypt and decrypt the message. We use forge-crypto library to read in
+  // the exported key and encrypt the message. This test is to ensure that
+  // the decrypt will succeed in the KMS call in Cape runtime.
+  test('rsa forge encrypt crypto decrypt', async () => {
     const { publicKey, privateKey } = generateKeyPairSync('rsa', {
       // The standard secure default length for RSA keys is 2048 bits
       modulusLength: 2048,
     });
+    const key = publicKey.export({ type: 'spki', format: 'pem' });
 
     const inputString = 'word arrays are terrible';
     const input = encoder.encode(inputString);
-    const key = publicKey.export({ type: 'spki', format: 'pem' });
-    const keyBytes = encoder.encode(key.toString());
 
-    const encryptedBytes = await rsaEncrypt(input, keyBytes);
+    const encryptedBytesForge = await forgeRsaEncrypt(input, key.toString());
 
     const decryptedData = privateDecrypt(
       {
@@ -60,24 +63,18 @@ describe('encrypt', () => {
         padding: constants.RSA_PKCS1_OAEP_PADDING,
         oaepHash: 'sha256',
       },
-      Buffer.from(encryptedBytes),
+      Buffer.from(encryptedBytesForge),
     );
 
     expect(decryptedData.toString()).toBe(inputString);
   });
 
   test('test cape encrypt', async () => {
-    const { publicKey } = generateKeyPairSync('rsa', {
-      // The standard secure default length for RSA keys is 2048 bits
-      modulusLength: 2048,
-    });
+    const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
+    const pubPem = forge.pki.publicKeyToPem(keypair.publicKey);
+    const input = 'interesting';
 
-    const key = publicKey.export({ type: 'spki', format: 'pem' });
-    const keyBytes = encoder.encode(key.toString());
-
-    const input = encoder.encode('interesting');
-
-    const encrypted = await capeEncrypt(keyBytes, input);
+    const encrypted = await capeEncrypt(pubPem, input);
     const result = encrypted.includes('cape');
     expect(result).toBe(true);
   });
