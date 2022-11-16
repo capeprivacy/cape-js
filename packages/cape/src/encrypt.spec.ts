@@ -88,12 +88,59 @@ describe('encrypt', () => {
     // expect(decryptedData.toString()).toBe(inputString);
   });
 
+  // The GOAL is to get this test to pass. We use the key pair generated
+  // using crypto library, which was working to encrypt and decrypt the message.
+  // However we use forge-crypto library to read in the exported key and encrypt
+  // the message. If the decrypt is successful,  then we will have found the proper
+  // implementation of rsaEncrypt.
+  test('rsa forge encrypt crypto decrypt', async () => {
+    const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+      // The standard secure default length for RSA keys is 2048 bits
+      modulusLength: 2048,
+    });
+    const key = publicKey.export({ type: 'spki', format: 'pem' });
+
+    const inputString = 'word arrays are terrible';
+    const input = encoder.encode(inputString);
+
+    const keyBytes = encoder.encode(key.toString());
+    console.log('public pem', key.toString());
+    console.log('public pem crypto length', key.toString().length);
+
+    const encryptedBytesForge = await forgeRsaEncrypt(input, key.toString());
+    const encryptedBytes = await rsaEncrypt(input, keyBytes);
+
+    console.log('forge bytes', encryptedBytesForge);
+    // The current behavior is that this length is around 380. The output is:
+    //  return '\x00' + maskedSeed + maskedDB; We would need the masked randomness, but I m not sure why we need all this
+    // https://github.com/digitalbazaar/forge/blob/2bb97afb5058285ef09bcf1d04d6bd6b87cffd58/lib/pkcs1.js#L145
+    console.log('forge bytes len', encryptedBytesForge.length);
+    console.log('crypto bytes', encryptedBytes);
+    // This encrypted output is always 256
+    console.log('crypto bytes len', encryptedBytes.length);
+
+    const decryptedData = privateDecrypt(
+      {
+        key: privateKey,
+        // In order to decrypt the data, we need to specify the
+        // same hashing function and padding scheme that we used to
+        // encrypt the data in the previous step
+        padding: constants.RSA_PKCS1_OAEP_PADDING,
+        oaepHash: 'sha256',
+      },
+      Buffer.from(encryptedBytesForge),
+    );
+
+    expect(decryptedData.toString()).toBe(inputString);
+  });
+
   test('test forge RSA', async () => {
     const inputString = 'word arrays are terrible';
     const input = encoder.encode(inputString);
-    let keypair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
+    let keypair = forge.pki.rsa.generateKeyPair(2048);
     const pubPem = forge.pki.publicKeyToPem(keypair.publicKey);
     console.log('public pem', pubPem);
+    console.log('public pem length', pubPem.length);
 
     const encryptedData = await forgeRsaEncrypt(input, pubPem);
 

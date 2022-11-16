@@ -96,6 +96,8 @@ export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promi
   // forge.util.binary.raw.encode(plainText);
   const encrypted = publicKey.encrypt(toBeEncrypted, 'RSA-OAEP', {
     md: forge.md.sha256.create(),
+    label: '', // Force the label to be empty.
+    mgf1: forge.md.sha256.create(),
   });
   debug('Finished RSA encryption.');
 
