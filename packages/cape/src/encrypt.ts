@@ -4,7 +4,6 @@ import { debug } from 'loglevel';
 import * as forge from 'node-forge';
 
 const encoder = new TextEncoder();
-const decoder = new TextDecoder();
 
 interface EncryptResponse {
   cipherText: Uint8Array;
@@ -69,7 +68,7 @@ export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse
  */
 export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promise<Uint8Array> {
   return forge.util.binary.raw.decode(
-    forge.pki.publicKeyFromPem(key).encrypt(decoder.decode(plainText), 'RSA-OAEP', {
+    forge.pki.publicKeyFromPem(key).encrypt(forge.util.binary.raw.encode(plainText), 'RSA-OAEP', {
       md: forge.md.sha256.create(),
       label: '', // Force the label to be empty.
       mgf1: forge.md.sha256.create(),
