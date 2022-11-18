@@ -113,9 +113,7 @@ export async function capeEncrypt(capeKey: string, plainText: string): Promise<s
   const { cipherText, encapsulatedKey } = await aesEncrypt(plainTextBytes);
   debug('CapeEncrypt encrypting AES key with public key: ', capeKey);
   debug('CapeEncrypt encapsulated key: ', encapsulatedKey);
-  // const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, capeKey);
-  const keyBytes = encoder.encode(capeKey);
-  const keyCipherText = await rsaEncrypt(encapsulatedKey, keyBytes);
+  const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, capeKey);
 
   debug('CapeEncrypt keyciphertext: ', keyCipherText);
   const fullCipherText = new Uint8Array([...keyCipherText, ...cipherText]);
