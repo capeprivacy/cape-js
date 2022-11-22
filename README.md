@@ -78,6 +78,24 @@ Please note that there is a 60-second inactivity timeout on the enclave connecti
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+### `encrypt`
+
+Encrypt is used to encrypt an input in string format. The encrypted content can't be accessed anywhere except in the enclave. This command will retrieve a public key with which it will encrypt the data with.
+
+```ts
+const input = '<USER_INPUT>';
+const functionToken = '<FUNCTION_TOKEN>';
+
+const client = new Cape({ functionToken });
+
+const encrypted = await client.encrypt(input);
+
+// Invoke with encrypted input.
+await client.run({ id: '<FUNCTION_ID>', data: encrypted });
+```
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 ## TypeScript
 
 The Cape SDK for JavaScript bundles TypeScript definitions to use in TypeScript projects.
