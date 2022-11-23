@@ -14,13 +14,15 @@ export const verifyCertChain = async (
   const cert = Certificate.fromBER(doc.certificate);
 
   const trustedCerts = [root];
+
+  var certs = [cert];
   for (const cBytes of doc.cabundle) {
-    trustedCerts.push(Certificate.fromBER(cBytes));
+    certs.push(Certificate.fromBER(cBytes));
   }
 
   const certChainVerificationEngine = new CertificateChainValidationEngine({
     trustedCerts,
-    certs: [cert],
+    certs: certs,
     checkDate: checkDate,
   });
 
@@ -28,6 +30,10 @@ export const verifyCertChain = async (
 };
 
 export const getAWSRootCert = async (): Promise<Buffer> => {
+  // TODO we should be getting this directly from amazon somehow...
+  // someone could manually validate this but would be ideal if we could do
+  // it automatically.
+
   const pem = `-----BEGIN CERTIFICATE-----
 MIICETCCAZagAwIBAgIRAPkxdWgbkK/hHUbMtOTn+FYwCgYIKoZIzj0EAwMwSTEL
 MAkGA1UEBhMCVVMxDzANBgNVBAoMBkFtYXpvbjEMMAoGA1UECwwDQVdTMRswGQYD
