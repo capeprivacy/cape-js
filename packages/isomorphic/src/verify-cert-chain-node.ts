@@ -17,13 +17,15 @@ export const verifyCertChain = async (
   const cert = Certificate.fromBER(doc.certificate);
 
   const trustedCerts = [root];
+
+  const certs = [cert];
   for (const cBytes of doc.cabundle) {
-    trustedCerts.push(Certificate.fromBER(cBytes));
+    certs.push(Certificate.fromBER(cBytes));
   }
 
   const certChainVerificationEngine = new CertificateChainValidationEngine({
     trustedCerts,
-    certs: [cert],
+    certs: certs,
     checkDate: checkDate,
   });
 
