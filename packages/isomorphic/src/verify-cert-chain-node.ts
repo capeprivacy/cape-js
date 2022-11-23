@@ -18,7 +18,7 @@ export const verifyCertChain = async (
 
   const trustedCerts = [root];
 
-  var certs = [cert];
+  const certs = [cert];
   for (const cBytes of doc.cabundle) {
     certs.push(Certificate.fromBER(cBytes));
   }
