@@ -12,7 +12,7 @@ import {
 import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
 import { concat } from './bytes';
-import { encrypt, capeEncrypt } from './encrypt';
+import { encrypt, capeEncrypt, PlainTextInput } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
 interface ConnectArgs {
   /**
@@ -217,7 +217,7 @@ export abstract class Methods {
    *
    * ```
    */
-  public async encrypt(input: string): Promise<string> {
+  public async encrypt(input: PlainTextInput): Promise<string> {
     const key = await this.key();
     return await capeEncrypt(key, input);
   }

@@ -10,6 +10,8 @@ interface EncryptResponse {
   encapsulatedKey: Uint8Array;
 }
 
+export type PlainTextInput = string | Uint8Array;
+
 // Exported for testing
 export const suite = new CipherSuite({
   kem: Kem.DhkemX25519HkdfSha256,
@@ -81,8 +83,8 @@ export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promi
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function capeEncrypt(capeKey: string, plainText: string): Promise<string> {
-  const plainTextBytes = encoder.encode(plainText);
+export async function capeEncrypt(capeKey: string, plainText: PlainTextInput): Promise<string> {
+  const plainTextBytes = typeof plainText === 'string' ? encoder.encode(plainText) : plainText;
   const { cipherText, encapsulatedKey } = await aesEncrypt(plainTextBytes);
   const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, capeKey);
 
