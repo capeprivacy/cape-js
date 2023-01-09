@@ -39,11 +39,22 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse> {
-  // Generate a new key
-  const key = forge.random.getBytesSync(32);
+export async function aesEncrypt(plainText: Uint8Array, key?: string): Promise<EncryptResponse> {
+  var useKey: string;
+  // Generate a new key if the key isn't provided.
+  if (typeof key !== 'undefined') {
+    // We got the key and want to just use it but need to check if
+    // the length of the key matches what we want.
+    if (key.length != 32) {
+      throw new Error(`Key length does not match requirements, expected 32 but got ${key.length}`);
+    }
 
-  const cipher = forge.cipher.createCipher('AES-GCM', key);
+    useKey = key;
+  } else {
+    useKey = forge.random.getBytesSync(32);
+  }
+
+  const cipher = forge.cipher.createCipher('AES-GCM', useKey);
 
   // aesGCM uses 12 byte nonce.
   const iv = forge.random.getBytesSync(12);
@@ -54,7 +65,7 @@ export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse
   const ciphertextByteArray = forge.util.binary.raw.decode(cipher.output.getBytes());
   const tagByteArray = forge.util.binary.raw.decode(cipher.mode.tag.getBytes());
   const ivArray = forge.util.binary.raw.decode(iv);
-  const keyArray = forge.util.binary.raw.decode(key);
+  const keyArray = forge.util.binary.raw.decode(useKey);
   const ciphertext = new Uint8Array([...ivArray, ...ciphertextByteArray, ...tagByteArray]);
   debug('Completed AES encryption of input. Ciphertext length is: ', ciphertext.length);
   return { cipherText: ciphertext, encapsulatedKey: keyArray };

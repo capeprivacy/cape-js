@@ -16,7 +16,7 @@ describe('encrypt', () => {
     expect(decoder.decode(plainText)).toBe(text);
   });
 
-  test('encrypt and decrypt using AES', async () => {
+  test('encrypt and decrypt using AES with self generated key', async () => {
     // For some reason this decrypt succeeds but doesn't print out the proper message.
     const text = encoder.encode('my secrete message');
     const encrypted = await aesEncrypt(text);
@@ -36,6 +36,38 @@ describe('encrypt', () => {
     const decrypted = cipher.output;
 
     expect(decrypted.toHex() == '').toBe(false);
+  });
+
+  test('encrypt and decrypt using AES with userpassed AES key', async () => {
+    const userPassedKey = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456';
+    // For some reason this decrypt succeeds but doesn't print out the proper message.
+    const text = encoder.encode('my secrete message');
+    const encrypted = await aesEncrypt(text, userPassedKey);
+    const key = encrypted.encapsulatedKey;
+    const parsedIv = encrypted.cipherText.slice(0, 12);
+    // Manipuate the ciphertext to not include iv and tag.
+    const forgeTag = forge.util.createBuffer(
+      encrypted.cipherText.subarray(encrypted.cipherText.length - 16, encrypted.cipherText.length),
+    );
+    const ciphertext = forge.util.createBuffer(encrypted.cipherText.slice(0, encrypted.cipherText.length - 16));
+    const forgeKey = forge.util.binary.raw.encode(key);
+    const forgeIv = forge.util.binary.raw.encode(parsedIv);
+    const cipher = forge.cipher.createDecipher('AES-GCM', forgeKey);
+    cipher.start({ iv: forgeIv, tag: forgeTag });
+    cipher.update(ciphertext);
+    cipher.finish();
+    const decrypted = cipher.output;
+
+    expect(decrypted.toHex() == '').toBe(false);
+  });
+
+  test('encrypt and decrypt using AES with provide key', async () => {
+    const userPassedKey = '';
+    // For some reason this decrypt succeeds but doesn't print out the proper message.
+    const text = encoder.encode('my secrete message');
+    await expect(aesEncrypt(text, userPassedKey)).rejects.toThrowError(
+      'Key length does not match requirements, expected 32 but got 0',
+    );
   });
 
   // We use the key pair generated using crypto library, which was working to

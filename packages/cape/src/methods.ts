@@ -189,8 +189,19 @@ export abstract class Methods {
    * await key = client.key();
    * ```
    */
-  public async key(): Promise<string> {
+  public async key(key?: string): Promise<string> {
     try {
+      if (typeof key !== 'undefined') {
+        // We got the key and want to just use it and persist it.
+        this.encryptKey = new TextEncoder().encode(key);
+        return key;
+      }
+
+      // We cache the key, the assumption is that each Cape client
+      // is connected to only one function, and therefore one encryption key.
+      if (this.encryptKey != null) {
+        return key;
+      }
       const path = this.getCanonicalPath(`/v1/key`);
 
       const attestationUserData = await this.connect_(path);
@@ -202,6 +213,25 @@ export abstract class Methods {
     } finally {
       this.disconnect();
     }
+  }
+
+  /**
+   * Specifies Cape key using your authentication token or function token. This method will manage the entire lifecycle for you.
+   * The returned key is stored in the `client` object as a parameter for encrypt.
+   *
+   * @example
+   * ```ts
+   * const client = new Cape({ authToken: 'my-auth-token' });
+   * await key = client.key();
+   * ```
+   */
+  public async AESKey(key?: string): Promise<string> {
+    if (typeof key !== 'undefined') {
+      // We got the key and want to just use it and persist it.
+      this.encryptKey = new TextEncoder().encode(key);
+      return key;
+    }
+    return '';
   }
 
   /**
