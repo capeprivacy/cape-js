@@ -379,6 +379,51 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
 
       mockServer.stop();
     });
+
+    test('should fetch a key and persist it', async () => {
+      const port = await getPortPromise({ host });
+      const capeApiUrl = `${host}:${port}`;
+      const mockServer = new Server(`${capeApiUrl}/v1/key`);
+
+      mockServer.on('connection', (socket) => {
+        socket.on('message', (data) => {
+          if (typeof data === 'string') {
+            const parsed = JSON.parse(data);
+            // First message contains a nonce, send back the attestation document.
+            if (parsed.message.nonce) {
+              socket.send(JSON.stringify({ message: { message: keyAttestationDocument, type: 'attestation_doc' } }));
+            }
+          } else {
+            socket.send(
+              JSON.stringify({ message: { message: Buffer.from('pong').toString('base64'), type: 'function_result' } }),
+            );
+          }
+        });
+      });
+
+      const client = new Cape({ authToken, capeApiUrl, checkDate: keyCheckDate });
+      const result = await client.key();
+      const expected = `-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnV8eokFPI6Nx+MJ+4iBG
++5Ms1W2qadbuKf8pFL3s8aEsLp4MSH7809b8nsLhgxtbs+nBh1CNaoOxkxY2bhhH
+Kv8gmnkP0kuH0dRKz9Egf0R3CV+vA+lnRnZThoz8GeouXCmRoYT/crfIjNq4FnKb
+6MMsGOdT1aS/UUYO5kvtz7/gTXE79RfQURWSt6oI3hBJQg/629ju1YVplXIIKQVy
+ZqwSaihY6htW9HS4P9LPEsFOIPFvt0+ogwcYfub6+nBlBO8/Ud1TJCl1o9MgkMf5
+YVjAEnY8IjxuJjGI6f53foLSd/Suou8BO+fCke1p82Bv7fjpBlwz3lvDmqzzcmF5
+6L8Ru/nXD6vxBp34MkOwNIKrZWTxnLbgGKpk1k0T+2Gp2vahDeqHn/BGmtBREzbc
+Db2oNpnikBf0eVJAEGM8J/pwQXUt2afRpSJ+PDT7Nh3m199NghUSHbEzzAvoib9B
+VrlYJvrvIldBUMpboXFFn0HOku4OcdpCDuyauklCMFnK0YnqOUzXBokXQlkRqO5H
+GxSN8obYmBWRDOLkNx3wAhhDkrR+sxFpqk+rMFPjYx3khBRW1FuMDDsKTYbUrRHW
+I0oRt17NpJgBlRQWEJfS0rYTRpj5IAK6pBJR8WR08WpoOTW03cutEz5SfIonJAFA
+Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
+-----END PUBLIC KEY-----`;
+      expect(result).toBe(expected);
+
+      const persisted = await client.key();
+      expect(persisted).toBe(expected);
+
+      mockServer.stop();
+    });
   });
 
   describe('#encrypt', () => {
@@ -387,6 +432,13 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - we are testing the reject behavior
       await expect(cape.run({})).rejects.toThrowError('Unable to connect to the server, missing function id.');
+    });
+
+    test('test encrypt with bad key', async () => {
+      const client = new Cape({ authToken, checkDate: keyCheckDate });
+      const key = await client.key('bad key');
+      expect(key).toBe('bad key');
+      await expect(client.encrypt('my message')).rejects.toThrowError('Invalid PEM formatted message');
     });
 
     test('should fetch a key and encrypt success', async () => {

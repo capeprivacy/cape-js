@@ -92,10 +92,10 @@ export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promi
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function capeEncrypt(capeKey: string, plainText: string): Promise<string> {
+export async function capeEncrypt(plainText: string, RSAKey: string, AESKey?: string): Promise<string> {
   const plainTextBytes = encoder.encode(plainText);
-  const { cipherText, encapsulatedKey } = await aesEncrypt(plainTextBytes);
-  const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, capeKey);
+  const { cipherText, encapsulatedKey } = await aesEncrypt(plainTextBytes, AESKey);
+  const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, RSAKey);
 
   debug('CapeEncrypt keyciphertext: ', keyCipherText);
   const fullCipherText = new Uint8Array([...keyCipherText, ...cipherText]);

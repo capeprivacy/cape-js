@@ -58,6 +58,7 @@ export abstract class Methods {
   public abstract getEncryptKey(): Uint8Array | undefined;
 
   publicKey?: Uint8Array;
+  aesKey?: Uint8Array;
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
@@ -193,6 +194,7 @@ export abstract class Methods {
     try {
       if (typeof key !== 'undefined') {
         // We got the key and want to just use it and persist it.
+        // RSA keys are expected to be passed in as string.
         this.encryptKey = new TextEncoder().encode(key);
         return key;
       }
@@ -200,7 +202,7 @@ export abstract class Methods {
       // We cache the key, the assumption is that each Cape client
       // is connected to only one function, and therefore one encryption key.
       if (this.encryptKey != null) {
-        return key;
+        return new TextDecoder().decode(this.encryptKey);
       }
       const path = this.getCanonicalPath(`/v1/key`);
 
@@ -249,7 +251,7 @@ export abstract class Methods {
    */
   public async encrypt(input: string): Promise<string> {
     const key = await this.key();
-    return await capeEncrypt(key, input);
+    return await capeEncrypt(input, key);
   }
 
   /**
