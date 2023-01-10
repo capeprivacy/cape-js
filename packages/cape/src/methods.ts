@@ -58,7 +58,7 @@ export abstract class Methods {
   public abstract getEncryptKey(): Uint8Array | undefined;
 
   publicKey?: Uint8Array;
-  aesKey?: Uint8Array;
+  aesKey?: string;
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
@@ -218,22 +218,25 @@ export abstract class Methods {
   }
 
   /**
-   * Specifies Cape key using your authentication token or function token. This method will manage the entire lifecycle for you.
-   * The returned key is stored in the `client` object as a parameter for encrypt.
+   * The returned key is stored in the `client` object as a parameter for encrypt. This process happens in the client
+   * locally.
    *
    * @example
    * ```ts
-   * const client = new Cape({ authToken: 'my-auth-token' });
-   * await key = client.key();
+   * const client = new Cape({});
+   * await key = client.AESkey();
    * ```
    */
-  public async AESKey(key?: string): Promise<string> {
+  public async AESKey(key?: string) {
     if (typeof key !== 'undefined') {
       // We got the key and want to just use it and persist it.
-      this.encryptKey = new TextEncoder().encode(key);
-      return key;
+      this.aesKey = key;
+      return;
     }
-    return '';
+    // I don't really think we need to generate an AES key
+    // and persisted here. The behavior is that if AES isn't set
+    // explicitly, then we always generate a new AES key for encryption.
+    return;
   }
 
   /**
@@ -251,7 +254,7 @@ export abstract class Methods {
    */
   public async encrypt(input: string): Promise<string> {
     const key = await this.key();
-    return await capeEncrypt(input, key);
+    return await capeEncrypt(input, key, this.aesKey);
   }
 
   /**

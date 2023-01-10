@@ -40,7 +40,7 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
  * @param plainText The plain text input to encrypt.
  */
 export async function aesEncrypt(plainText: Uint8Array, key?: string): Promise<EncryptResponse> {
-  var useKey: string;
+  let useKey: string;
   // Generate a new key if the key isn't provided.
   if (typeof key !== 'undefined') {
     // We got the key and want to just use it but need to check if

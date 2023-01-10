@@ -106,7 +106,7 @@ describe('encrypt', () => {
     const pubPem = forge.pki.publicKeyToPem(keypair.publicKey);
     const input = 'interesting';
 
-    const encrypted = await capeEncrypt(pubPem, input);
+    const encrypted = await capeEncrypt(input, pubPem);
     const result = encrypted.includes('cape');
     expect(result).toBe(true);
   });
