@@ -231,12 +231,7 @@ export abstract class Methods {
     if (typeof key !== 'undefined') {
       // We got the key and want to just use it and persist it.
       this.aesKey = key;
-      return;
     }
-    // I don't really think we need to generate an AES key
-    // and persisted here. The behavior is that if AES isn't set
-    // explicitly, then we always generate a new AES key for encryption.
-    return;
   }
 
   /**
