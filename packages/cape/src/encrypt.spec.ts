@@ -18,24 +18,24 @@ describe('encrypt', () => {
 
   test('encrypt and decrypt using AES', async () => {
     // For some reason this decrypt succeeds but doesn't print out the proper message.
-    const text = encoder.encode('my secrete message');
-    const encrypted = await aesEncrypt(text);
-    const key = encrypted.encapsulatedKey;
-    const parsedIv = encrypted.cipherText.slice(0, 12);
-    // Manipuate the ciphertext to not include iv and tag.
-    const forgeTag = forge.util.createBuffer(
-      encrypted.cipherText.subarray(encrypted.cipherText.length - 16, encrypted.cipherText.length),
+    const encrypted = await aesEncrypt('my secret message');
+    const key = forge.util.binary.raw.encode(encrypted.encapsulatedKey);
+
+    const ciphertext = forge.util.binary.raw.encode(encrypted.cipherText);
+
+    const parsedIv = ciphertext.slice(0, 12);
+    const ciphertextBuffer = forge.util.createBuffer(ciphertext.slice(12, encrypted.cipherText.length - 16));
+    const tagBuffer = forge.util.createBuffer(
+      ciphertext.slice(encrypted.cipherText.length - 16, encrypted.cipherText.length),
     );
-    const ciphertext = forge.util.createBuffer(encrypted.cipherText.slice(0, encrypted.cipherText.length - 16));
-    const forgeKey = forge.util.binary.raw.encode(key);
-    const forgeIv = forge.util.binary.raw.encode(parsedIv);
-    const cipher = forge.cipher.createDecipher('AES-GCM', forgeKey);
-    cipher.start({ iv: forgeIv, tag: forgeTag });
-    cipher.update(ciphertext);
+
+    const cipher = forge.cipher.createDecipher('AES-GCM', key);
+    cipher.start({ iv: parsedIv, tag: tagBuffer });
+    cipher.update(ciphertextBuffer);
     cipher.finish();
     const decrypted = cipher.output;
 
-    expect(decrypted.toHex() == '').toBe(false);
+    expect(decrypted.toString() == 'my secret message').toBe(true);
   });
 
   // We use the key pair generated using crypto library, which was working to

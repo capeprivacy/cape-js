@@ -39,7 +39,7 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse> {
+export async function aesEncrypt(plainText: string): Promise<EncryptResponse> {
   // Generate a new key
   const key = forge.random.getBytesSync(32);
 
@@ -51,13 +51,11 @@ export async function aesEncrypt(plainText: Uint8Array): Promise<EncryptResponse
   cipher.start({ iv: iv });
   cipher.update(forge.util.createBuffer(plainText));
   cipher.finish();
-  const ciphertextByteArray = forge.util.binary.raw.decode(cipher.output.getBytes());
-  const tagByteArray = forge.util.binary.raw.decode(cipher.mode.tag.getBytes());
-  const ivArray = forge.util.binary.raw.decode(iv);
-  const keyArray = forge.util.binary.raw.decode(key);
-  const ciphertext = new Uint8Array([...ivArray, ...ciphertextByteArray, ...tagByteArray]);
+
+  const ciphertext = iv + cipher.output.getBytes() + cipher.mode.tag.getBytes();
+
   debug('Completed AES encryption of input. Ciphertext length is: ', ciphertext.length);
-  return { cipherText: ciphertext, encapsulatedKey: keyArray };
+  return { cipherText: forge.util.binary.raw.decode(ciphertext), encapsulatedKey: forge.util.binary.raw.decode(key) };
 }
 
 /**
@@ -82,8 +80,7 @@ export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promi
  * @param plainText The plain text input to encrypt.
  */
 export async function capeEncrypt(capeKey: string, plainText: string): Promise<string> {
-  const plainTextBytes = encoder.encode(plainText);
-  const { cipherText, encapsulatedKey } = await aesEncrypt(plainTextBytes);
+  const { cipherText, encapsulatedKey } = await aesEncrypt(plainText);
   const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, capeKey);
 
   debug('CapeEncrypt keyciphertext: ', keyCipherText);
