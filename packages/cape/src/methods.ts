@@ -167,7 +167,10 @@ export abstract class Methods {
     }
     try {
       const { cipherText, encapsulatedKey } = await encrypt(getBytes(data), this.publicKey);
-      this.websocket.send(concat(encapsulatedKey, cipherText));
+      const input = concat(encapsulatedKey, cipherText);
+
+      this.websocket.send(input);
+
       const result = parseFrame(await this.websocket.receive());
       if (result.error) {
         throw new Error(result.error);
