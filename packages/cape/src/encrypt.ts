@@ -39,7 +39,9 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function aesEncrypt(plainText: string): Promise<EncryptResponse> {
+export async function aesEncrypt(
+  plainText: forge.Bytes | ArrayBuffer | forge.util.ArrayBufferView | forge.util.ByteBuffer,
+): Promise<EncryptResponse> {
   // Generate a new key
   const key = forge.random.getBytesSync(32);
 
