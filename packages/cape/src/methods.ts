@@ -4,7 +4,6 @@ import {
   getBytes,
   parseAttestationDocument,
   TextDecoder,
-  TextEncoder,
   verifyCertChain,
   verifySignature,
   type BytesInput,
@@ -55,13 +54,11 @@ export abstract class Methods {
   public abstract getAuthToken(): string | undefined;
   public abstract getFunctionToken(): string | undefined;
   public abstract getFunctionChecksum(): string | undefined;
-  public abstract getEncryptKey(): Uint8Array | undefined;
 
   publicKey?: Uint8Array;
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
-  encryptKey?: Uint8Array;
 
   /**
    * Get the authentication token and protocol for the websocket connection.
@@ -198,10 +195,8 @@ export abstract class Methods {
 
       const attestationUserData = await this.connect_(path);
       const obj = JSON.parse(attestationUserData);
-      const userData = obj.key;
-      const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(userData) + '\n-----END PUBLIC KEY-----';
-      this.encryptKey = new TextEncoder().encode(keyString);
-      return keyString;
+
+      return '-----BEGIN PUBLIC KEY-----\n' + addNewLines(obj.key) + '\n-----END PUBLIC KEY-----';
     } finally {
       this.disconnect();
     }
@@ -220,9 +215,13 @@ export abstract class Methods {
    *
    * ```
    */
-  public async encrypt(input: string): Promise<string> {
-    const key = await this.key();
-    return await capeEncrypt(key, input);
+  public async encrypt(input: string, key?: string): Promise<string> {
+    var k = key;
+    if (k == null) {
+      k = await this.key();
+    }
+
+    return await capeEncrypt(k, input);
   }
 
   /**

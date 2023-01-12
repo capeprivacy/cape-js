@@ -6,6 +6,7 @@ import * as pkijs from 'pkijs';
 import { getPortPromise } from 'portfinder';
 import { Cape } from './Cape';
 import { WebsocketConnection } from './websocket-connection';
+import * as forge from 'node-forge';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 jest.mock('isomorphic-ws', () => require('mock-socket').WebSocket);
@@ -415,6 +416,43 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
       const result = encrypted.includes('cape');
       expect(result).toBe(true);
       mockServer.stop();
+    });
+
+    test('should take optional key and encrypt success', async () => {
+      const port = await getPortPromise({ host });
+      const capeApiUrl = `${host}:${port}`;
+
+      const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
+
+      const pem = forge.pki.publicKeyToPem(keypair.publicKey);
+
+      const client = new Cape({ authToken, capeApiUrl, checkDate: keyCheckDate });
+      const encrypted = await client.encrypt('my message', pem);
+
+      const b64 = encrypted.slice(5);
+      const decoded = forge.util.decode64(b64);
+      const ciphertextKey = decoded.slice(0, 256);
+
+      const aesKey = keypair.privateKey.decrypt(ciphertextKey, 'RSA-OAEP', {
+        md: forge.md.sha256.create(),
+        label: '', // Force the label to be empty.
+        mgf1: forge.md.sha256.create(),
+      });
+
+      var ciphertext = decoded.slice(256);
+
+      const parsedIv = ciphertext.slice(0, 12);
+      const ciphertextBuffer = forge.util.createBuffer(ciphertext.slice(12, ciphertext.length - 16));
+      const tagBuffer = forge.util.createBuffer(ciphertext.slice(ciphertext.length - 16, ciphertext.length));
+
+      const cipher = forge.cipher.createDecipher('AES-GCM', aesKey);
+      cipher.start({ iv: parsedIv, tag: tagBuffer });
+      cipher.update(ciphertextBuffer);
+      cipher.finish();
+
+      const decrypted = cipher.output;
+
+      expect(decrypted.toString()).toBe('my message');
     });
   });
 
