@@ -1,9 +1,6 @@
-import { TextEncoder } from '@capeprivacy/isomorphic';
 import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
 import { debug } from 'loglevel';
 import * as forge from 'node-forge';
-
-const encoder = new TextEncoder();
 
 interface EncryptResponse {
   cipherText: Uint8Array;
