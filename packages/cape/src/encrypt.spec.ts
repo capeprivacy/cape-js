@@ -34,7 +34,7 @@ describe('encrypt', () => {
     cipher.finish();
     const decrypted = cipher.output;
 
-    expect(decrypted.toString() == 'my secret message').toBe(true);
+    expect(decrypted.toString()).toBe('my secret message');
   });
 
   test('encrypt and decrypt using AES with bytes', async () => {
