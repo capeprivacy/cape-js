@@ -14,6 +14,8 @@ export const suite = new CipherSuite({
   aead: Aead.Chacha20Poly1305,
 });
 
+type PlainText = forge.Bytes | ArrayBuffer | forge.util.ArrayBufferView | forge.util.ByteBuffer;
+
 /**
  * Encrypts the given input using the provided public key.
  *
@@ -36,9 +38,7 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function aesEncrypt(
-  plainText: forge.Bytes | ArrayBuffer | forge.util.ArrayBufferView | forge.util.ByteBuffer,
-): Promise<EncryptResponse> {
+export async function aesEncrypt(plainText: PlainText): Promise<EncryptResponse> {
   // Generate a new key
   const key = forge.random.getBytesSync(32);
 
@@ -78,7 +78,7 @@ export async function forgeRsaEncrypt(plainText: Uint8Array, key: string): Promi
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function capeEncrypt(capeKey: string, plainText: string): Promise<string> {
+export async function capeEncrypt(capeKey: string, plainText: PlainText): Promise<string> {
   const { cipherText, encapsulatedKey } = await aesEncrypt(plainText);
   const keyCipherText = await forgeRsaEncrypt(encapsulatedKey, capeKey);
 
