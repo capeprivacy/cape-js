@@ -163,7 +163,7 @@ export abstract class Methods {
       throw new Error('Unable to invoke the function, not connected to the server. Call Cape.connect() first.');
     }
     if (!this.publicKey) {
-      throw new Error('Unable to invoke the function, missing public key. Callc Cape.connect() first.');
+      throw new Error('Unable to invoke the function, missing public key. Call Cape.connect() first.');
     }
     try {
       const { cipherText, encapsulatedKey } = await encrypt(getBytes(data), this.publicKey);
