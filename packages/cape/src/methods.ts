@@ -216,7 +216,7 @@ export abstract class Methods {
    * ```
    */
   public async encrypt(input: string, key?: string): Promise<string> {
-    var k = key;
+    let k = key;
     if (k == null) {
       k = await this.key();
     }

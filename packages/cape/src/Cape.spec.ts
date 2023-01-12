@@ -439,7 +439,7 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
         mgf1: forge.md.sha256.create(),
       });
 
-      var ciphertext = decoded.slice(256);
+      const ciphertext = decoded.slice(256);
 
       const parsedIv = ciphertext.slice(0, 12);
       const ciphertextBuffer = forge.util.createBuffer(ciphertext.slice(12, ciphertext.length - 16));
