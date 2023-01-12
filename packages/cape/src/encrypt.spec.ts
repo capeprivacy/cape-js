@@ -57,7 +57,7 @@ describe('encrypt', () => {
     cipher.finish();
     const decrypted = cipher.output;
 
-    expect(decrypted.getBytes() == msg).toBe(true);
+    expect(decrypted.getBytes()).toBe(msg);
   });
 
   // We use the key pair generated using crypto library, which was working to
