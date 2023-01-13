@@ -10,6 +10,7 @@ import {
 } from '@capeprivacy/isomorphic';
 import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
+import { AttestationDocument } from '@capeprivacy/types';
 import { concat } from './bytes';
 import { encrypt, capeEncrypt } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
@@ -50,7 +51,8 @@ interface Message {
 }
 
 export abstract class Methods {
-  public abstract getCanonicalPath(path: string): string;
+  public abstract getCanonicalEnclavePath(path: string): string;
+  public abstract getCanonicalApiPath(path: string): string;
   public abstract getAuthToken(): string | undefined;
   public abstract getFunctionToken(): string | undefined;
   public abstract getFunctionChecksum(): string | undefined;
@@ -91,7 +93,7 @@ export abstract class Methods {
     }
 
     const functionChecksum = this.getFunctionChecksum() || '';
-    const path = this.getCanonicalPath(`/v1/run/${id}`);
+    const path = this.getCanonicalEnclavePath(`/v1/run/${id}`);
     const attestationUserData = await this.connect_(path);
     const obj = JSON.parse(attestationUserData);
     const userData = obj.func_checksum;
@@ -189,9 +191,28 @@ export abstract class Methods {
    * await key = client.key();
    * ```
    */
-  public async key(): Promise<string> {
+  public async key(username?: string): Promise<string> {
+    if (username != null) {
+      const path = this.getCanonicalApiPath(`/v1/user/${username}/key`);
+      const response = await fetch(path, { headers: { Authorization: `Bearer ${this.getAuthToken()}` } });
+      const data = await response.json();
+      if (data.error != undefined) {
+        throw new Error(data.error);
+      }
+
+      if (data.message != undefined) {
+        throw new Error(data.message);
+      }
+
+      const doc = await this.verifyAttestationDocument(data.attestation_document);
+
+      const obj = JSON.parse(new TextDecoder().decode(doc.user_data));
+
+      return '-----BEGIN PUBLIC KEY-----\n' + addNewLines(obj.key) + '\n-----END PUBLIC KEY-----';
+    }
+
     try {
-      const path = this.getCanonicalPath(`/v1/key`);
+      const path = this.getCanonicalEnclavePath(`/v1/key`);
 
       const attestationUserData = await this.connect_(path);
       const obj = JSON.parse(attestationUserData);
@@ -249,24 +270,31 @@ export abstract class Methods {
       if (type !== 'attestation_doc') {
         throw new Error(`Expected attestation document but received ${type}.`);
       }
-      const doc = parseAttestationDocument(message);
-      const decoder = new TextDecoder();
-      const decodedUserData = decoder.decode(doc.user_data);
 
-      await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
+      const doc = await this.verifyAttestationDocument(message);
 
-      const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
-
-      const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
-      if (!certResult.result) {
-        throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
-      }
       this.publicKey = doc.public_key;
-      return decodedUserData;
+      return new TextDecoder().decode(doc.user_data);
     } catch (e) {
+      console.log('HEY', e);
       this.disconnect();
       throw e;
     }
+  }
+
+  private async verifyAttestationDocument(message: string): Promise<AttestationDocument> {
+    const doc = parseAttestationDocument(message);
+
+    await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
+
+    const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
+
+    const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
+    if (!certResult.result) {
+      throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
+    }
+
+    return doc;
   }
 }
 

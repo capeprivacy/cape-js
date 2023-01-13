@@ -8,10 +8,15 @@ export interface CapeInit {
    */
   authToken?: string;
   /**
-   * The websocket host to use when connecting to Cape.
+   * The HTTP host to use when eing to Cape.
    * @internal
    */
   capeApiUrl?: string;
+  /**
+   * The websocket host to use when connecting to Cape.
+   * @internal
+   */
+  enclaveUrl?: string;
   /**
    * Optional function hash for checking if the loaded function is one
    * that is expected by the caller.
@@ -37,13 +42,15 @@ export interface CapeInit {
 
 export class Cape extends Methods {
   private readonly authToken: string | undefined;
+  private readonly enclaveUrl: string;
   private readonly capeApiUrl: string;
   private readonly functionToken: string | undefined;
   private readonly functionChecksum: string | undefined;
 
-  static DEFAULT_CAPE_API_URL = 'wss://enclave.capeprivacy.com';
+  static DEFAULT_ENCLAVE_URL = 'wss://enclave.capeprivacy.com';
+  static DEFAULT_API_URL = 'https://app.capeprivacy.com';
 
-  constructor({ authToken, capeApiUrl, functionToken, functionChecksum, verbose, checkDate }: CapeInit) {
+  constructor({ authToken, enclaveUrl, capeApiUrl, functionToken, functionChecksum, verbose, checkDate }: CapeInit) {
     super();
 
     if (verbose) {
@@ -51,13 +58,18 @@ export class Cape extends Methods {
     }
 
     this.authToken = authToken;
-    this.capeApiUrl = capeApiUrl || Cape.DEFAULT_CAPE_API_URL;
+    this.enclaveUrl = enclaveUrl || Cape.DEFAULT_ENCLAVE_URL;
+    this.capeApiUrl = capeApiUrl || Cape.DEFAULT_API_URL;
     this.checkDate = checkDate;
     this.functionToken = functionToken;
     this.functionChecksum = functionChecksum;
   }
 
-  getCanonicalPath(path: string): string {
+  getCanonicalEnclavePath(path: string): string {
+    return this.enclaveUrl + path;
+  }
+
+  getCanonicalApiPath(path: string): string {
     return this.capeApiUrl + path;
   }
 
