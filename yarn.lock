@@ -324,8 +324,8 @@
   resolved "https://registry.npmjs.org/@hutson/parse-repository-url/-/parse-repository-url-3.0.2.tgz"
 
 "@hyrious/esbuild-plugin-commonjs@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.npmjs.org/@hyrious/esbuild-plugin-commonjs/-/esbuild-plugin-commonjs-0.2.1.tgz"
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@hyrious/esbuild-plugin-commonjs/-/esbuild-plugin-commonjs-0.2.2.tgz#1505dc904ead8628fee73fd0caa458bea2b20c91"
 
 "@isaacs/string-locale-compare@^1.1.0":
   version "1.1.0"
