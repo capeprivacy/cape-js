@@ -1,6 +1,6 @@
 {
   "name": "@capeprivacy/isomorphic",
-  "version": "0.7.0",
+  "version": "0.7.4",
   "description": "",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
