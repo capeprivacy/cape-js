@@ -47,7 +47,7 @@ export class Cape extends Methods {
   private readonly functionToken: string | undefined;
   private readonly functionChecksum: string | undefined;
 
-  static DEFAULT_ENCLAVE_URL = 'wss://enclave.capeprivacy.com';
+  static DEFAULT_ENCLAVE_URL = 'wss://app.capeprivacy.com';
   static DEFAULT_API_URL = 'https://app.capeprivacy.com';
 
   constructor({ authToken, enclaveUrl, capeApiUrl, functionToken, functionChecksum, verbose, checkDate }: CapeInit) {
