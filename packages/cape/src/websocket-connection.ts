@@ -77,7 +77,7 @@ export class WebsocketConnection {
    */
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.socket = new WebSocket(this.url, this.subprotocols, { followRedirects: true });
+      this.socket = new WebSocket(this.url, this.subprotocols);
 
       this.socket.onopen = () => {
         debug('Websocket connection opened.');
