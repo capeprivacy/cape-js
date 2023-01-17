@@ -257,7 +257,7 @@ export abstract class Methods {
    *
    * Encrypt takes options which allow you customize what RSA key or
    * data encryption key (dek) is used. You cannot pass a custom RSA key
-   * and dek. This function will return an error if you do.
+   * and a dataKey. This function will return an error if you do.
    *
    * @example
    * ```ts
