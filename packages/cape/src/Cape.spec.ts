@@ -479,7 +479,7 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
       const pem = forge.pki.publicKeyToPem(keypair.publicKey);
 
       const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate: keyCheckDate });
-      const encrypted = await client.encrypt('my message', pem);
+      const encrypted = await client.encrypt('my message', { key: pem });
 
       const b64 = encrypted.slice(5);
       const decoded = forge.util.decode64(b64);
