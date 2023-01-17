@@ -12,9 +12,8 @@ import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
 import { AttestationDocument } from '@capeprivacy/types';
 import { concat } from './bytes';
-import { encrypt, rsaEncrypt, aesEncrypt, DataEncryptionKey } from './encrypt';
+import { encrypt, rsaEncrypt, aesEncrypt, DataKey } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
-import { debug } from 'loglevel';
 import * as forge from 'node-forge';
 
 interface ConnectArgs {
@@ -69,7 +68,7 @@ export abstract class Methods {
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
-  savedDataEncryptedKey?: DataEncryptionKey;
+  dataKeyCache: Map<string, DataKey>;
 
   /**
    * Get the authentication token and protocol for the websocket connection.
@@ -232,16 +231,25 @@ export abstract class Methods {
     }
   }
 
-  public async generateDataEncryptionKey(key?: string): Promise<DataEncryptionKey> {
+  public async generateDataKey(key?: string): Promise<DataKey> {
     if (key == null) {
       key = await this.key();
+    }
+
+    const dataKey = this.dataKeyCache.get(key);
+    if (dataKey != undefined) {
+      return dataKey;
     }
 
     const plaintext = forge.random.getBytesSync(32);
 
     const ciphertext = await rsaEncrypt(plaintext, key);
 
-    return { plaintext, ciphertext: ciphertext };
+    const newDataKey = { plaintext: plaintext, ciphertext: ciphertext };
+
+    this.dataKeyCache.set(key, newDataKey);
+
+    return newDataKey;
   }
 
   /**
@@ -266,17 +274,15 @@ export abstract class Methods {
     }
 
     if (options.dek != null) {
-      // TODO set this.saveDataEncryptedkey or something...
+      // TODO ??
       throw Error('not implemented');
     }
 
-    if (this.savedDataEncryptedKey == null) {
-      this.savedDataEncryptedKey = await this.generateDataEncryptionKey(options.key);
-    }
+    const dataKey = await this.generateDataKey(options.key);
 
-    const ciphertext = await aesEncrypt(input, this.savedDataEncryptedKey);
+    const ciphertext = await aesEncrypt(input, dataKey);
 
-    return 'cape:' + forge.util.encode64(this.savedDataEncryptedKey.ciphertext + ciphertext);
+    return 'cape:' + forge.util.encode64(dataKey.ciphertext + ciphertext);
   }
 
   /**

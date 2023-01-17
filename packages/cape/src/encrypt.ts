@@ -2,7 +2,7 @@ import { Aead, CipherSuite, Kdf, Kem } from 'hpke-js';
 import { debug } from 'loglevel';
 import * as forge from 'node-forge';
 
-export interface DataEncryptionKey {
+export interface DataKey {
   plaintext: string;
   ciphertext: string;
 }
@@ -43,8 +43,8 @@ export async function encrypt(plainText: Uint8Array, publicKey: Uint8Array): Pro
  *
  * @param plainText The plain text input to encrypt.
  */
-export async function aesEncrypt(plainText: PlainText, dek: DataEncryptionKey): Promise<string> {
-  const cipher = forge.cipher.createCipher('AES-GCM', dek.plaintext);
+export async function aesEncrypt(plainText: PlainText, dataKey: DataKey): Promise<string> {
+  const cipher = forge.cipher.createCipher('AES-GCM', dataKey.plaintext);
 
   // aesGCM uses 12 byte nonce.
   const iv = forge.random.getBytesSync(12);

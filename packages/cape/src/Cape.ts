@@ -1,5 +1,6 @@
 import loglevel from 'loglevel';
 import { Methods } from './methods';
+import { DataKey } from './encrypt';
 
 export interface CapeInit {
   /**
@@ -64,7 +65,7 @@ export class Cape extends Methods {
     this.functionToken = functionToken;
     this.functionChecksum = functionChecksum;
 
-    this.savedDataEncryptedKey = undefined;
+    this.dataKeyCache = new Map<string, DataKey>();
   }
 
   getCanonicalEnclavePath(path: string): string {
