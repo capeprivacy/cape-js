@@ -64,7 +64,7 @@ export class Cape extends Methods {
     this.functionToken = functionToken;
     this.functionChecksum = functionChecksum;
 
-    this.savedDataEncryptedKey = null;
+    this.savedDataEncryptedKey = undefined;
   }
 
   getCanonicalEnclavePath(path: string): string {
