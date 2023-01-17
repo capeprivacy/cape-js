@@ -9,7 +9,7 @@ export interface DataKey {
 
 interface EncryptResponse {
   cipherText: Uint8Array;
-  plaintextDek: Uint8Array;
+  plaintextDataKey: Uint8Array;
 }
 
 // Exported for testing
