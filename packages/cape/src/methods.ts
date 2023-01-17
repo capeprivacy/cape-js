@@ -54,7 +54,7 @@ interface Message {
 
 interface EncryptOptions {
   key?: string;
-  dek?: string;
+  dataKey?: string;
 }
 
 export abstract class Methods {
@@ -268,12 +268,15 @@ export abstract class Methods {
    *
    * ```
    */
-  public async encrypt(input: string, options: EncryptOptions = { key: undefined, dek: undefined }): Promise<string> {
-    if (options.key != null && options.dek != null) {
+  public async encrypt(
+    input: string,
+    options: EncryptOptions = { key: undefined, dataKey: undefined },
+  ): Promise<string> {
+    if (options.key != null && options.dataKey != null) {
       throw Error('cannot pass key and dek to this function');
     }
 
-    if (options.dek != null) {
+    if (options.dataKey != null) {
       // TODO ??
       throw Error('not implemented');
     }
