@@ -174,7 +174,7 @@ export abstract class Methods {
     }
     try {
       const { cipherText, plaintextDek } = await encrypt(getBytes(data), this.publicKey);
-      const input = concat(plaintextDek, cipherText);
+      const input = concat(plaintextDataKey, cipherText);
 
       this.websocket.send(input);
 
