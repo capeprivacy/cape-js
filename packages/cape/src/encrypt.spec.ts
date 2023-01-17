@@ -11,7 +11,7 @@ describe('encrypt', () => {
   test('encrypt and decrypt the text', async () => {
     const text = 'hello world';
     const keyPair = await suite.generateKeyPair();
-    const { cipherText, plaintextDek } = await encrypt(encoder.encode(text), (keyPair.publicKey as XCryptoKey).key);
+    const { cipherText, plaintextDataKey } = await encrypt(encoder.encode(text), (keyPair.publicKey as XCryptoKey).key);
     const plainText = await suite.open({ recipientKey: keyPair, enc: plaintextDataKey }, cipherText);
     expect(decoder.decode(plainText)).toBe(text);
   });
