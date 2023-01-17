@@ -69,7 +69,7 @@ export abstract class Methods {
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
-  savedDataEncryptedKey: DataEncryptionKey;
+  savedDataEncryptedKey?: DataEncryptionKey;
 
   /**
    * Get the authentication token and protocol for the websocket connection.
@@ -260,7 +260,7 @@ export abstract class Methods {
    *
    * ```
    */
-  public async encrypt(input: string, options: EncryptOptions = { key: null, dek: null }): Promise<string> {
+  public async encrypt(input: string, options: EncryptOptions = { key: undefined, dek: undefined }): Promise<string> {
     if (options.key != null && options.dek != null) {
       throw Error('cannot pass key and dek to this function');
     }
