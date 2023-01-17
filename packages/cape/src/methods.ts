@@ -68,7 +68,7 @@ export abstract class Methods {
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
-  dataKeyCache: Map<string, DataKey>;
+  dataKeyCache: Map<string, DataKey> = new Map<string, DataKey>();
 
   /**
    * Get the authentication token and protocol for the websocket connection.
