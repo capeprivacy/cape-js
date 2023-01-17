@@ -45,6 +45,6 @@
     "mock-socket": "^9.1.5",
     "nock": "^13.3.0",
     "portfinder": "^1.0.32",
-    "rimraf": "^3.0.2"
+    "rimraf": "^4.1.1"
   }
 }
