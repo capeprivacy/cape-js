@@ -273,7 +273,7 @@ export abstract class Methods {
     options: EncryptOptions = { key: undefined, dataKey: undefined },
   ): Promise<string> {
     if (options.key != null && options.dataKey != null) {
-      throw Error('cannot pass key and dek to this function');
+      throw Error('cannot pass key and datakey to this function');
     }
 
     if (options.dataKey != null) {
