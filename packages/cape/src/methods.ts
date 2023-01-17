@@ -173,7 +173,7 @@ export abstract class Methods {
       throw new Error('Unable to invoke the function, missing public key. Call Cape.connect() first.');
     }
     try {
-      const { cipherText, plaintextDek } = await encrypt(getBytes(data), this.publicKey);
+      const { cipherText, plaintextDataKey } = await encrypt(getBytes(data), this.publicKey);
       const input = concat(plaintextDataKey, cipherText);
 
       this.websocket.send(input);
