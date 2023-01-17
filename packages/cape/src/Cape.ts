@@ -1,5 +1,6 @@
 import loglevel from 'loglevel';
 import { Methods } from './methods';
+import { DataKey } from './encrypt';
 
 export interface CapeInit {
   /**

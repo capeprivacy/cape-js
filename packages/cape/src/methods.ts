@@ -12,8 +12,10 @@ import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
 import { AttestationDocument } from '@capeprivacy/types';
 import { concat } from './bytes';
-import { encrypt, capeEncrypt } from './encrypt';
+import { encrypt, rsaEncrypt, aesEncrypt, DataKey } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
+import * as forge from 'node-forge';
+
 interface ConnectArgs {
   /**
    * The function ID to run.
@@ -50,6 +52,11 @@ interface Message {
   error: string;
 }
 
+interface EncryptOptions {
+  key?: string;
+  dataKey?: string;
+}
+
 export abstract class Methods {
   public abstract getCanonicalEnclavePath(path: string): string;
   public abstract getCanonicalApiPath(path: string): string;
@@ -61,6 +68,7 @@ export abstract class Methods {
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
+  dataKeyCache: Map<string, DataKey> = new Map<string, DataKey>();
 
   /**
    * Get the authentication token and protocol for the websocket connection.
@@ -165,8 +173,8 @@ export abstract class Methods {
       throw new Error('Unable to invoke the function, missing public key. Call Cape.connect() first.');
     }
     try {
-      const { cipherText, encapsulatedKey } = await encrypt(getBytes(data), this.publicKey);
-      const input = concat(encapsulatedKey, cipherText);
+      const { cipherText, plaintextDataKey } = await encrypt(getBytes(data), this.publicKey);
+      const input = concat(plaintextDataKey, cipherText);
 
       this.websocket.send(input);
 
@@ -223,26 +231,61 @@ export abstract class Methods {
     }
   }
 
+  public async generateDataKey(key?: string): Promise<DataKey> {
+    if (key == null) {
+      key = await this.key();
+    }
+
+    const dataKey = this.dataKeyCache.get(key);
+    if (dataKey != undefined) {
+      return dataKey;
+    }
+
+    const plaintext = forge.random.getBytesSync(32);
+
+    const ciphertext = await rsaEncrypt(plaintext, key);
+
+    const newDataKey = { plaintext: plaintext, ciphertext: ciphertext };
+
+    this.dataKeyCache.set(key, newDataKey);
+
+    return newDataKey;
+  }
+
   /**
-   * Encrypt the
-   * The returned key is stored in the `client` object
+   * Encrypt the input.
+   *
+   * Encrypt takes options which allow you customize what RSA key or
+   * dataKey is used. You cannot pass a custom RSA key
+   * and a dataKey. This function will return an error if you do.
    *
    * @example
    * ```ts
    * const myInput = <YOUR_INPUT>;
    * const client = new Cape({ authToken: 'my-auth-token' });
    * await key = client.key();
-   * const encrypted = client.encrypt(myInput)
+   * const encrypted = client.encrypt(myInput, { key })
    *
    * ```
    */
-  public async encrypt(input: string, key?: string): Promise<string> {
-    let k = key;
-    if (k == null) {
-      k = await this.key();
+  public async encrypt(
+    input: string,
+    options: EncryptOptions = { key: undefined, dataKey: undefined },
+  ): Promise<string> {
+    if (options.key != null && options.dataKey != null) {
+      throw Error('cannot pass key and datakey to this function');
     }
 
-    return await capeEncrypt(k, input);
+    if (options.dataKey != null) {
+      // TODO ??
+      throw Error('not implemented');
+    }
+
+    const dataKey = await this.generateDataKey(options.key);
+
+    const ciphertext = await aesEncrypt(input, dataKey);
+
+    return 'cape:' + forge.util.encode64(dataKey.ciphertext + ciphertext);
   }
 
   /**
@@ -276,7 +319,6 @@ export abstract class Methods {
       this.publicKey = doc.public_key;
       return new TextDecoder().decode(doc.user_data);
     } catch (e) {
-      console.log('HEY', e);
       this.disconnect();
       throw e;
     }
@@ -320,7 +362,7 @@ function generateNonce() {
 
 /**
  * Utility function for adding a newline character every n characters in string.
- * @param data - The string to format.
+ * @param orgStr - The string to format.
  * @param numChar - number of characters before adding a new line, default is 65.
  * @returns The result string
  */
