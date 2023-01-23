@@ -40,15 +40,15 @@ describe('Cape', () => {
   });
 
   test('Works without an authToken', () => {
-    const cape = new Cape({})
-    expect(cape.authToken).toBe(undefined)
-    expect(cape.enclaveUrl).toBe(Cape.DEFAULT_ENCLAVE_URL)
+    const cape = new Cape({});
+    expect(cape.authToken).toBe(undefined);
+    expect(cape.enclaveUrl).toBe(Cape.DEFAULT_ENCLAVE_URL);
   });
 
   test('Works without a CapeInit object', () => {
-    const cape = new Cape()
-    expect(cape.authToken).toBe(undefined)
-    expect(cape.enclaveUrl).toBe(Cape.DEFAULT_ENCLAVE_URL)
+    const cape = new Cape();
+    expect(cape.authToken).toBe(undefined);
+    expect(cape.enclaveUrl).toBe(Cape.DEFAULT_ENCLAVE_URL);
   });
 
   describe('#connect', () => {
