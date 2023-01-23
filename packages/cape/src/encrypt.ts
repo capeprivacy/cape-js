@@ -19,7 +19,7 @@ export const suite = new CipherSuite({
   aead: Aead.Chacha20Poly1305,
 });
 
-type PlainText = forge.Bytes | ArrayBuffer | forge.util.ArrayBufferView | forge.util.ByteBuffer;
+export type PlainText = forge.Bytes | ArrayBuffer | forge.util.ArrayBufferView | forge.util.ByteBuffer;
 
 /**
  * Encrypts the given input using the provided public key.
