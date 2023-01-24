@@ -12,7 +12,7 @@ import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
 import { AttestationDocument } from '@capeprivacy/types';
 import { concat } from './bytes';
-import { encrypt, rsaEncrypt, aesEncrypt, DataKey } from './encrypt';
+import { encrypt, rsaEncrypt, aesEncrypt, DataKey, PlainText } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
 import * as forge from 'node-forge';
 
@@ -203,7 +203,7 @@ export abstract class Methods {
   public async key(username?: string): Promise<string> {
     if (username != null) {
       const path = this.getCanonicalApiPath(`/v1/user/${username}/key`);
-      const response = await fetch(path, { headers: { Authorization: `Bearer ${this.getAuthToken()}` } });
+      const response = await fetch(path);
       const data = await response.json();
       if (data.error != undefined) {
         throw new Error(data.error);
@@ -270,7 +270,7 @@ export abstract class Methods {
    * ```
    */
   public async encrypt(
-    input: string,
+    input: PlainText,
     options: EncryptOptions = { key: undefined, dataKey: undefined, username: undefined },
   ): Promise<string> {
     if (options.key != null && options.dataKey != null) {
