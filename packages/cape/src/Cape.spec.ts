@@ -39,6 +39,18 @@ describe('Cape', () => {
     expect(loglevel.getLevel()).toBe(loglevel.levels.TRACE);
   });
 
+  test('Works without an authToken', () => {
+    const cape = new Cape({});
+    expect(cape.authToken).toBe(undefined);
+    expect(cape.enclaveUrl).toBe(Cape.DEFAULT_ENCLAVE_URL);
+  });
+
+  test('Works without a CapeInit object', () => {
+    const cape = new Cape();
+    expect(cape.authToken).toBe(undefined);
+    expect(cape.enclaveUrl).toBe(Cape.DEFAULT_ENCLAVE_URL);
+  });
+
   describe('#connect', () => {
     test('when the id is not set, it should throw an error', async () => {
       const cape = new Cape({ authToken, checkDate });
