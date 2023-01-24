@@ -39,6 +39,18 @@ describe('Cape', () => {
     expect(loglevel.getLevel()).toBe(loglevel.levels.TRACE);
   });
 
+  test('Works without an authToken', () => {
+    const cape = new Cape({});
+    expect(cape.authToken).toBe(undefined);
+    expect(cape.enclaveUrl).toBe(Cape.DEFAULT_ENCLAVE_URL);
+  });
+
+  test('Works without a CapeInit object', () => {
+    const cape = new Cape();
+    expect(cape.authToken).toBe(undefined);
+    expect(cape.enclaveUrl).toBe(Cape.DEFAULT_ENCLAVE_URL);
+  });
+
   describe('#connect', () => {
     test('when the id is not set, it should throw an error', async () => {
       const cape = new Cape({ authToken, checkDate });
@@ -505,6 +517,23 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
       const decrypted = cipher.output;
 
       expect(decrypted.toString()).toBe('my message');
+    });
+
+    test('should encrypt by username', async () => {
+      const port = await getPortPromise({ host });
+      const capeApiUrl = `${httpHost}:${port}`;
+      const enclaveUrl = `${host}:${port}`;
+
+      const scope = nock(`${capeApiUrl}`)
+        .get('/v1/user/cool-user/key')
+        .reply(200, JSON.stringify({ attestation_document: keyAttestationDocument }));
+
+      const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate: keyCheckDate });
+      const result = await client.encrypt('data', { username: 'cool-user' });
+
+      expect(result.includes('cape')).toBe(true);
+
+      scope.done();
     });
   });
 

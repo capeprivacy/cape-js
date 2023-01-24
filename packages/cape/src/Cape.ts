@@ -1,6 +1,5 @@
 import loglevel from 'loglevel';
 import { Methods } from './methods';
-import { DataKey } from './encrypt';
 
 export interface CapeInit {
   /**
@@ -51,7 +50,15 @@ export class Cape extends Methods {
   static DEFAULT_ENCLAVE_URL = 'wss://enclave.capeprivacy.com';
   static DEFAULT_API_URL = 'https://app.capeprivacy.com';
 
-  constructor({ authToken, enclaveUrl, capeApiUrl, functionToken, functionChecksum, verbose, checkDate }: CapeInit) {
+  constructor({
+    authToken,
+    enclaveUrl,
+    capeApiUrl,
+    functionToken,
+    functionChecksum,
+    verbose,
+    checkDate,
+  }: CapeInit = {}) {
     super();
 
     if (verbose) {
