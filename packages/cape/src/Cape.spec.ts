@@ -518,6 +518,23 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
 
       expect(decrypted.toString()).toBe('my message');
     });
+
+    test('should encrypt by username', async () => {
+      const port = await getPortPromise({ host });
+      const capeApiUrl = `${httpHost}:${port}`;
+      const enclaveUrl = `${host}:${port}`;
+
+      const scope = nock(`${capeApiUrl}`)
+        .get('/v1/user/cool-user/key')
+        .reply(200, JSON.stringify({ attestation_document: keyAttestationDocument }));
+
+      const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate: keyCheckDate });
+      const result = await client.encrypt('data', { username: 'cool-user' });
+
+      expect(result.includes('cape')).toBe(true);
+
+      scope.done();
+    });
   });
 
   test('when the server responds with an error, it should throw the error', async () => {

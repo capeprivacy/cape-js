@@ -55,6 +55,7 @@ interface Message {
 interface EncryptOptions {
   key?: string;
   dataKey?: string;
+  username?: string;
 }
 
 export abstract class Methods {
@@ -270,10 +271,18 @@ export abstract class Methods {
    */
   public async encrypt(
     input: string,
-    options: EncryptOptions = { key: undefined, dataKey: undefined },
+    options: EncryptOptions = { key: undefined, dataKey: undefined, username: undefined },
   ): Promise<string> {
     if (options.key != null && options.dataKey != null) {
       throw Error('cannot pass key and datakey to this function');
+    }
+
+    if (options.key != null && options.username != null) {
+      throw Error('cannot pass key and username');
+    }
+
+    if (options.username != null) {
+      options.key = await this.key(options.username);
     }
 
     if (options.dataKey != null) {

@@ -2,15 +2,23 @@ import { Cape } from '../dist/index.mjs';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import * as pkijs from 'pkijs';
+import * as crypto from 'crypto';
 
 // Fill with your own values
-const id = '<FUNCTION_ID>';
-const data = '<DATA>';
+const id = 'kvmSQyFfQj5jWqBF4BJTxu';
+const data = '5';
+
+const name = 'nodeEngine';
+pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: crypto.webcrypto }));
 
 const authToken = JSON.parse(fs.readFileSync(path.resolve(os.homedir(), '.config/cape/auth'), 'utf-8')).access_token;
-const client = new Cape({ authToken });
-const result = await client.run({ id, data });
+const client = new Cape({ authToken, verbose: false });
 
-console.log('Cape run result:', result);
+//const dek = client.generateDataEncryptionKey()
 
-process.exit();
+console.log(await client.key('capedocs'));
+
+const encrypted = await client.encrypt(data, { username: 'justin1121' });
+
+const result = await client.run({ id, data: encrypted });
