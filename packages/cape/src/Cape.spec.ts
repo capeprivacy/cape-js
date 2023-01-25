@@ -413,7 +413,7 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
       mockServer.stop();
     });
 
-    test('should fetch a key by username without error', async () => {
+    test('should fetch a key by username without error and cache it', async () => {
       const port = await getPortPromise({ host });
       const capeApiUrl = `${httpHost}:${port}`;
       const enclaveUrl = `${host}:${port}`;
@@ -439,14 +439,16 @@ I0oRt17NpJgBlRQWEJfS0rYTRpj5IAK6pBJR8WR08WpoOTW03cutEz5SfIonJAFA
 Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
 -----END PUBLIC KEY-----`;
       expect(result).toBe(expected);
-
       scope.done();
+      const cachedResult = await client.key('cool-user');
+      expect(cachedResult).toBe(expected);
     });
 
-    test('should fetch a key with auth/function token and persist it', async () => {
+    test('should fetch a key and persist without error', async () => {
       const port = await getPortPromise({ host });
-      const capeApiUrl = `${host}:${port}`;
-      const mockServer = new Server(`${capeApiUrl}/v1/key`);
+      const capeApiUrl = `${httpHost}:${port}`;
+      const enclaveUrl = `${host}:${port}`;
+      const mockServer = new Server(`${enclaveUrl}/v1/key`);
 
       mockServer.on('connection', (socket) => {
         socket.on('message', (data) => {
@@ -464,7 +466,7 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
         });
       });
 
-      const client = new Cape({ authToken, capeApiUrl, checkDate: keyCheckDate });
+      const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate: keyCheckDate });
       const result = await client.key();
       const expected = `-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnV8eokFPI6Nx+MJ+4iBG
@@ -481,9 +483,10 @@ I0oRt17NpJgBlRQWEJfS0rYTRpj5IAK6pBJR8WR08WpoOTW03cutEz5SfIonJAFA
 Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
 -----END PUBLIC KEY-----`;
       expect(result).toBe(expected);
+      // Stop server since next result should not reach out to server anymore.
       mockServer.stop();
-      // const persisted = await client.key();
-      // expect(persisted).toBe(expected);
+      const cachedResult = await client.key();
+      expect(cachedResult).toBe(expected);
     });
   });
 

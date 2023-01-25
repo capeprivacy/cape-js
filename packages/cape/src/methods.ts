@@ -228,7 +228,7 @@ export abstract class Methods {
 
     try {
       // We look for the existing cached key under specific username.
-      const rsaKey = this.rsaKeyCache.get('oldTokenUser');
+      const rsaKey = this.rsaKeyCache.get('currentUser');
       if (rsaKey != undefined) {
         return rsaKey;
       }
@@ -238,8 +238,8 @@ export abstract class Methods {
       const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(obj.key) + '\n-----END PUBLIC KEY-----';
       // We cache the old key under a specific user name in this case. This cache
       // prioritizes username key retrieval so this is okay, e.g. If someone signs in
-      // with the username `oldTokenUser` then the cache value will be overwritten.
-      this.rsaKeyCache.set('oldTokenUser', keyString);
+      // with the username `currentUser` then the cache value will be overwritten.
+      this.rsaKeyCache.set('currentUser', keyString);
       return keyString;
     } finally {
       this.disconnect();
