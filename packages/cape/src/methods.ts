@@ -69,6 +69,7 @@ export abstract class Methods {
   websocket?: WebsocketConnection;
   nonce?: string;
   checkDate?: Date;
+  rsaKeyCache: Map<string, string> = new Map<string, string>();
   dataKeyCache: Map<string, DataKey> = new Map<string, DataKey>();
 
   /**
@@ -202,6 +203,10 @@ export abstract class Methods {
    */
   public async key(username?: string): Promise<string> {
     if (username != null) {
+      const rsaKey = this.rsaKeyCache.get(username);
+      if (rsaKey != undefined) {
+        return rsaKey;
+      }
       const path = this.getCanonicalApiPath(`/v1/user/${username}/key`);
       const response = await fetch(path);
       const data = await response.json();
@@ -216,17 +221,26 @@ export abstract class Methods {
       const doc = await this.verifyAttestationDocument(data.attestation_document);
 
       const obj = JSON.parse(new TextDecoder().decode(doc.user_data));
-
-      return '-----BEGIN PUBLIC KEY-----\n' + addNewLines(obj.key) + '\n-----END PUBLIC KEY-----';
+      const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(obj.key) + '\n-----END PUBLIC KEY-----';
+      this.rsaKeyCache.set(username, keyString);
+      return keyString;
     }
 
     try {
+      // We look for the existing cached key under specific username.
+      const rsaKey = this.rsaKeyCache.get('currentUser');
+      if (rsaKey != undefined) {
+        return rsaKey;
+      }
       const path = this.getCanonicalEnclavePath(`/v1/key`);
-
       const attestationUserData = await this.connect_(path);
       const obj = JSON.parse(attestationUserData);
-
-      return '-----BEGIN PUBLIC KEY-----\n' + addNewLines(obj.key) + '\n-----END PUBLIC KEY-----';
+      const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(obj.key) + '\n-----END PUBLIC KEY-----';
+      // We cache the old key under a specific user name in this case. This cache
+      // prioritizes username key retrieval so this is okay, e.g. If someone signs in
+      // with the username `currentUser` then the cache value will be overwritten.
+      this.rsaKeyCache.set('currentUser', keyString);
+      return keyString;
     } finally {
       this.disconnect();
     }
@@ -237,6 +251,7 @@ export abstract class Methods {
       key = await this.key();
     }
 
+    // dataKeyCache maps RSA keys to encrypted AES keys.
     const dataKey = this.dataKeyCache.get(key);
     if (dataKey != undefined) {
       return dataKey;
@@ -259,13 +274,15 @@ export abstract class Methods {
    * Encrypt takes options which allow you customize what RSA key or
    * dataKey is used. You cannot pass a custom RSA key
    * and a dataKey. This function will return an error if you do.
+   * The assumption is that given a new RSA key, a dataKey will be
+   * generated to pair with that RSA key automatically.
    *
    * @example
    * ```ts
    * const myInput = <YOUR_INPUT>;
    * const client = new Cape({ authToken: 'my-auth-token' });
    * await key = client.key();
-   * const encrypted = client.encrypt(myInput, { key })
+   * const encrypted = client.encrypt(myInput, { key }) // key is an RSA key
    *
    * ```
    */
@@ -282,6 +299,7 @@ export abstract class Methods {
     }
 
     if (options.username != null) {
+      // This will hit the username cache first.
       options.key = await this.key(options.username);
     }
 
@@ -290,6 +308,8 @@ export abstract class Methods {
       throw Error('not implemented');
     }
 
+    // If the user doesn't provide a key, then we go fetch a key from
+    // either the rsaKeyCache or a remote endpoint.
     const dataKey = await this.generateDataKey(options.key);
 
     const ciphertext = await aesEncrypt(input, dataKey);
