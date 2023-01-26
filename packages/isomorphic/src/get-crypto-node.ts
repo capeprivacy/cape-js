@@ -1,5 +1,5 @@
 import * as nodeCrypt from 'crypto';
 
-export const getCrypto = (): Crypto => {
+export const getCrypto = (): nodeCrypt.webcrypto.Crypto => {
   return nodeCrypt.webcrypto;
 };
