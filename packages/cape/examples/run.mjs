@@ -1,4 +1,4 @@
-import { Cape } from '../dist/index.mjs';
+import { Cape } from '../dist/index.js';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';

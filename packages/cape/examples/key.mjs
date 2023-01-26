@@ -4,7 +4,7 @@ import os from 'os';
 import * as pkijs from 'pkijs';
 import * as crypto from 'crypto';
 
-import { Cape } from '../dist/index.mjs';
+import { Cape } from '../dist/index.js';
 
 const name = 'nodeEngine';
 pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: crypto.webcrypto }));

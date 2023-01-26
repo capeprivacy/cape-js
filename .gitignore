@@ -130,3 +130,4 @@ out
 # Built directories
 dist
 dist-*
+dist.*

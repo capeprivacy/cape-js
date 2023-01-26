@@ -16,7 +16,7 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "paths": {
-      "@capeprivacy/cape-sdk": "../../dist/browser.esm.js"
+      "@capeprivacy/cape-sdk": "../../dist.browser/index.js"
     }
   },
   "include": ["src"]

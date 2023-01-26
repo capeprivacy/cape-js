@@ -1,12 +1,12 @@
-import 'cbor-rn-prereqs'; // Fixes TextDecoder not found issue and must be imported before cbor
-import { decodeFirstSync, encode } from 'cbor';
-import { Certificate, getCrypto } from 'pkijs';
-import { ec } from 'elliptic';
-import * as nodeCrypt from 'crypto';
-import { parseAttestationDocument } from './parse-attestation-document-browser';
 import { Signature } from '@capeprivacy/types';
-
 import { Buffer } from 'buffer';
+import 'cbor-rn-prereqs'; // Fixes TextDecoder not found issue and must be imported before cbor
+import * as nodeCrypt from 'crypto';
+import { ec } from 'elliptic';
+import { Certificate, getCrypto } from 'pkijs';
+import { parseAttestationDocument } from './parse-attestation-document-browser';
+
+import { decodeFirstSync, encode } from 'cbor';
 
 const EMPTY_BUFFER = Buffer.alloc(0);
 
