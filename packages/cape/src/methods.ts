@@ -7,6 +7,7 @@ import {
   verifyCertChain,
   verifySignature,
   type BytesInput,
+  getCrypto,
 } from '@capeprivacy/isomorphic';
 import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';

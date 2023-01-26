@@ -4,3 +4,4 @@ export * from './parse-attestation-document-browser';
 export * from './text-utils-browser';
 export * from './verify-cert-chain-browser';
 export * from './verify-signature-browser';
+export * from './get-crypto-browser';

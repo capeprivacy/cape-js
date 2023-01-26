@@ -1,5 +1,7 @@
 import loglevel from 'loglevel';
 import { Methods } from './methods';
+import * as pkijs from 'pkijs';
+import { getCrypto } from '@capeprivacy/isomorphic';
 
 export interface CapeInit {
   /**
@@ -60,6 +62,9 @@ export class Cape extends Methods {
     checkDate,
   }: CapeInit = {}) {
     super();
+
+    const name = 'nodeEngine';
+    pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: getCrypto() }));
 
     if (verbose) {
       loglevel.setLevel(loglevel.levels.TRACE);
