@@ -1,3 +1,3 @@
-export const getCrypto = (): Crypto => {
+export const getCrypto = () => {
   return window.crypto;
 };

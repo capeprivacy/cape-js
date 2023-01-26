@@ -7,15 +7,14 @@ import {
   verifyCertChain,
   verifySignature,
   type BytesInput,
-  getCrypto,
 } from '@capeprivacy/isomorphic';
+import { AttestationDocument } from '@capeprivacy/types';
 import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
-import { AttestationDocument } from '@capeprivacy/types';
-import { concat } from './bytes';
-import { encrypt, rsaEncrypt, aesEncrypt, DataKey, PlainText } from './encrypt';
-import { WebsocketConnection } from './websocket-connection';
 import * as forge from 'node-forge';
+import { concat } from './bytes';
+import { aesEncrypt, DataKey, encrypt, PlainText, rsaEncrypt } from './encrypt';
+import { WebsocketConnection } from './websocket-connection';
 
 interface ConnectArgs {
   /**

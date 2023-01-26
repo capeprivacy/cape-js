@@ -1,7 +1,7 @@
-import loglevel from 'loglevel';
-import { Methods } from './methods';
-import * as pkijs from 'pkijs';
 import { getCrypto } from '@capeprivacy/isomorphic';
+import loglevel from 'loglevel';
+import * as pkijs from 'pkijs';
+import { Methods } from './methods';
 
 export interface CapeInit {
   /**
@@ -63,7 +63,7 @@ export class Cape extends Methods {
   }: CapeInit = {}) {
     super();
 
-    const name = 'nodeEngine';
+    const name = 'capeCrypto';
     pkijs.setEngine(name, new pkijs.CryptoEngine({ name, crypto: getCrypto() }));
 
     if (verbose) {
