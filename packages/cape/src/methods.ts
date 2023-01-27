@@ -9,7 +9,6 @@ import {
   type BytesInput,
 } from '@capeprivacy/isomorphic';
 import { AttestationDocument } from '@capeprivacy/types';
-import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
 import * as forge from 'node-forge';
 import { concat } from './bytes';
@@ -386,7 +385,7 @@ function parseFrame(frame: Data | undefined): Message {
  * Generate a fixed length of bytes for the nonce.
  */
 function generateNonce() {
-  return randomBytes(12).toString('base64');
+  return forge.util.encode64(forge.random.getBytesSync(12));
 }
 
 /**

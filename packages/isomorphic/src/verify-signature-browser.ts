@@ -1,12 +1,10 @@
 import { Signature } from '@capeprivacy/types';
 import { Buffer } from 'buffer';
-import 'cbor-rn-prereqs'; // Fixes TextDecoder not found issue and must be imported before cbor
-import * as nodeCrypt from 'crypto';
 import { ec } from 'elliptic';
 import { Certificate, getCrypto } from 'pkijs';
 import { parseAttestationDocument } from './parse-attestation-document-browser';
 
-import { decodeFirstSync, encode } from 'cbor';
+import { decodeFirstSync, encode } from 'cbor-web';
 
 const EMPTY_BUFFER = Buffer.alloc(0);
 
@@ -55,15 +53,13 @@ function verifyInternal(verifier: ec.KeyPair, obj: Buffer[]) {
   return plaintext;
 }
 
-function doVerify(SigStructure: Signature, verifier: ec.KeyPair, sig: Uint8Array) {
+async function doVerify(SigStructure: Signature, verifier: ec.KeyPair, sig: Uint8Array) {
   const ToBeSigned = encode(SigStructure);
 
-  const hash = nodeCrypt.createHash('sha384');
-  hash.update(ToBeSigned);
-  const msgHash = hash.digest();
+  const msgHash = await window.crypto.subtle.digest('SHA-384', ToBeSigned);
 
   const sigInput = { r: sig.slice(0, sig.length / 2), s: sig.slice(sig.length / 2) };
-  if (!verifier.verify(msgHash, sigInput)) {
+  if (!verifier.verify(new Uint8Array(msgHash), sigInput)) {
     throw new Error('Signature missmatch');
   }
 }

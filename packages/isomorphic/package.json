@@ -19,6 +19,7 @@
     "buffer": "^6.0.3",
     "cbor": "^8.1.0",
     "cbor-rn-prereqs": "^8.1.0",
+    "cbor-web": "^8.1.0",
     "cose-js": "^0.8.4",
     "elliptic": "^6.5.4",
     "fflate": "^0.7.3",
