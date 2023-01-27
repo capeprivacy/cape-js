@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "concurrently 'yarn build:browser' 'yarn build:node'",
-    "watch": "concurrently 'yarn build:browser watch' 'yarn build:node watch'",
+    "watch": "concurrently 'yarn build:browser --watch' 'yarn build:node --watch'",
     "build:browser": "tsc -p tsconfig.browser.json",
     "build:node": "tsc",
     "clean": "rimraf ./dist && rimraf *.tsbuildinfo",
