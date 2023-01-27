@@ -12,10 +12,10 @@ jobs:
           cache: npm
       - run: yarn install --frozen-lockfile
       - run: yarn bootstrap
-      - name: Build
-        run: yarn build
       - name: Lint
         run: yarn lint
+      - name: Build
+        run: yarn build
       - name: Test
         run: yarn test:ci
       - name: Upload coverage to Codecov
@@ -27,7 +27,7 @@ jobs:
       - name: Publish
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc 
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
           yarn publish:ci
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
