@@ -8,9 +8,10 @@
     "moduleResolution": "node",
     "noImplicitReturns": true,
     "paths": {
+      "@capeprivacy/cape-sdk": ["packages/cape/src"],
       "@capeprivacy/*": ["packages/*/src"]
     },
-    "target": "ES6"
+    "target": "es2017"
   },
   "exclude": ["node_modules/", "**/*.spec.ts"],
   "include": ["packages/**/*.ts"]

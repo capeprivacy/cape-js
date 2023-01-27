@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import path from 'path';
-import { Cape } from '../dist-cjs/index.js';
+import { Cape } from '../dist/index.js';
 import { readFile } from 'fs/promises';
 
 // Fill with your own values

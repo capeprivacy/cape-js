@@ -28,5 +28,5 @@ module.exports = {
       },
     },
   },
-  ignorePatterns: ['**/dist/**', '**/coverage/**'],
+  ignorePatterns: ['**/dist/**', '**/coverage/**', '**/dist.browser/**'],
 };
