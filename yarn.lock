@@ -3674,8 +3674,8 @@ fb-watchman@^2.0.0:
     bser "2.1.1"
 
 fflate@^0.7.3:
-  version "0.7.3"
-  resolved "https://registry.npmjs.org/fflate/-/fflate-0.7.3.tgz"
+  version "0.7.4"
+  resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.7.4.tgz#61587e5d958fdabb5a9368a302c25363f4f69f50"
 
 figures@3.2.0, figures@^3.0.0:
   version "3.2.0"
