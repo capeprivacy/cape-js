@@ -6193,8 +6193,8 @@ pkg-dir@^4.2.0:
     find-up "^4.0.0"
 
 pkijs@*, pkijs@^3.0.5:
-  version "3.0.10"
-  resolved "https://registry.yarnpkg.com/pkijs/-/pkijs-3.0.10.tgz#2639148fd3fcb45ef253e9a6c22c681f870a0785"
+  version "3.0.13"
+  resolved "https://registry.yarnpkg.com/pkijs/-/pkijs-3.0.13.tgz#d33c7d9d6f1dc20d8f588c357d725d57e1245638"
   dependencies:
     asn1js "^3.0.5"
     bytestreamjs "^2.0.0"
