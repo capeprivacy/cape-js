@@ -8,12 +8,13 @@ import {
   verifySignature,
   type BytesInput,
 } from '@capeprivacy/isomorphic';
-import { AttestationDocument } from '@capeprivacy/types';
+import { randomBytes } from 'crypto';
 import { type Data } from 'isomorphic-ws';
-import * as forge from 'node-forge';
+import { AttestationDocument } from '@capeprivacy/types';
 import { concat } from './bytes';
-import { aesEncrypt, DataKey, encrypt, PlainText, rsaEncrypt } from './encrypt';
+import { encrypt, rsaEncrypt, aesEncrypt, DataKey, PlainText } from './encrypt';
 import { WebsocketConnection } from './websocket-connection';
+import * as forge from 'node-forge';
 
 interface ConnectArgs {
   /**
@@ -385,7 +386,7 @@ function parseFrame(frame: Data | undefined): Message {
  * Generate a fixed length of bytes for the nonce.
  */
 function generateNonce() {
-  return forge.util.encode64(forge.random.getBytesSync(12));
+  return randomBytes(12).toString('base64');
 }
 
 /**

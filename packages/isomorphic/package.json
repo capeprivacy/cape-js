@@ -2,14 +2,19 @@
   "name": "@capeprivacy/isomorphic",
   "version": "0.9.0",
   "description": "",
-  "main": "./dist/index.node.js",
-  "browser": "./dist.browser/index.browser.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "browser": {
+    "./dist/index.mjs": "./dist/browser.esm.js",
+    "./dist/index.js": "./dist/browser.cjs.js"
+  },
   "types": "dist/index.node.d.ts",
   "scripts": {
-    "build": "concurrently 'yarn build:browser' 'yarn build:node'",
-    "watch": "concurrently 'yarn build:browser --watch' 'yarn build:node --watch'",
-    "build:browser": "tsc -p tsconfig.browser.json",
-    "build:node": "tsc",
+    "build": "concurrently 'yarn build:browser' 'yarn build:node' 'yarn build:types'",
+    "watch": "concurrently 'yarn build:browser watch' 'yarn build:node watch'",
+    "build:browser": "node ../../scripts/build.browser.mjs ./src/index.browser.ts ./dist",
+    "build:node": "node ../../scripts/build.node.mjs ./src/index.node.ts ./dist",
+    "build:types": "tsc -p tsconfig.types.json",
     "clean": "rimraf ./dist && rimraf *.tsbuildinfo",
     "test": "jest --coverage"
   },
@@ -19,7 +24,6 @@
     "buffer": "^6.0.3",
     "cbor": "^8.1.0",
     "cbor-rn-prereqs": "^8.1.0",
-    "cbor-web": "^8.1.0",
     "cose-js": "^0.8.4",
     "elliptic": "^6.5.4",
     "fflate": "^0.7.3",

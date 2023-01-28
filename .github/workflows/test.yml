@@ -27,7 +27,7 @@ jobs:
       - name: Publish
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc 
           yarn publish:ci
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
