@@ -19,6 +19,8 @@ import * as forge from 'node-forge';
 interface ConnectArgs {
   /**
    * The function ID to run.
+   *
+   * The ID can be in the form of <username>/<function_name> or the function ID itself. E.g., 26TmysX9Jmvu69fpUpXCYz
    */
   id: string;
 }
@@ -29,6 +31,8 @@ interface ConnectArgs {
 interface RunArguments {
   /**
    * The function ID to run.
+   *
+   * The ID can be in the form of <username>/<function_name> or the function ID itself. E.g., 26TmysX9Jmvu69fpUpXCYz
    */
   id: string;
   /**
