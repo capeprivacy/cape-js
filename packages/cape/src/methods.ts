@@ -218,7 +218,7 @@ export abstract class Methods {
         throw new Error(data.message);
       }
 
-      const doc = await this.verifyAttestationDocument(data.attestation_document);
+      const doc = await this.verifyAttestationDocument(data.attestation_document, true);
 
       const obj = JSON.parse(new TextDecoder().decode(doc.user_data));
       const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(obj.key) + '\n-----END PUBLIC KEY-----';
@@ -353,16 +353,18 @@ export abstract class Methods {
     }
   }
 
-  private async verifyAttestationDocument(message: string): Promise<AttestationDocument> {
+  private async verifyAttestationDocument(message: string, skipVerifyCertChain = false): Promise<AttestationDocument> {
     const doc = parseAttestationDocument(message);
 
     await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
 
     const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
 
-    const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
-    if (!certResult.result) {
-      throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
+    if (!skipVerifyCertChain) {
+      const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
+      if (!certResult.result) {
+        throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
+      }
     }
 
     return doc;
