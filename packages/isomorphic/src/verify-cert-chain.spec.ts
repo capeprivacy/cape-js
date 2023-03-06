@@ -1,6 +1,6 @@
 import * as pkijs from 'pkijs';
 import { parseAttestationDocument } from './parse-attestation-document-node';
-import { getAWSRootCert, verifyCertChain } from './verify-cert-chain-node';
+import { getAWSRootCert, verifyCertChain, getCertificateNotBefore } from './verify-cert-chain-node';
 
 import * as crypto from 'crypto';
 import { readFileSync } from 'fs';
@@ -24,4 +24,14 @@ describe('verify-cert-chain.node', () => {
     const verified = await verifyCertChain(doc, root, new Date('2022-07-14T21:46:04.000Z'));
     expect(verified.result).toBe(true);
   });
+});
+
+describe('get-certificate-not-before.node', () => {
+  const file = readFileSync(join(__dirname, '../attestation.bin'));
+  const docB64 = Buffer.from(file).toString('base64');
+
+  const doc = parseAttestationDocument(docB64);
+
+  const date = getCertificateNotBefore(doc.certificate);
+  expect(date.toDateString()).toEqual('Thu Jul 14 2022');
 });

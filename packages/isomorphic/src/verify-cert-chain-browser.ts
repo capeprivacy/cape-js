@@ -54,3 +54,9 @@ IwLz3/Y=
 
   return Buffer.from(der.trim(), 'base64');
 };
+
+export const getCertificateNotBefore = (certificate: Uint8Array): Date => {
+  const cert = Certificate.fromBER(certificate);
+
+  return cert.notBefore.value;
+};
