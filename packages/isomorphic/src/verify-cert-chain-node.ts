@@ -49,3 +49,9 @@ export const getAWSRootCert = async (url: string): Promise<Buffer> => {
 
   return Buffer.from(der.trim(), 'base64');
 };
+
+export const getCertificateNotBefore = (certificate: Uint8Array): Date => {
+  const cert = Certificate.fromBER(certificate);
+
+  return cert.notBefore.value;
+};

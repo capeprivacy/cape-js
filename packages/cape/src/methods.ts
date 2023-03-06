@@ -2,6 +2,7 @@ import {
   base64Decode,
   getAWSRootCert,
   getBytes,
+  getCertificateNotBefore,
   parseAttestationDocument,
   TextDecoder,
   verifyCertChain,
@@ -66,9 +67,9 @@ export abstract class Methods {
   public abstract getFunctionChecksum(): string | undefined;
 
   publicKey?: Uint8Array;
+  checkDate?: Date;
   websocket?: WebsocketConnection;
   nonce?: string;
-  checkDate?: Date;
   rsaKeyCache: Map<string, string> = new Map<string, string>();
   dataKeyCache: Map<string, DataKey> = new Map<string, DataKey>();
 
@@ -218,7 +219,10 @@ export abstract class Methods {
         throw new Error(data.message);
       }
 
-      const doc = await this.verifyAttestationDocument(data.attestation_document);
+      const d = parseAttestationDocument(data.attestation_document);
+      const notBefore = getCertificateNotBefore(d.certificate);
+
+      const doc = await this.verifyAttestationDocument(data.attestation_document, notBefore);
 
       const obj = JSON.parse(new TextDecoder().decode(doc.user_data));
       const keyString = '-----BEGIN PUBLIC KEY-----\n' + addNewLines(obj.key) + '\n-----END PUBLIC KEY-----';
@@ -353,14 +357,18 @@ export abstract class Methods {
     }
   }
 
-  private async verifyAttestationDocument(message: string): Promise<AttestationDocument> {
+  private async verifyAttestationDocument(message: string, checkDate?: Date): Promise<AttestationDocument> {
     const doc = parseAttestationDocument(message);
 
     await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
 
     const rootCert = await getAWSRootCert('https://aws-nitro-enclaves.amazonaws.com/AWS_NitroEnclaves_Root-G1.zip');
 
-    const certResult = await verifyCertChain(doc, rootCert, this.checkDate);
+    if (checkDate == null) {
+      checkDate = this.checkDate;
+    }
+
+    const certResult = await verifyCertChain(doc, rootCert, checkDate);
     if (!certResult.result) {
       throw new Error(`Error validating certificate chain ${certResult.resultCode} ${certResult.resultMessage}.`);
     }
