@@ -335,7 +335,7 @@ export abstract class Methods {
       await this.websocket.connect();
 
       // Generate the nonce for the connection.
-      if (this.nonce == undefined) {
+      if (!this.nonce) {
         this.nonce = generateNonce();
       }
 
