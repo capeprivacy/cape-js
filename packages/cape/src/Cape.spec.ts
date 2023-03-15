@@ -224,6 +224,35 @@ describe('Cape', () => {
         client.disconnect();
         mockServer.stop();
       });
+
+      test('errors if nonces dont match', async () => {
+        const id = 'ABC';
+        const port = await getPortPromise({ host });
+        const capeApiUrl = `${httpHost}:${port}`;
+        const enclaveUrl = `${host}:${port}`;
+
+        const mockServer = new Server(`${enclaveUrl}/v1/run/${id}`);
+
+        mockServer.on('connection', (socket) => {
+          socket.on('message', () => {
+            socket.send(JSON.stringify({ message: { message: attestationDocument, type: 'attestation_doc' } }));
+          });
+        });
+
+        const client = new Cape({
+          [tokenType]: authToken,
+          capeApiUrl,
+          enclaveUrl,
+          checkDate,
+        });
+
+        client.setNonce(Buffer.from('deadbeef', 'base64'));
+
+        await expect(client.connect({ id })).rejects.toThrowError('error validating nonce R7X7ppecv35WfiYp deadbeef');
+
+        client.disconnect();
+        mockServer.stop();
+      });
     });
   });
 

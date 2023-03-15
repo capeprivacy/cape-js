@@ -368,7 +368,7 @@ export abstract class Methods {
     if (this.nonce != undefined) {
       const b64Nonce = Buffer.from(this.nonce).toString('base64');
       const b64DocNonce = Buffer.from(doc.nonce).toString('base64');
-      if (b64DocNonce != b64Nonce) {
+      if (b64DocNonce !== b64Nonce) {
         throw new Error(`error validating nonce ${b64DocNonce} ${b64Nonce}`);
       }
     }
