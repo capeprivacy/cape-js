@@ -248,7 +248,9 @@ describe('Cape', () => {
 
         client.setNonce(Buffer.from('deadbeef', 'base64'));
 
-        await expect(client.connect({ id })).rejects.toThrowError('error validating nonce R7X7ppecv35WfiYp deadbeef');
+        await expect(client.connect({ id })).rejects.toThrowError(
+          'Error validating nonce in the attestation document. R7X7ppecv35WfiYp does not equal deadbeef.',
+        );
 
         client.disconnect();
         mockServer.stop();
