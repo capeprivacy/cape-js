@@ -365,7 +365,7 @@ export abstract class Methods {
   private async verifyAttestationDocument(message: string, checkDate?: Date): Promise<AttestationDocument> {
     const doc = parseAttestationDocument(message);
 
-    if (this.nonce != undefined) {
+    if (!!this.nonce) {
       const b64Nonce = Buffer.from(this.nonce).toString('base64');
       const b64DocNonce = Buffer.from(doc.nonce).toString('base64');
       if (b64DocNonce !== b64Nonce) {
