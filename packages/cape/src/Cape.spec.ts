@@ -54,6 +54,7 @@ describe('Cape', () => {
   describe('#connect', () => {
     test('when the id is not set, it should throw an error', async () => {
       const cape = new Cape({ authToken, checkDate });
+      cape.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
       await expect(() => cape.connect({ id: '' })).rejects.toThrowError(
         'Unable to connect to the server, missing function id.',
       );
@@ -79,6 +80,8 @@ describe('Cape', () => {
         });
       });
       const cape = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate, functionChecksum });
+
+      cape.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
       await expect(() => cape.connect({ id })).rejects.toThrowError(
         'Error validating function checksum, got 66731e5ccf226680dd5c98a1d1ad52b7a4c986984042d0672d8f3153130b34a8, wanted: runbad.',
       );
@@ -106,6 +109,7 @@ describe('Cape', () => {
         });
 
         const cape = new Cape({ [tokenType]: authToken, capeApiUrl, enclaveUrl, checkDate });
+        cape.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
         await expect(cape.connect({ id })).rejects.toThrowError(error);
         mockServer.stop();
       });
@@ -126,6 +130,9 @@ describe('Cape', () => {
         });
 
         const cape = new Cape({ [tokenType]: authToken, capeApiUrl, enclaveUrl, checkDate });
+
+        cape.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
+
         await expect(cape.connect({ id })).rejects.toThrowError('Invalid attestation document');
         expect(spy).toHaveBeenCalled();
         jest.restoreAllMocks();
@@ -146,6 +153,8 @@ describe('Cape', () => {
         });
 
         const cape = new Cape({ [tokenType]: authToken, capeApiUrl, enclaveUrl, checkDate });
+
+        cape.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
         await cape.connect({ id });
 
         await expect(() => cape.connect({ id })).rejects.toThrowError(
@@ -175,6 +184,8 @@ describe('Cape', () => {
           enclaveUrl,
           checkDate,
         });
+
+        client.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
         await expect(client.connect({ id })).rejects.toThrowError(
           'Expected attestation document but received undefined',
         );
@@ -203,6 +214,9 @@ describe('Cape', () => {
           enclaveUrl,
           checkDate,
         });
+
+        client.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
+
         await client.connect({ id });
 
         expect(client.publicKey).toEqual(publicKey);
@@ -248,6 +262,7 @@ describe('Cape', () => {
       });
 
       const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate });
+      client.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
       const result = await client.run({ id, data: 'ping' });
 
       expect(incomingMessageCount).toBe(2);
@@ -311,6 +326,7 @@ describe('Cape', () => {
       });
 
       const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate, functionChecksum });
+      client.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
       await client.connect({ id });
 
       const result1 = await client.invoke({ data: 'ping' });
@@ -352,6 +368,7 @@ describe('Cape', () => {
       });
 
       const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate });
+      client.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
       await client.connect({ id });
 
       await expect(client.invoke({ data: 'ping' })).rejects.toThrowError('Invalid message received from the server.');
@@ -393,6 +410,7 @@ describe('Cape', () => {
       });
 
       const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate: keyCheckDate });
+      client.setNonce(Buffer.from('rNuf/od9XJzJv4EV', 'base64'));
       const result = await client.key();
       const expected = `-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnV8eokFPI6Nx+MJ+4iBG
@@ -467,6 +485,7 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
       });
 
       const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate: keyCheckDate });
+      client.setNonce(Buffer.from('rNuf/od9XJzJv4EV', 'base64'));
       const result = await client.key();
       const expected = `-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAnV8eokFPI6Nx+MJ+4iBG
@@ -521,6 +540,7 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
       });
 
       const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate: keyCheckDate });
+      client.setNonce(Buffer.from('rNuf/od9XJzJv4EV', 'base64'));
       const encrypted = await client.encrypt('my message');
       const result = encrypted.includes('cape');
       expect(result).toBe(true);
@@ -605,6 +625,7 @@ Phnoqp6wsB5/7JTzciA+qAMCAwEAAQ==
     });
 
     const client = new Cape({ authToken, capeApiUrl, enclaveUrl, checkDate, functionChecksum });
+    client.setNonce(Buffer.from('R7X7ppecv35WfiYp', 'base64'));
     await client.connect({ id });
 
     await expect(client.invoke({ data: 'ping' })).rejects.toThrowError(error);

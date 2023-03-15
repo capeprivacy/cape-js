@@ -34,7 +34,7 @@ export interface AttestationDocument {
   /**
    * Nonce provided by the consumer as a proof of authenticity.
    */
-  nonce: number;
+  nonce: Uint8Array;
 }
 
 export type WebSocketMessageType = 'attestation_doc' | 'function_result';
