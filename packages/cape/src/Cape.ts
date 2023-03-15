@@ -92,4 +92,8 @@ export class Cape extends Methods {
   getFunctionChecksum(): string | undefined {
     return this.functionChecksum;
   }
+
+  public setNonce(nonce: Uint8Array) {
+    this.nonce = nonce;
+  }
 }

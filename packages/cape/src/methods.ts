@@ -66,10 +66,13 @@ export abstract class Methods {
   public abstract getFunctionToken(): string | undefined;
   public abstract getFunctionChecksum(): string | undefined;
 
+  // only to be used for testing
+  public abstract setNonce(nonce: Buffer): void;
+
   publicKey?: Uint8Array;
   checkDate?: Date;
   websocket?: WebsocketConnection;
-  nonce?: string;
+  nonce?: Uint8Array;
   rsaKeyCache: Map<string, string> = new Map<string, string>();
   dataKeyCache: Map<string, DataKey> = new Map<string, DataKey>();
 
@@ -332,10 +335,12 @@ export abstract class Methods {
       await this.websocket.connect();
 
       // Generate the nonce for the connection.
-      this.nonce = generateNonce();
+      if (!this.nonce) {
+        this.nonce = generateNonce();
+      }
 
       // Send the nonce and auth token to the server to kick off the function.
-      this.websocket.send(JSON.stringify({ message: { nonce: this.nonce } }));
+      this.websocket.send(JSON.stringify({ message: { nonce: Buffer.from(this.nonce).toString('base64') } }));
 
       // Wait for the server to send back the attestation document with the public key.
       const result = parseFrame(await this.websocket.receive());
@@ -359,6 +364,16 @@ export abstract class Methods {
 
   private async verifyAttestationDocument(message: string, checkDate?: Date): Promise<AttestationDocument> {
     const doc = parseAttestationDocument(message);
+
+    if (this.nonce) {
+      const b64Nonce = Buffer.from(this.nonce).toString('base64');
+      const b64DocNonce = Buffer.from(doc.nonce).toString('base64');
+      if (b64DocNonce !== b64Nonce) {
+        throw new Error(
+          `Error validating nonce in the attestation document. ${b64DocNonce} does not equal ${b64Nonce}.`,
+        );
+      }
+    }
 
     await verifySignature(Buffer.from(message, 'base64'), doc.certificate);
 
@@ -394,7 +409,7 @@ function parseFrame(frame: Data | undefined): Message {
  * Generate a fixed length of bytes for the nonce.
  */
 function generateNonce() {
-  return randomBytes(12).toString('base64');
+  return randomBytes(12);
 }
 
 /**
